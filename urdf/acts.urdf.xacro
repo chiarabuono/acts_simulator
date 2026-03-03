@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts_system">
+
+  <xacro:include filename="panel.urdf.xacro" />
+  <xacro:include filename="uav_cable_assembly.xacro" />
+  <!-- <xacro:include filename="physics_macros.xacro" /> -->
+
+  <xacro:panel_platform prefix="main_panel_" />
+
+  <xacro:uav_plus_cable 
+    prefix="uav_left_" 
+    parent_link="main_panel_base_link" 
+    x="1.0" y="0.0" z="0.5" />
+
+  <xacro:uav_plus_cable 
+    prefix="uav_right_" 
+    parent_link="main_panel_base_link" 
+    x="-1.0" y="0.0" z="0.5" />
+
+</robot>

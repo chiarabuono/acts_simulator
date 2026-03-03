@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${(m/12) * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+               iyy="${(m/12) * (3*r*r + h*h)}" iyz="0.0"
+               izz="${(m/2) * (r*r)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cable_tether" params="prefix parent_link">
+    <link name="${prefix}link_1">
+      <xacro:cylinder_inertia m="0.05" r="0.01" h="0.5" />
+      <visual>
+        <origin xyz="0 0 -0.25"/>
+        <geometry><cylinder radius="0.01" length="0.5"/></geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 -0.25"/>
+        <geometry><cylinder radius="0.01" length="0.5"/></geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}connection_joint" type="continuous">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}link_1"/>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+    </joint>
+  </xacro:macro>
+</robot>

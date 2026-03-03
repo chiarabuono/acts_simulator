@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="uav_component.xacro" />
+  <xacro:include filename="cable_component.xacro" />
+
+  <xacro:macro name="uav_plus_cable" params="prefix parent_link x y z">
+    
+    <xacro:uav_platform prefix="${prefix}" />
+
+    <joint name="${prefix}to_panel" type="fixed">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}base_link"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+    </joint>
+
+    <xacro:cable_tether prefix="${prefix}cable_" parent_link="${prefix}base_link" />
+    
+  </xacro:macro>
+</robot>
