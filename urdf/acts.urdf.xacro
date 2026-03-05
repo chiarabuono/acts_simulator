@@ -3,6 +3,7 @@
 
   <xacro:include filename="panel.urdf.xacro" />
   <xacro:include filename="uav_cable_assembly.xacro" />
+  <xacro:include filename="components/cable_component.xacro" />
   <!-- <xacro:include filename="physics_macros.xacro" /> -->
 
   <xacro:panel_platform prefix="main_panel_" />

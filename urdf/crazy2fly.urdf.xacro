@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+File: crazy2fly.urdf.xacro
+Project: Quadrotor Control Lab
+File Created: Tuesday, 25th November 2025 9:06:25 AM
+Author: nknab
+Email: kojo.anyinam-boateng@ls2n.fr
+Version: 1.0.0
+Brief: Xacro file for crazy2fly robot description.
+~~~~~
+Last Modified: Tuesday, 25th November 2025 10:53:10 PM
+Modified By: nknab
+~~~~~
+Copyright ©2025 nknab
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="crazy2fly">
+
+	<!-- Arguments -->
+	<xacro:arg name="namespace" default="" />
+	<xacro:arg name="fixed" default="false" />
+
+
+	<!-- CONSTANTS -->
+	<xacro:property name="QCL_PACKAGE_NAME" value="quadrotor_control_lab" />
+
+	<xacro:property name="BASE_MESH_PATH" value="package://${QCL_PACKAGE_NAME}/meshes" />
+	<xacro:property name="BASE_CONFIG_PATH" value="$(find ${QCL_PACKAGE_NAME})/config" />
+
+
+	<!-- VARIABLES -->
+	<xacro:if value="${'$(arg namespace)' != ''}">
+		<xacro:property name="ns" value="$(arg namespace)/" />
+	</xacro:if>
+	<xacro:unless value="${'$(arg namespace)' != ''}">
+		<xacro:property name="ns" value="" />
+	</xacro:unless>
+
+
+	<!-- IMPORTS -->
+	<xacro:include filename="macros/inertial.xacro" />
+	<xacro:include filename="macros/properties.xacro" />
+	<xacro:include filename="macros/child.xacro" />
+
+	<xacro:include filename="components/core.xacro" />
+	<xacro:include filename="components/propeller.xacro" />
+
+	<xacro:include filename="sensors/imu.xacro" />
+
+
+	<!-- BASE LINK -->
+	<link name="base_link" />
+
+
+	<!-- CORE -->
+	<xacro:core parent_link="base">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	</xacro:core>
+
+
+	<!-- IMU SENSOR -->
+	<xacro:imu parent_link="c2f" sensor="px4">
+		<origin xyz="0 0 0.0315" rpy="0 0 0" />
+	</xacro:imu>
+
+
+	<!-- PROPELLERS -->
+	<xacro:property name="prop_xy_offset" value="0.17" />
+	<xacro:property name="prop_z_offset" value="0.017" />
+	<xacro:property name="prop_Y" value="${radians(90)}" />
+
+	<xacro:prop parent_link="base" prefix="front" motor_number="2">
+		<origin xyz="${prop_xy_offset} 0 ${prop_z_offset}" rpy="0 0 0" />
+	</xacro:prop>
+
+	<xacro:prop parent_link="base" prefix="back" motor_number="3">
+		<origin xyz="-${prop_xy_offset} 0 ${prop_z_offset}" rpy="0 0 0" />
+	</xacro:prop>
+
+	<xacro:prop parent_link="base" prefix="right" prop_type="ccw" motor_number="0">
+		<origin xyz="0 -${prop_xy_offset} ${prop_z_offset}" rpy="0 0 ${prop_Y}" />
+	</xacro:prop>
+
+	<xacro:prop parent_link="base" prefix="left" prop_type="ccw" motor_number="1">
+		<origin xyz="0 ${prop_xy_offset} ${prop_z_offset}" rpy="0 0 ${prop_Y}" />
+	</xacro:prop>
+
+	<!-- GAZEBO PLUGINS -->
+	<gazebo>
+		<!-- JOINT STATES -->
+		<plugin filename="gz-sim-joint-state-publisher-system"
+			name="gz::sim::systems::JointStatePublisher">
+			<topic>${ns}joint_states</topic>
+			<joint_name>front_cw_propeller_joint</joint_name>
+			<joint_name>back_cw_propeller_joint</joint_name>
+			<joint_name>right_ccw_propeller_joint</joint_name>
+			<joint_name>left_ccw_propeller_joint</joint_name>
+		</plugin>
+
+
+		<!-- ODOMETRY PUBLISHER -->
+		<plugin name="gz::sim::systems::OdometryPublisher"
+			filename="gz-sim-odometry-publisher-system">
+			<odom_publish_frequency>100</odom_publish_frequency>
+			<dimensions>3</dimensions>
+			<xacro:if value="${'$(arg namespace)' != ''}">
+				<odom_frame>$(arg namespace)</odom_frame>
+			</xacro:if>
+			<xacro:unless value="${'$(arg namespace)' != ''}">
+				<odom_frame>crazy2fly</odom_frame>
+			</xacro:unless>
+			<odom_topic>${ns}mocap/odom</odom_topic>
+			<odom_covariance_topic>${ns}mocap/odometry_with_covariance</odom_covariance_topic>
+			<tf_topic>${ns}mocap/pose</tf_topic>
+			<robot_base_frame>px4_imu_link</robot_base_frame>
+		</plugin>
+
+
+		<!-- DETACHABLE JOINT -->
+		<xacro:if value="$(arg fixed)">
+			<plugin filename="gz-sim-detachable-joint-system"
+				name="gz::sim::systems::DetachableJoint">
+				<parent_link>base_link</parent_link>
+				<child_model>fixed_support</child_model>
+				<child_link>fixed_support_link</child_link>
+			</plugin>
+		</xacro:if>
+	</gazebo>
+
+</robot>

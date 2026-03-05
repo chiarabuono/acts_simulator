@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+File: imu.xacro
+Project: Quadrotor Control Lab
+File Created: Tuesday, 25th November 2025 10:37:39 AM
+Author: nknab
+Email: kojo.anyinam-boateng@ls2n.fr
+Version: 1.0.0
+Brief: IMU macro to be used to create the IMU sensor of the drone.
+~~~~~
+Last Modified: Tuesday, 25th November 2025 10:38:57 AM
+Modified By: nknab
+~~~~~
+Copyright ©2025 nknab
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<xacro:macro name="imu" params="parent_link prefix:='' sensor *joint_pose">
+
+		<xacro:property name="imu_yaml_file" value="${BASE_CONFIG_PATH}/sensors/imu.yaml" />
+
+		<xacro:property name="props" value="${xacro.load_yaml(imu_yaml_file)}" />
+
+
+		<xacro:if value="${prefix != ''}">
+			<xacro:property name="resolved_prefix" value="${prefix}_${sensor}_imu" />
+		</xacro:if>
+		<xacro:unless value="${prefix != ''}">
+			<xacro:property name="resolved_prefix" value="${sensor}_imu" />
+		</xacro:unless>
+
+		<!-- Joint -->
+		<joint name="${resolved_prefix}_joint" type="fixed">
+			<parent link="${parent_link}_link" />
+			<child link="${resolved_prefix}_link" />
+			<xacro:insert_block name="joint_pose" />
+		</joint>
+
+		<!-- Link -->
+		<link name="${resolved_prefix}_link">
+			<visual name='${resolved_prefix}_visual'>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<box size="0.0001 0.0001 0.0001" />
+				</geometry>
+				<material name='${resolved_prefix}_material'>
+					<color rgba="0 0 0 0" />
+				</material>
+			</visual>
+		</link>
+
+		<gazebo reference="${resolved_prefix}_link">
+			<sensor name="imu_sensor" type="imu">
+				<always_on>true</always_on>
+				<update_rate>${props.update_rate}</update_rate>
+				<visualize>true</visualize>
+				<imu>
+					<angular_velocity>
+						<x>
+							<noise type="${props.angular_velocity.x.noise.type}">
+								<mean>${props.angular_velocity.x.noise.mean}</mean>
+								<stddev>${props.angular_velocity.x.noise.stddev}</stddev>
+								<dynamic_bias_stddev>
+									${props.angular_velocity.x.noise.dynamic_bias_stddev}</dynamic_bias_stddev>
+								<dynamic_bias_correlation_time>
+									${props.angular_velocity.x.noise.dynamic_bias_correlation_time}</dynamic_bias_correlation_time>
+							</noise>
+						</x>
+						<y>
+							<noise type="${props.angular_velocity.y.noise.type}">
+								<mean>${props.angular_velocity.y.noise.mean}</mean>
+								<stddev>${props.angular_velocity.y.noise.stddev}</stddev>
+								<dynamic_bias_stddev>
+									${props.angular_velocity.y.noise.dynamic_bias_stddev}</dynamic_bias_stddev>
+								<dynamic_bias_correlation_time>
+									${props.angular_velocity.y.noise.dynamic_bias_correlation_time}</dynamic_bias_correlation_time>
+							</noise>
+						</y>
+						<z>
+							<noise type="${props.angular_velocity.z.noise.type}">
+								<mean>${props.angular_velocity.z.noise.mean}</mean>
+								<stddev>${props.angular_velocity.z.noise.stddev}</stddev>
+								<dynamic_bias_stddev>
+									${props.angular_velocity.z.noise.dynamic_bias_stddev}</dynamic_bias_stddev>
+								<dynamic_bias_correlation_time>
+									${props.angular_velocity.z.noise.dynamic_bias_correlation_time}</dynamic_bias_correlation_time>
+							</noise>
+						</z>
+					</angular_velocity>
+					<linear_acceleration>
+						<x>
+							<noise type="${props.linear_acceleration.x.noise.type}">
+								<mean>${props.linear_acceleration.x.noise.mean}</mean>
+								<stddev>${props.linear_acceleration.x.noise.stddev}</stddev>
+								<dynamic_bias_stddev>
+									${props.linear_acceleration.x.noise.dynamic_bias_stddev}</dynamic_bias_stddev>
+								<dynamic_bias_correlation_time>
+									${props.linear_acceleration.x.noise.dynamic_bias_correlation_time}</dynamic_bias_correlation_time>
+							</noise>
+						</x>
+						<y>
+							<noise type="${props.linear_acceleration.y.noise.type}">
+								<mean>${props.linear_acceleration.y.noise.mean}</mean>
+								<stddev>${props.linear_acceleration.y.noise.stddev}</stddev>
+								<dynamic_bias_stddev>
+									${props.linear_acceleration.y.noise.dynamic_bias_stddev}</dynamic_bias_stddev>
+								<dynamic_bias_correlation_time>
+									${props.linear_acceleration.y.noise.dynamic_bias_correlation_time}</dynamic_bias_correlation_time>
+							</noise>
+						</y>
+						<z>
+							<noise type="${props.linear_acceleration.z.noise.type}">
+								<mean>${props.linear_acceleration.z.noise.mean}</mean>
+								<stddev>${props.linear_acceleration.z.noise.stddev}</stddev>
+								<dynamic_bias_stddev>
+									${props.linear_acceleration.z.noise.dynamic_bias_stddev}</dynamic_bias_stddev>
+								<dynamic_bias_correlation_time>
+									${props.linear_acceleration.z.noise.dynamic_bias_correlation_time}</dynamic_bias_correlation_time>
+							</noise>
+						</z>
+					</linear_acceleration>
+				</imu>
+
+				<topic>${ns}${props.topic}</topic>
+				<gz_frame_id>${resolved_prefix}_link</gz_frame_id>
+			</sensor>
+		</gazebo>
+
+	</xacro:macro>
+
+</robot>

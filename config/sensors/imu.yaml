@@ -1,0 +1,67 @@
+#
+# File: imu.yaml
+# Project: Quadrotor Control Lab
+# File Created: Tuesday, 25th November 2025 10:36:25 AM
+# Author: nknab
+# Email: kojo.anyinam-boateng@ls2n.fr
+# Version: 1.0.0
+# Brief: Configuration file for IMU sensor (BMI270) noise parameters.
+# -----
+# Last Modified: Tuesday, 25th November 2025 10:36:53 AM
+# Modified By: nknab
+# -----
+# Copyright ©2025 nknab
+#
+
+
+# DATASHEET REFERENCE
+# https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmi270-ds000.pdf
+
+topic: "imu"
+update_rate: 250
+
+angular_velocity:
+  x:
+    noise:
+      type: gaussian
+      mean: 0.0
+      stddev: 0.0015
+      dynamic_bias_stddev: 0.00001
+      dynamic_bias_correlation_time: 1000.0
+  y:
+    noise:
+      type: gaussian
+      mean: 0.0
+      stddev: 0.0015
+      dynamic_bias_stddev: 0.00001
+      dynamic_bias_correlation_time: 1000.0
+  z:
+    noise:
+      type: gaussian
+      mean: 0.0
+      stddev: 0.0015
+      dynamic_bias_stddev: 0.00001
+      dynamic_bias_correlation_time: 1000.0
+
+linear_acceleration:
+  x:
+    noise:
+      type: gaussian
+      mean: 0.0
+      stddev: 0.00025
+      dynamic_bias_stddev: 0.000005
+      dynamic_bias_correlation_time: 1000.0
+  y:
+    noise:
+      type: gaussian
+      mean: 0.0
+      stddev: 0.00025
+      dynamic_bias_stddev: 0.000005
+      dynamic_bias_correlation_time: 1000.0
+  z:
+    noise:
+      type: gaussian
+      mean: 0.0
+      stddev: 0.00025
+      dynamic_bias_stddev: 0.000005
+      dynamic_bias_correlation_time: 1000.0

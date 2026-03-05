@@ -1,0 +1,62 @@
+#
+# File: gz_bridge.yaml
+# Project: Quadrotor Control Lab
+# File Created: Tuesday, 25th November 2025 11:29:50 AM
+# Author: nknab
+# Email: kojo.anyinam-boateng@ls2n.fr
+# Version: 1.0.0
+# Brief: This file contains the configuration for the Gazebo ROS bridge.
+# -----
+# Last Modified: Tuesday, 25th November 2025 11:37:24 AM
+# Modified By: nknab
+# -----
+# Copyright ©2025 nknab
+#
+
+# Gazebo Clock topic: Synchronizes simulation time with ROS.
+- ros_topic_name: "/clock"
+  gz_topic_name: "clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "gz.msgs.Clock"
+  direction: GZ_TO_ROS
+
+# Joint States topic: Publishes joint state data from Gazebo to ROS.
+- ros_topic_name: "joint_states"
+  gz_topic_name: "<namespace>/joint_states"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Model"
+  direction: GZ_TO_ROS
+
+# Odometry topic: Publishes odometry data from Gazebo to ROS.
+- ros_topic_name: "/odom"
+  gz_topic_name: "odom"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+  direction: GZ_TO_ROS
+
+# Motion Capture Odometry topic: Publishes mocap odometry data from Gazebo to ROS.
+- ros_topic_name: "mocap/odom"
+  gz_topic_name: "<namespace>/mocap/odometry_with_covariance"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.OdometryWithCovariance"
+  direction: GZ_TO_ROS
+
+# TF topic: Publishes transform data from Gazebo to ROS.
+- ros_topic_name: "/tf"
+  gz_topic_name: "tf"
+  ros_type_name: "tf2_msgs/msg/TFMessage"
+  gz_type_name: "gz.msgs.Pose_V"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "command/motor_speed"
+  gz_topic_name: "<namespace>/command/motor_speed"
+  ros_type_name: "actuator_msgs/msg/Actuators"
+  gz_type_name: "gz.msgs.Actuators"
+  direction: ROS_TO_GZ
+
+# IMU topic: Publishes IMU sensor data from Gazebo to ROS.
+- ros_topic_name: "imu"
+  gz_topic_name: "<namespace>/imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
+  direction: GZ_TO_ROS

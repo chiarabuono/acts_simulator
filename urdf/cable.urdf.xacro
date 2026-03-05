@@ -7,7 +7,7 @@
   </inertial>
 </xacro:macro>
 
-<xacro:macro name="cable_segment" params="name m r h color">
+<xacro:macro name="cable_segment" parent_xyz:='0 0 0' params="name m r h color">
   <link name="${name}">
     <xacro:cylinder_inertia m="${m}" r="${r}" h="${h}" />
     <visual>

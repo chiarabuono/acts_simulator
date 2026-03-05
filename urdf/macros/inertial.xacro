@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+File: inertial.xacro
+Project: Quadrotor Control Lab
+File Created: Tuesday, 25th November 2025 9:27:24 AM
+Author: nknab
+Email: kojo.anyinam-boateng@ls2n.fr
+Version: 1.0.0
+Brief:  Contains macros for calculating the inertial properties of different shapes.
+~~~~~
+Last Modified: Tuesday, 25th November 2025 9:27:53 AM
+Modified By: nknab
+~~~~~
+Copyright ©2025 nknab
+-->
+
+<!--
+****************************************************************************
+*	Title: List of moments of inertia
+*   Author: Wikipedia contributors
+*   Date: Retrieved Friday, 21st November 2025
+*   Code version: N/A
+*   URL: https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+****************************************************************************
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<!--
+    box_inertial
+    ~~~~~~~~~~~~
+    Generate inertial properties for a solid box with dimensions aligned to the coordinate axes.
+
+    Parameters
+    ~~~~~~~~~~
+    prefix : str
+        Prefix for the inertial element name.
+    mass : float
+        Total mass of the box in kg.
+    x : float
+        Length of the box along the x-axis in meters.
+    y : float
+        Width of the box along the y-axis in meters.
+    z : float
+        Height of the box along the z-axis in meters.
+    origin : xml block
+		Center of Gravity (position and orientation).
+
+    Returns
+    ~~~~~~~
+    inertial : xml element
+        Inertial element with appropriate mass and moment of inertia values.
+
+    -->
+	<xacro:macro name="box_inertial" params="prefix mass x y z *origin">
+		<inertial name="${prefix}_inertial">
+			<xacro:insert_block name="origin" />
+			<mass value="${mass}" />
+			<inertia ixx="${(1/12) * mass * (y*y + z*z)}" ixy="0.0" ixz="0.0"
+				iyy="${(1/12) * mass * (x*x + z*z)}" iyz="0.0" izz="${(1/12) * mass *(x*x + y*y)}" />
+		</inertial>
+	</xacro:macro>
+
+	<!--
+	hollow_cylinder_inertial
+	~~~~~~~~~~~~~~~~~~~~~~~
+	Generate inertial properties for a hollow cylinder.
+
+	Parameters
+	~~~~~~~~~~
+	prefix : str
+		Prefix for the inertial element name.
+	mass : float
+		Total mass of the hollow cylinder in kg.
+	inner_radius : float
+		Inner radius of the hollow cylinder in meters.
+	outer_radius : float
+		Outer radius of the hollow cylinder in meters.
+	height : float
+		Height of the hollow cylinder in meters.
+	origin : xml block
+		Center of Gravity (position and orientation).
+
+	Returns
+	~~~~~~~
+	inertial : xml element
+		Inertial element with appropriate mass and moment of inertia values.
+	-->
+	<xacro:macro name="hollow_cylinder_inertial"
+		params="prefix mass inner_radius outer_radius height *origin">
+		<inertial name="${prefix}_inertial">
+			<xacro:insert_block name="origin" />
+			<mass value="${mass}" />
+			<inertia
+				ixx="${(1/12) * mass * (3*((inner_radius*inner_radius)+(outer_radius*outer_radius)) + height*height)}"
+				ixy="0.0" ixz="0.0"
+				iyy="${(1/12) * mass * (3*((inner_radius*inner_radius)+(outer_radius*outer_radius)) + height*height)}"
+				iyz="0.0"
+				izz="${(1/2) * mass * (((inner_radius*inner_radius)+(outer_radius*outer_radius)))}" />
+		</inertial>
+	</xacro:macro>
+
+
+</robot>

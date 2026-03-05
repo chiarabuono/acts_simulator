@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+File: core.xacro
+Project: Quadrotor Control Lab
+File Created: Tuesday, 25th November 2025 9:31:43 AM
+Author: nknab
+Email: kojo.anyinam-boateng@ls2n.fr
+Version: 1.0.0
+Brief: Core components for crazy2fly drone
+~~~~~
+Last Modified: Tuesday, 25th November 2025 10:44:59 AM
+Modified By: nknab
+~~~~~
+Copyright ©2025 nknab
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<!-- VARIABLES -->
+	<xacro:property name="core_mesh_path" value="${BASE_MESH_PATH}/core" />
+
+	<xacro:macro name="core" params="parent_link *joint_pose">
+
+		<xacro:box_properties width="0.399681" length="0.399681" height="0.162643" />
+		<xacro:com mass="0.99" x="0.000847" y="-0.000015" z="-0.001832" />
+
+		<xacro:child_macro name="c2f" parent_link="${parent_link}"
+			file="core" shape="box" mesh_path="${core_mesh_path}">
+			<xacro:insert_block name="joint_pose" />
+		</xacro:child_macro>
+	</xacro:macro>
+
+</robot>

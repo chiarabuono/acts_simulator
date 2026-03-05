@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${(m/12) * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+               iyy="${(m/12) * (3*r*r + h*h)}" iyz="0.0"
+               izz="${(m/2) * (r*r)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="rigid_cable" params="prefix parent_link length radius mass">
+    <link name="${prefix}rigid_link">
+      <xacro:cylinder_inertia m="${mass}" r="${radius}" h="${length}" />
+      <visual>
+        <origin xyz="0 0 ${-length/2.0}"/>
+        <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-length/2.0}"/>
+        <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}rigid_joint" type="fixed">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}rigid_link"/>
+      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="flexible_chain_generator" params="prefix parent current_num total_num len rad m">
+    <link name="${prefix}link_${current_num}">
+      <xacro:cylinder_inertia m="${m}" r="${rad}" h="${len}" />
+      <visual>
+        <origin xyz="0 0 ${-len/2.0}"/>
+        <geometry><cylinder radius="${rad}" length="${len}"/></geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-len/2.0}"/>
+        <geometry><cylinder radius="${rad}" length="${len}"/></geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}joint_${current_num}" type="continuous">
+      <parent link="${parent}"/>
+      <child link="${prefix}link_${current_num}"/>
+      <xacro:if value="${current_num == 1}">
+        <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      </xacro:if>
+      <xacro:unless value="${current_num == 1}">
+        <origin xyz="0 0 ${-len}" rpy="0 0 0"/>
+      </xacro:unless>
+      <axis xyz="1 1 0"/>
+      <dynamics damping="0.1" friction="0.02"/>
+    </joint>
+
+    <xacro:if value="${current_num &lt; total_num}">
+      <xacro:flexible_chain_generator 
+        prefix="${prefix}" 
+        parent="${prefix}link_${current_num}" 
+        current_num="${current_num + 1}" 
+        total_num="${total_num}" 
+        len="${len}" 
+        rad="${rad}" 
+        m="${m}" />
+    </xacro:if>
+  </xacro:macro>
+
+  <xacro:macro name="uav_cable" params="prefix parent_link is_flexible segments length radius mass">
+    <xacro:if value="${is_flexible == 'True'}">
+      <xacro:flexible_chain_generator 
+        prefix="${prefix}" parent="${parent_link}" current_num="1" 
+        total_num="${segments}" len="${length/segments}" rad="${radius}" m="${mass/segments}" />
+    </xacro:if>
+    <xacro:unless value="${is_flexible == 'True'}">
+      <xacro:rigid_cable prefix="${prefix}" parent_link="${parent_link}" 
+        length="${length}" radius="${radius}" mass="${mass}" />
+    </xacro:unless>
+  </xacro:macro>
+
+</robot>
