@@ -1,13 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<!-- PARAMETERS -->
-  <xacro:property name="p_mass" value="1.0" />
-  <xacro:property name="p_width" value="1" />
-  <xacro:property name="p_depth" value="1" />
-  <xacro:property name="p_height" value="0.1" />
-
-    <!-- inertia -->
   <xacro:macro name="panel_box_inertia" params="m w d h">
     <inertial>
       <mass value="${m}"/>
@@ -17,23 +10,27 @@
     </inertial>
   </xacro:macro>
 
-  <xacro:macro name="panel_platform" params="prefix">
+  <xacro:macro name="panel_platform" params="prefix mass:=1.0 width:=1.0 depth:=1.0 height:=0.1">
     <link name="${prefix}base_link">
-      <xacro:panel_box_inertia m="${p_mass}" w="${p_width}" d="${p_depth}" h="${p_height}" />
+      <xacro:panel_box_inertia m="${mass}" w="${width}" d="${depth}" h="${height}" />
       
       <visual>
         <geometry>
-          <box size="${p_width} ${p_depth} ${p_height}"/>
+          <box size="${width} ${depth} ${height}"/>
         </geometry>
         <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
       </visual>
       
       <collision>
         <geometry>
-          <box size="${p_width} ${p_depth} ${p_height}"/>
+          <box size="${width} ${depth} ${height}"/>
         </geometry>
       </collision>
     </link>
+
+    <gazebo reference="${prefix}base_link">
+      <selfCollide>true</selfCollide>
+    </gazebo>
   </xacro:macro>
 
 </robot>

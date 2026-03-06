@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="uav_cable_assembly">
+
+
+<xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
+
+<!-- # TODO: delete these lines to allow the uav to follow gravity-->
+<link name="world"/>
+<joint name="world_fixed" type="fixed">
+  <parent link="world"/>
+  <child link="base_link"/>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+</joint>
+
+<xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
+
+
+  <xacro:uav_cable 
+    prefix="uav1_" 
+    parent_link="base_link" 
+    is_flexible="true" 
+    segments="30" 
+    length="1.0" 
+    radius="0.005" 
+    mass="0.05" />
+
+</robot>
+

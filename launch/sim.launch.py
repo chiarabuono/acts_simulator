@@ -16,6 +16,8 @@ Copyright ©2025 nknab
 """
 
 from os.path import join
+import os
+import tempfile
 
 from ament_index_python.packages import get_package_share_directory
 from launch_ros.substitutions import FindPackageShare
@@ -25,12 +27,13 @@ from launch.actions import (
     DeclareLaunchArgument,
     IncludeLaunchDescription,
     OpaqueFunction,
+    AppendEnvironmentVariable,
 )
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
 # CONSTANTS
-PACKAGE_NAME = "quadrotor_control_lab"
+PACKAGE_NAME = "acts_simulator"
 GAZEBO_VERBOSE_LEVEL = 4
 WORLD = "simple"
 
@@ -98,7 +101,14 @@ def generate_launch_description() -> LaunchDescription:
         The launch description object
 
     """
+    pkg_share = get_package_share_directory(PACKAGE_NAME)
+    model_path = os.path.dirname(pkg_share)
+
     return LaunchDescription([
+        AppendEnvironmentVariable(
+        name='GZ_SIM_RESOURCE_PATH',
+        value=model_path
+        ),
         DeclareLaunchArgument(
             "headless",
             default_value="false",

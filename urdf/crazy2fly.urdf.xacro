@@ -22,7 +22,7 @@ Copyright ©2025 nknab
 
 
 	<!-- CONSTANTS -->
-	<xacro:property name="QCL_PACKAGE_NAME" value="quadrotor_control_lab" />
+	<xacro:property name="QCL_PACKAGE_NAME" value="acts_simulator" />
 
 	<xacro:property name="BASE_MESH_PATH" value="package://${QCL_PACKAGE_NAME}/meshes" />
 	<xacro:property name="BASE_CONFIG_PATH" value="$(find ${QCL_PACKAGE_NAME})/config" />

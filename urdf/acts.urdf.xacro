@@ -4,18 +4,35 @@
   <xacro:include filename="panel.urdf.xacro" />
   <xacro:include filename="uav_cable_assembly.xacro" />
   <xacro:include filename="components/cable_component.xacro" />
-  <!-- <xacro:include filename="physics_macros.xacro" /> -->
 
-  <xacro:panel_platform prefix="main_panel_" />
+  <xacro:panel_platform 
+  prefix="main_panel_" 
+  mass="2.5" 
+  width="2.0" 
+  depth="2.0" 
+  height="0.2" />
 
-  <xacro:uav_plus_cable 
-    prefix="uav_left_" 
-    parent_link="main_panel_base_link" 
-    x="1.0" y="0.0" z="0.5" />
 
-  <xacro:uav_plus_cable 
-    prefix="uav_right_" 
-    parent_link="main_panel_base_link" 
-    x="-1.0" y="0.0" z="0.5" />
+  <link name="panel_corner_link" />
+
+  <joint name="panel_to_corner" type="fixed">
+    <parent link="main_panel_base_link"/>
+    <child link="panel_corner_link"/>
+    <origin xyz="0.8 0.8 0.1" rpy="0 3.14159 0"/>  <!-- the cable is directed upwards-->
+    <gazebo reference="panel_to_corner">
+    <disableFixedJointLumping>true</disableFixedJointLumping>
+  </gazebo>
+  </joint>
+
+  
+
+  <xacro:uav_cable 
+    prefix="upward_cable_" 
+    parent_link="panel_corner_link" 
+    is_flexible="${True}" 
+    segments="10" 
+    length="1.5" 
+    radius="0.01" 
+    mass="0.2" />
 
 </robot>

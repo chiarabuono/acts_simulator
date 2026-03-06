@@ -7,7 +7,7 @@ Email: kojo.anyinam-boateng@ls2n.fr
 Version: 1.0.0
 Brief: Launch file to simulate a UAV with a controller in Gazebo.
 -----
-Last Modified: Tuesday, 5th March 2026 11:50:26 PM
+Last Modified: Tuesday, 25th November 2025 10:50:26 PM
 Modified By: nknab
 -----
 Copyright ©2025 nknab
@@ -34,6 +34,56 @@ from launch.substitutions import (
     LaunchConfiguration,
     PathJoinSubstitution,
 )
+
+def parse_float_list(value: str, expected_length: int, name: str) -> list[float]:
+    """
+    Parse a string representing a list of floats.
+
+    Parameters
+    ----------
+    value : str
+        The string to parse.
+    expected_length : int
+        How many floats to expect.
+    name : str
+        The name of the parameter (used for error messages).
+
+    Raises
+    ------
+    ValueError
+        If parsing fails or the wrong number of values is provided.
+
+    Returns
+    -------
+    List[float]
+        Parsed floats.
+
+    """
+    if value is None:
+        raise ValueError(
+            f"Missing value for '{name}'. Expected {expected_length} comma-separated numbers."
+        )
+
+    s = value.strip()
+
+    if s.startswith("[") and s.endswith("]"):
+        s = s[1:-1]
+
+    parts = [p.strip() for p in s.split(",") if p.strip() != ""]
+
+    if len(parts) != expected_length:
+        raise ValueError(
+            f"Invalid format for '{name}': expected {expected_length} comma-separated values but got {len(parts)}."
+            f" Example: '[{', '.join(['0'] * expected_length)}]'"
+        )
+
+    try:
+        return [float(p) for p in parts]
+    except ValueError as e:
+        raise ValueError(
+            f"Invalid numeric value in '{name}': '{value}'. Ensure all entries are numeric (e.g., '[0, 0, 0.056]')."
+        ) from e
+
 
 PACKAGE_NAME = "acts_simulator"
 WAIT_TIME = 10.0
@@ -76,9 +126,13 @@ def launch_setup(
     # Get the package share directory
     pkg_share = FindPackageShare(package=PACKAGE_NAME).find(PACKAGE_NAME)
 
+    # desired_position = LaunchConfiguration("desired_position").perform(context)
+    # desired_velocity = LaunchConfiguration("desired_velocity").perform(context)
 
     fixed = LaunchConfiguration("fixed").perform(context)
 
+    # d_position = parse_float_list(desired_position, 3, "xyz")
+    # d_velocity = parse_float_list(desired_velocity, 3, "xyz")
 
     sim = ExecuteProcess(
         cmd=[
@@ -99,6 +153,27 @@ def launch_setup(
         shell=True,
         output="screen",
     )
+    """
+    controller = Node(
+        package=PACKAGE_NAME,
+        executable="controller_node",
+        name="controller",
+        output="screen",
+        parameters=[
+            {
+                "desired_position": d_position,
+                "desired_velocity": d_velocity,
+            }
+        ],
+    )
+
+    delayed_controller = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=sim,
+            on_start=TimerAction(period=WAIT_TIME, actions=[controller]),
+        )
+    )
+    """
 
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
@@ -109,8 +184,7 @@ def launch_setup(
         )
     )
 
-    return [sim, shutdown_handler]
-
+    return [sim, shutdown_handler]  # delayed_controller
 
 def generate_launch_description() -> LaunchDescription:
     """
@@ -131,3 +205,16 @@ def generate_launch_description() -> LaunchDescription:
         ),
         OpaqueFunction(function=launch_setup),
     ])
+
+    """ 
+        DeclareLaunchArgument(
+            "desired_position",
+            default_value="[0.5, 0.5, 0.5]",
+            description="Desired position the drone should reach",
+        ),
+        DeclareLaunchArgument(
+            "desired_velocity",
+            default_value="[0.0, 0.0, 0.0]",
+            description="Desired velocity the drone should maintain",
+        ), 
+         """
