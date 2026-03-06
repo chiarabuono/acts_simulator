@@ -1,28 +1,34 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="uav_cable_assembly">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
+  <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
 
-<xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
+  <xacro:macro name="uav_towing_unit" params="prefix panel_link x y z segments length radius mass">
+    
+    <xacro:uav_cable 
+      prefix="${prefix}" 
+      parent_link="base_link" 
+      is_flexible="true" 
+      segments="${segments}" 
+      length="${length}" 
+      radius="${radius}" 
+      mass="${mass}" />
+
+    <joint name="${prefix}cable_to_panel_joint" type="continuous">
+      <parent link="${prefix}link_${segments}"/> 
+      <child link="${panel_link}"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <dynamics damping="0.1" friction="0.01"/>
+    </joint>
+  </xacro:macro>
+</robot>
 
 <!-- # TODO: delete these lines to allow the uav to follow gravity-->
-<link name="world"/>
+<!-- <link name="world"/>
 <joint name="world_fixed" type="fixed">
   <parent link="world"/>
   <child link="base_link"/>
   <origin xyz="0 0 0" rpy="0 0 0"/>
-</joint>
-
-<xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
-
-
-  <xacro:uav_cable 
-    prefix="uav1_" 
-    parent_link="base_link" 
-    is_flexible="true" 
-    segments="30" 
-    length="1.0" 
-    radius="0.005" 
-    mass="0.05" />
-
-</robot>
-
+</joint> -->

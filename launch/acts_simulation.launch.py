@@ -25,7 +25,7 @@ def generate_launch_description():
     pkg_share = get_package_share_directory(package_name)
     
     # PROCESS THE ACTS SYSTEM (UAV + Panel + Cable)
-    xacro_file = os.path.join(pkg_share, 'urdf', 'uav_cable_assembly.urdf.xacro')
+    xacro_file = os.path.join(pkg_share, 'urdf', 'acts.urdf.xacro')
     robot_description_config = xacro.process_file(xacro_file)
     robot_desc = robot_description_config.toxml()
 

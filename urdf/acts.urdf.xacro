@@ -2,37 +2,29 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts_system">
 
   <xacro:include filename="panel.urdf.xacro" />
-  <xacro:include filename="uav_cable_assembly.xacro" />
-  <xacro:include filename="components/cable_component.xacro" />
+  <xacro:include filename="uav_cable_assembly.urdf.xacro" />
 
   <xacro:panel_platform 
-  prefix="main_panel_" 
-  mass="2.5" 
-  width="2.0" 
-  depth="2.0" 
-  height="0.2" />
+    prefix="main_panel_" 
+    mass="2.5" 
+    width="2.0" 
+    depth="2.0" 
+    height="0.2" />
 
+  <xacro:uav_towing_unit 
+    prefix="drone1_" 
+    panel_link="main_panel_base_link"
+    x="0" y="0" z="-0.1" 
+    segments="30" 
+    length="1.0" 
+    radius="0.005" 
+    mass="0.05" />
 
-  <link name="panel_corner_link" />
-
-  <joint name="panel_to_corner" type="fixed">
-    <parent link="main_panel_base_link"/>
-    <child link="panel_corner_link"/>
-    <origin xyz="0.8 0.8 0.1" rpy="0 3.14159 0"/>  <!-- the cable is directed upwards-->
-    <gazebo reference="panel_to_corner">
-    <disableFixedJointLumping>true</disableFixedJointLumping>
-  </gazebo>
+  <link name="world"/>
+  <joint name="world_fixed" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/> 
+    <origin xyz="0 0 2.0" rpy="0 0 0"/>
   </joint>
-
-  
-
-  <xacro:uav_cable 
-    prefix="upward_cable_" 
-    parent_link="panel_corner_link" 
-    is_flexible="${True}" 
-    segments="10" 
-    length="1.5" 
-    radius="0.01" 
-    mass="0.2" />
 
 </robot>
