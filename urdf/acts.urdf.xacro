@@ -4,27 +4,36 @@
   <xacro:include filename="panel.urdf.xacro" />
   <xacro:include filename="uav_cable_assembly.urdf.xacro" />
 
+  <link name="world"/>
+
   <xacro:panel_platform 
     prefix="main_panel_" 
     mass="2.5" 
-    width="2.0" 
-    depth="2.0" 
+    width="1.0" 
+    depth="1.0" 
     height="0.2" />
+
+  <joint name="world_to_panel" type="fixed">
+    <parent link="world"/>
+    <child link="main_panel_base_link"/>
+    <origin xyz="0 0 1.0" rpy="0 0 0"/> </joint>
 
   <xacro:uav_towing_unit 
     prefix="drone1_" 
     panel_link="main_panel_base_link"
-    x="0" y="0" z="-0.1" 
-    segments="30" 
+    x="1.0" y="1.0" z="1" 
+    segments="3" 
     length="1.0" 
     radius="0.005" 
     mass="0.05" />
 
-  <link name="world"/>
-  <joint name="world_fixed" type="fixed">
-    <parent link="world"/>
-    <child link="base_link"/> 
-    <origin xyz="0 0 2.0" rpy="0 0 0"/>
-  </joint>
+  <xacro:uav_towing_unit 
+    prefix="drone2_" 
+    panel_link="main_panel_base_link"
+    x="-1.0" y="-1.0" z="1" 
+    segments="3" 
+    length="1.0" 
+    radius="0.005" 
+    mass="0.05" />
 
 </robot>

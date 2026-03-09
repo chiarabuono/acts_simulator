@@ -16,18 +16,16 @@ Copyright ©2025 nknab
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-	<xacro:macro name="imu" params="parent_link prefix:='' sensor *joint_pose">
+	<xacro:macro name="imu" params="parent_link drone_prefix:='' prefix:='' sensor *joint_pose">
 
 		<xacro:property name="imu_yaml_file" value="${BASE_CONFIG_PATH}/sensors/imu.yaml" />
-
 		<xacro:property name="props" value="${xacro.load_yaml(imu_yaml_file)}" />
 
-
 		<xacro:if value="${prefix != ''}">
-			<xacro:property name="resolved_prefix" value="${prefix}_${sensor}_imu" />
+			<xacro:property name="resolved_prefix" value="${drone_prefix}${prefix}_${sensor}_imu" />
 		</xacro:if>
 		<xacro:unless value="${prefix != ''}">
-			<xacro:property name="resolved_prefix" value="${sensor}_imu" />
+			<xacro:property name="resolved_prefix" value="${drone_prefix}${sensor}_imu" />
 		</xacro:unless>
 
 		<!-- Joint -->
@@ -51,7 +49,7 @@ Copyright ©2025 nknab
 		</link>
 
 		<gazebo reference="${resolved_prefix}_link">
-			<sensor name="imu_sensor" type="imu">
+			<sensor name="${resolved_prefix}_sensor" type="imu">
 				<always_on>true</always_on>
 				<update_rate>${props.update_rate}</update_rate>
 				<visualize>true</visualize>
@@ -121,12 +119,10 @@ Copyright ©2025 nknab
 						</z>
 					</linear_acceleration>
 				</imu>
-
-				<topic>${ns}${props.topic}</topic>
+				<topic>${ns}${drone_prefix}${props.topic}</topic>
 				<gz_frame_id>${resolved_prefix}_link</gz_frame_id>
 			</sensor>
 		</gazebo>
-
 	</xacro:macro>
 
 </robot>

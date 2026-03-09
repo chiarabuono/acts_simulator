@@ -1,79 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-File: child.xacro
-Project: Quadrotor Control Lab
-File Created: Tuesday, 25th November 2025 9:30:48 AM
-Author: nknab
-Email: kojo.anyinam-boateng@ls2n.fr
-Version: 1.0.0
-Brief:  Macro for creating child links and joints.
-~~~~~
-Last Modified: Tuesday, 25th November 2025 10:15:27 AM
-Modified By: nknab
-~~~~~
-Copyright ©2025 nknab
--->
-
-
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-	<xacro:macro name="child_macro"
-		params="name parent_link mesh_path file prefix:='' shape:='' joint_type:=fixed *joint_pose">
+    <xacro:macro name="child_macro"
+        params="name parent_link mesh_path file prefix:='' shape:='' joint_type:=fixed *joint_pose">
 
-		<xacro:if value="${prefix != ''}">
-			<xacro:property name="resolved_prefix" value="${prefix}_${name}" />
-		</xacro:if>
-		<xacro:unless value="${prefix != ''}">
-			<xacro:property name="resolved_prefix" value="${name}" />
-		</xacro:unless>
+        <xacro:property name="resolved_prefix" value="${prefix}${name}" />
 
-		<!-- Joint -->
-		<joint name="${resolved_prefix}_joint" type="${joint_type}">
-			<parent link="${parent_link}_link" />
-			<child link="${resolved_prefix}_link" />
-			<xacro:insert_block name="joint_pose" />
-			<xacro:if value="${joint_type == 'continuous' or joint_type == 'revolute'}">
-				<axis xyz="0 0 1" />
-			</xacro:if>
-			<xacro:if value="${joint_type == 'revolute'}">
-				<limit lower="${lower}" upper="${upper}" velocity="${velocity}" effort="${effort}" />
-				<dynamics damping="${damping}" friction="${friction}" />
-			</xacro:if>
-		</joint>
+        <joint name="${resolved_prefix}_joint" type="${joint_type}">
+            <parent link="${parent_link}" />
+            <child link="${resolved_prefix}_link" />
+            <xacro:insert_block name="joint_pose" />
+            
+            <xacro:if value="${joint_type == 'continuous' or joint_type == 'revolute'}">
+                <axis xyz="0 0 1" />
+            </xacro:if>
+            
+            <xacro:if value="${joint_type == 'revolute'}">
+                <limit lower="${lower}" upper="${upper}" velocity="${velocity}" effort="${effort}" />
+                <dynamics damping="${damping}" friction="${friction}" />
+            </xacro:if>
+        </joint>
 
-		<!-- Link -->
-		<link name="${resolved_prefix}_link">
-			<visual name="${resolved_prefix}_link_visual">
-				<origin xyz="0 0 0" rpy="0 0 0" />
-				<geometry>
-					<mesh filename="${mesh_path}/${file}.dae" />
-				</geometry>
-			</visual>
-			<collision name="${resolved_prefix}_link_collision">
-				<origin xyz="0 0 0" rpy="0 0 0" />
-				<geometry>
-					<mesh filename="${mesh_path}/${file}.stl" />
-				</geometry>
-			</collision>
+        <link name="${resolved_prefix}_link">
+            <visual name="${resolved_prefix}_link_visual">
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="${mesh_path}/${file}.dae" />
+                </geometry>
+            </visual>
+            
+            <collision name="${resolved_prefix}_link_collision">
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="${mesh_path}/${file}.stl" />
+                </geometry>
+            </collision>
 
+            <xacro:if value="${shape == 'hollow'}">
+                <xacro:hollow_cylinder_inertial prefix="${resolved_prefix}_link" mass="${mass}"
+                    inner_radius="${inner_radius}" outer_radius="${outer_radius}"
+                    height="${height}">
+                    <origin xyz="${com_x} ${com_y} ${com_z}" rpy="0 0 0" />
+                </xacro:hollow_cylinder_inertial>
+            </xacro:if>
 
-			<xacro:if value="${shape == 'hollow'}">
-				<xacro:hollow_cylinder_inertial prefix="${resolved_prefix}_link" mass="${mass}"
-					inner_radius="${inner_radius}" outer_radius="${outer_radius}"
-					height="${height}">
-					<origin xyz="${com_x} ${com_y} ${com_z}" rpy="0 0 0" />
-				</xacro:hollow_cylinder_inertial>
-			</xacro:if>
+            <xacro:if value="${shape == 'box'}">
+                <xacro:box_inertial prefix="${resolved_prefix}_link" mass="${mass}"
+                    x="${width}" y="${length}" z="${height}">
+                    <origin xyz="${com_x} ${com_y} ${com_z}" rpy="0 0 0" />
+                </xacro:box_inertial>
+            </xacro:if>
+        </link>
 
-			<xacro:if value="${shape == 'box'}">
-				<xacro:box_inertial prefix="${resolved_prefix}_link" mass="${mass}"
-					x="${width}" y="${length}" z="${height}">
-					<origin xyz="${com_x} ${com_y} ${com_z}" rpy="0 0 0" />
-				</xacro:box_inertial>
-			</xacro:if>
-
-		</link>
-
-	</xacro:macro>
+    </xacro:macro>
 
 </robot>
