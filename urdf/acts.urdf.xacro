@@ -8,32 +8,11 @@
 
   <xacro:panel_platform 
     prefix="main_panel_" 
-    mass="2.5" 
-    width="1.0" 
-    depth="1.0" 
-    height="0.2" />
+    mass="2.5" width="5.0" depth="5.0" height="0.2" />
 
-  <joint name="world_to_panel" type="fixed">
-    <parent link="world"/>
-    <child link="main_panel_base_link"/>
-    <origin xyz="0 0 1.0" rpy="0 0 0"/> </joint>
-
-  <xacro:uav_towing_unit 
-    prefix="drone1_" 
-    panel_link="main_panel_base_link"
-    x="1.0" y="1.0" z="1" 
-    segments="3" 
-    length="1.0" 
-    radius="0.005" 
-    mass="0.05" />
-
-  <xacro:uav_towing_unit 
-    prefix="drone2_" 
-    panel_link="main_panel_base_link"
-    x="-1.0" y="-1.0" z="1" 
-    segments="3" 
-    length="1.0" 
-    radius="0.005" 
-    mass="0.05" />
+  <xacro:add_drone id="1" x="1"  y="2"  z="1.2" segments="10" length="1" primary="true" />
+  <xacro:add_drone id="2" x="2"  y="2" z="1.2" segments="10"  length="1" handle_id="2" />
+  <xacro:add_drone id="3" x="1" y="3" z="1.2" segments="10"  length="1" handle_id="3" />
+  <xacro:add_drone id="4" x="2" y="3"  z="1.2" segments="10"  length="1" handle_id="4" />
 
 </robot>
