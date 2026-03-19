@@ -38,10 +38,12 @@
       </collision>
     </link>
 
-    <xacro:handle prefix="${prefix}" suffix="1" x="0.2"  y="0.2"  z="${height/2}" />
+    <xacro:handle prefix="${prefix}" suffix="1" x="1"  y="1"  z="${height/2}" />
     <xacro:handle prefix="${prefix}" suffix="2" x="0.2"  y="-0.2" z="${height/2}" />
+    
+    <!-- 
     <xacro:handle prefix="${prefix}" suffix="3" x="-0.2" y="-0.2" z="${height/2}" />
-    <xacro:handle prefix="${prefix}" suffix="4" x="-0.2" y="0.2"  z="${height/2}" />
+    <xacro:handle prefix="${prefix}" suffix="4" x="-0.2" y="0.2"  z="${height/2}" /> -->
 
   </xacro:macro>
 </robot>

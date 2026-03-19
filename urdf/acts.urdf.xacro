@@ -8,11 +8,12 @@
 
   <xacro:panel_platform 
     prefix="main_panel_" 
-    mass="2.5" width="5.0" depth="5.0" height="0.2" />
+    mass="2.5" width="2.0" depth="2.0" height="0.2" />
 
-  <xacro:add_drone id="1" x="1"  y="2"  z="1.2" segments="10" length="1" primary="true" />
-  <xacro:add_drone id="2" x="2"  y="2" z="1.2" segments="10"  length="1" handle_id="2" />
-  <xacro:add_drone id="3" x="1" y="3" z="1.2" segments="10"  length="1" handle_id="3" />
-  <xacro:add_drone id="4" x="2" y="3"  z="1.2" segments="10"  length="1" handle_id="4" />
+  <xacro:add_drone id="1" x="0"  y="1"  z="1.2" segments="10" length="1" primary="true" />
+  <xacro:add_drone id="2" x="0"  y="0" z="1.2" segments="10"  length="1" handle_id="2" />
+
+  <!--<xacro:add_drone id="3" x="1" y="3" z="1.2" segments="10"  length="1" handle_id="3" />
+  <xacro:add_drone id="4" x="2" y="3"  z="1.2" segments="10"  length="1" handle_id="4" /> -->
 
 </robot>

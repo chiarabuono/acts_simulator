@@ -33,7 +33,7 @@
 
 
 <!-- ____________   Flexible cable  _______________________-->
-  <xacro:macro name="flexible_chain_generator" params="prefix parent current_num total_num len rad m">
+  <xacro:macro name="flexible_chain_generator" params="prefix parent current_num total_num cable_len rad m">
   
   <link name="${prefix}virtual_${current_num}">
     <inertial>
@@ -47,21 +47,21 @@
     <xacro:if value="${current_num == 1}">
       <origin xyz="0 0 0" rpy="0 0 0"/> </xacro:if>
     <xacro:unless value="${current_num == 1}">
-      <origin xyz="0 0 ${-len}" rpy="0 0 0"/>
+      <origin xyz="0 0 ${-cable_len}" rpy="0 0 0"/>
     </xacro:unless>
     <axis xyz="1 0 0"/>
     <dynamics damping="0.01" friction="0.001"/>
   </joint>
 
   <link name="${prefix}link_${current_num}">
-    <xacro:cylinder_inertia m="${m}" r="${rad}" h="${len}" />
+    <xacro:cylinder_inertia m="${m}" r="${rad}" h="${cable_len}" />
     <visual>
-      <origin xyz="0 0 ${-len/2.0}"/>
-      <geometry><cylinder radius="${rad}" length="${len}"/></geometry>
+      <origin xyz="0 0 ${-cable_len/2.0}"/>
+      <geometry><cylinder radius="${rad}" length="${cable_len}"/></geometry>
     </visual>
     <collision>
-      <origin xyz="0 0 ${-len/2.0}"/>
-      <geometry><cylinder radius="${rad}" length="${len}"/></geometry>
+      <origin xyz="0 0 ${-cable_len/2.0}"/>
+      <geometry><cylinder radius="${rad}" length="${cable_len}"/></geometry>
     </collision>
     <self_collide>false</self_collide>
   </link>
@@ -80,7 +80,7 @@
       parent="${prefix}link_${current_num}" 
       current_num="${current_num + 1}" 
       total_num="${total_num}" 
-      len="${len}" rad="${rad}" m="${m}" />
+      cable_len="${cable_len}" rad="${rad}" m="${m}" />
   </xacro:if>
 </xacro:macro>
 
@@ -90,7 +90,7 @@
     <xacro:if value="${is_flexible}">
       <xacro:flexible_chain_generator 
         prefix="${prefix}" parent="${parent_link}" current_num="1" 
-        total_num="${segments}" len="${length/segments}" rad="${radius}" m="${mass/segments}" />
+        total_num="${segments}" cable_len="${length/segments}" rad="${radius}" m="${mass/segments}" />
     </xacro:if>
     <xacro:unless value="${is_flexible}">
       <xacro:rigid_cable prefix="${prefix}" parent_link="${parent_link}" 

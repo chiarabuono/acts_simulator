@@ -21,18 +21,23 @@
       radius="${radius}" 
       mass="${mass}" />
 
-    <link name="${prefix}hook_link">
-      <inertial>
-        <mass value="0.01"/>
-        <inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/>
-      </inertial>
-    </link>
+  <link name="${prefix}hook_link">
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+    <visual>
+      <geometry><sphere radius="0.005"/></geometry>
+      <material name="red"/>
+    </visual>
+  </link>
 
-    <joint name="${prefix}cable_to_hook_joint" type="fixed">
-      <parent link="${prefix}link_${segments}"/> 
-      <child link="${prefix}hook_link"/>
-      <origin xyz="0 0 ${-length/segments}" rpy="0 0 0"/>
-    </joint>
+  <joint name="${prefix}cable_to_hook_joint" type="revolute">
+    <parent link="${prefix}link_${segments}"/> 
+    <child link="${prefix}hook_link"/>
+    <origin xyz="0 0 ${-length/segments}" rpy="0 0 0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
 
     <xacro:if value="${attach_to_panel}">
       <joint name="${prefix}hook_to_panel_joint" type="continuous">
@@ -55,10 +60,13 @@
 
     <xacro:unless value="${primary}">
       <gazebo>
-        <joint name="drone${id}_loop_closure" type="fixed">
-          <parent>main_panel_handle_${handle_id}</parent>
-          <child>drone${id}_hook_link</child>
-        </joint>
+        <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
+          <parent_link>drone${id}_hook_link</parent_link>
+          <child_model>acts_system</child_model>
+          <child_link>main_panel_handle_${handle_id}</child_link>
+          <attach_topic>/drone${id}/attach</attach_topic>
+          <detach_topic>/drone${id}/detach</detach_topic>
+        </plugin>
       </gazebo>
     </xacro:unless>
   </xacro:macro>

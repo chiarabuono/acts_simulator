@@ -49,7 +49,7 @@ def generate_launch_description():
         package='ros_gz_sim',
         executable='create',
         arguments=[
-            '-name', 'acts_towed_system',
+            '-name', 'acts_system',
             '-string', robot_desc,
             '-z', '2.0'  # Spawn it higher so the cables have room to hang
         ],
