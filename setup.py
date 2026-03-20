@@ -45,6 +45,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'controller_node = acts_simulator.controller_node:main',
         ],
     },
 )

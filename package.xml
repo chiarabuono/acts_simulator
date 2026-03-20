@@ -20,6 +20,10 @@
   <exec_depend>ros_gz_sim</exec_depend>
   <exec_depend>ros_gz_bridge</exec_depend>
 
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-scipy</exec_depend>
+  <exec_depend>python3-matplotlib</exec_depend>
+
   <!-- Delete these lines if you don't use turtlebot3 anymore-->
   <exec_depend>turtlebot3_description</exec_depend>
   <exec_depend>turtlebot3_gazebo</exec_depend>

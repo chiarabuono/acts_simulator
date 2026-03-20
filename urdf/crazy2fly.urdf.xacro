@@ -101,12 +101,13 @@ Copyright ©2025 nknab
 		<!-- ODOMETRY PUBLISHER -->
 		<plugin name="gz::sim::systems::OdometryPublisher" filename="gz-sim-odometry-publisher-system">
 			<odom_publish_frequency>100</odom_publish_frequency>
-			<dimensions>3</dimensions>		
-			<odom_frame>${prefix}crazy2fly</odom_frame>
+			<dimensions>3</dimensions>
+			
+			<odom_frame>world</odom_frame>
+			<robot_base_frame>acts_system::drone1_link_10</robot_base_frame>
+			
 			<odom_topic>${ns}${prefix}mocap/odom</odom_topic>
-			<odom_covariance_topic>${ns}mocap/odometry_with_covariance</odom_covariance_topic>
-			<tf_topic>${ns}${prefix}mocap/pose</tf_topic>
-			<robot_base_frame>${prefix}px4_imu_link</robot_base_frame>
+			<tf_topic>${ns}${prefix}tf</tf_topic>
 		</plugin>
 
 
