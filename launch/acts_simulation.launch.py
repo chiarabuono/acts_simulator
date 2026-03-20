@@ -14,6 +14,13 @@ from launch.actions import (
 )
 from launch.event_handlers import OnShutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.substitutions import FindPackageShare
+
+
+# CONSTANTS
+PACKAGE_NAME = "acts_simulator"
+GAZEBO_VERBOSE_LEVEL = 4
+WORLD = "simple"
 
 def clean_function(_: LaunchContext) -> None:
     """Kills lingering processes on exit to prevent the Ruby ESRCH error."""
@@ -21,8 +28,7 @@ def clean_function(_: LaunchContext) -> None:
     popen("pkill -x ruby")
 
 def generate_launch_description():
-    package_name = 'acts_simulator'
-    pkg_share = get_package_share_directory(package_name)
+    pkg_share = FindPackageShare(package=PACKAGE_NAME).find(PACKAGE_NAME)
     
     # PROCESS THE ACTS SYSTEM (UAV + Panel + Cable)
     xacro_file = os.path.join(pkg_share, 'urdf', 'acts.urdf.xacro')
@@ -51,7 +57,7 @@ def generate_launch_description():
         arguments=[
             '-name', 'acts_system',
             '-string', robot_desc,
-            '-z', '2.0'  # Spawn it higher so the cables have room to hang
+            '-z', '1.2'  # Spawn it higher so the cables have room to hang
         ],
         output='screen'
     )
@@ -99,8 +105,6 @@ def generate_launch_description():
         set_gz_resource_path, 
         gazebo,
         spawn_system,
-        # spawn_turtlebot,                <-------------- Add this inside the acts xacro 
         node_robot_state_publisher,
         shutdown_handler,
-        # node_joint_state_publisher
     ])
