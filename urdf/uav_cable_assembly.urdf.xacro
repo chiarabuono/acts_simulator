@@ -3,35 +3,24 @@
   <xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
 
-<xacro:macro name="add_drone" params="id handle_id segments length">
+<xacro:macro name="add_drone" params="id handle_id segments length panel_link">
   <xacro:property name="prefix" value="drone${id}_" />
-
-  <joint name="${prefix}attachment_joint" type="continuous">
-    <parent link="main_panel_handle_${handle_id}"/>
-    <child link="${prefix}hook_link"/>
-    <axis xyz="1 0 0"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-  </joint>
-
-  <link name="${prefix}hook_link">
-    <inertial><mass value="0.01"/><inertia ixx="1e-6" iyy="1e-6" izz="1e-6" ixy="0" ixz="0" iyz="0"/></inertial>
-    <visual><geometry><sphere radius="0.01"/></geometry></visual>
-  </link>
-
-  <xacro:uav_cable 
-    prefix="${prefix}" 
-    parent_link="${prefix}hook_link" 
-    is_flexible="true" 
-    segments="${segments}" 
-    length="${length}" 
-    radius="0.01" mass="0.1" />
 
   <xacro:crazy2fly prefix="${prefix}" />
 
-  <joint name="${prefix}cable_to_uav_joint" type="fixed">
-    <parent link="${prefix}link_${segments}"/>
+  <xacro:uav_cable 
+    prefix="${prefix}" 
+    parent_link="${panel_link}" 
+    is_flexible="true" 
+    segments="${segments}" 
+    length="${length}" 
+    radius="0.01" mass="0001" />
+
+  <joint name="${prefix}cable_to_drone_joint" type="fixed">
+    <parent link="${prefix}link_${segments}"/> 
     <child link="${prefix}base_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0 ${length/segments}" rpy="0 0 0"/>
   </joint>
+
 </xacro:macro>
 </robot>

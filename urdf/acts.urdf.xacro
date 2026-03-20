@@ -6,16 +6,17 @@
 
   <link name="world"/>
 
+  <joint name="world_to_panel_joint" type="fixed">
+    <parent link="world"/>
+    <child link="main_panel_base_link"/>
+    <origin xyz="0 0 2.0" rpy="0 0 0"/> 
+  </joint>
+
   <xacro:panel_platform 
     prefix="main_panel_" 
     mass="2.5" width="2.0" depth="2.0" height="0.2" />
 
-  <joint name="world_to_panel_joint" type="fixed">
-    <parent link="world"/>
-    <child link="main_panel_base_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/> </joint>
-
-  <xacro:add_drone id="1" handle_id="1" segments="10" length="1.0" />
-  <xacro:add_drone id="2" handle_id="2" segments="10" length="1.0" />
+  <xacro:add_drone id="1" handle_id="1" segments="30" length="1.0" panel_link="main_panel_base_link"/>
+  <xacro:add_drone id="2" handle_id="2" segments="30" length="1.0" panel_link="main_panel_base_link"/>
 
 </robot>
