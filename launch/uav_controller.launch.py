@@ -172,6 +172,14 @@ def launch_setup(
         ]
     )
 
+
+    drone_start = Node(
+        package=PACKAGE_NAME,
+        executable="drone_start",
+        name="drone_start",
+        output="screen",
+    )
+
     # 2. The ROS-GZ Bridge Node
     # This replaces the manual 'ros2 run ros_gz_bridge...' command
     bridge_node = Node(
@@ -202,7 +210,7 @@ def launch_setup(
         )
     )
 
-    return [sim, bridge_node, shutdown_handler] #delayed_controller,
+    return [sim, bridge_node, drone_start, shutdown_handler] #delayed_controller,
 
 
 def generate_launch_description() -> LaunchDescription:

@@ -50,7 +50,23 @@ Copyright ©2025 nknab
 	<xacro:macro name="crazy2fly" params="prefix"> 
 
 	<!-- BASE LINK -->
-	<link name="${prefix}base_link" />
+	<link name="${prefix}base_link">
+		<inertial>
+			<mass value="1.0" />
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.02" />
+		</inertial>
+		<visual>
+			<geometry>
+			<box size="0.2 0.2 0.1"/>
+			</geometry>
+		</visual>
+		<collision name="${prefix}base_collision">
+			<geometry>
+			<box size="0.3 0.3 0.15"/>
+			</geometry>
+		</collision>
+	</link>
 
 
 	<!-- CORE -->

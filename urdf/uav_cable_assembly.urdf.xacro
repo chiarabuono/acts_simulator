@@ -3,24 +3,34 @@
   <xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
 
-<xacro:macro name="add_drone" params="id handle_id segments length panel_link">
-  <xacro:property name="prefix" value="drone${id}_" />
+  <xacro:macro name="add_drone" params="id segments length panel_link x_off y_off z_off">
+    <xacro:property name="prefix" value="drone${id}_" />
+    
+    <xacro:crazy2fly prefix="${prefix}" />
 
-  <xacro:crazy2fly prefix="${prefix}" />
+    <xacro:uav_cable 
+      prefix="${prefix}" 
+      parent_link="${panel_link}" 
+      is_flexible="true" 
+      segments="${segments}" 
+      length="${length}" 
+      radius="0.005" mass="0.01" />
 
-  <xacro:uav_cable 
-    prefix="${prefix}" 
-    parent_link="${panel_link}" 
-    is_flexible="true" 
-    segments="${segments}" 
-    length="${length}" 
-    radius="0.01" mass="0001" />
+    <joint name="${prefix}cable_to_drone_joint" type="fixed">
+      <parent link="${prefix}link_${segments}"/> 
+      <child link="${prefix}base_link"/>
+      <origin xyz="${x_off} ${y_off} ${float(z_off)}" rpy="0 0 0"/>
+    </joint>
 
-  <joint name="${prefix}cable_to_drone_joint" type="fixed">
-    <parent link="${prefix}link_${segments}"/> 
-    <child link="${prefix}base_link"/>
-    <origin xyz="0 0 ${length/segments}" rpy="0 0 0"/>
-  </joint>
+    <gazebo reference="${prefix}cable_to_drone_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+      <disableFixedJointLumping>true</disableFixedJointLumping>
+    </gazebo>
 
-</xacro:macro>
+    <gazebo reference="${prefix}base_link">
+      <self_collide>true</self_collide>
+    </gazebo>
+
+    
+  </xacro:macro>
 </robot>

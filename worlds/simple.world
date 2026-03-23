@@ -19,8 +19,10 @@ Copyright ©2025 nknab
 		<physics name="1ms" type="ignored">
 			<max_step_size>0.001</max_step_size>
 			<real_time_factor>1.0</real_time_factor>
-			<real_time_update_rate>250</real_time_update_rate>
+			<real_time_update_rate>1000</real_time_update_rate>
 		</physics>
+
+		<plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact" />
 
 		<plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
 

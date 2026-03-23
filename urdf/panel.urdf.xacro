@@ -33,17 +33,25 @@
         <geometry><box size="${width} ${depth} ${height}"/></geometry>
         <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
       </visual>
-      <collision>
-        <geometry><box size="${width} ${depth} ${height}"/></geometry>
+      <collision name="panel_collision">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry> <box size="${width} ${depth} ${height}"/> </geometry>
       </collision>
     </link>
 
     <xacro:handle prefix="${prefix}" suffix="1" x="0"  y="0"  z="${height/2}" />
-    <xacro:handle prefix="${prefix}" suffix="2" x="0.2"  y="-0.2" z="${height/2}" />
+    <!-- <xacro:handle prefix="${prefix}" suffix="2" x="1"  y="1" z="${height/2}" /> -->
     
     <!-- 
     <xacro:handle prefix="${prefix}" suffix="3" x="-0.2" y="-0.2" z="${height/2}" />
     <xacro:handle prefix="${prefix}" suffix="4" x="-0.2" y="0.2"  z="${height/2}" /> -->
+
+  <gazebo reference="main_panel_base_link">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <self_collide>true</self_collide>
+    <kp>1000000.0</kp> <kd>1.0</kd>      
+  </gazebo>
 
   </xacro:macro>
 </robot>
