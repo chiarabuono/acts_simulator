@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="cable_guide" params="prefix parent_link x y z">
+
+    <link name="${prefix}_base_center">
+      <inertial>
+        <mass value="0.01"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_base_joint" type="fixed">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}_base_center"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+    </joint>
+
+    <xacro:macro name="pulley_wall" params="wall_name wx wy wsx wsy">
+      <link name="${prefix}_wall_${wall_name}">
+        <inertial>
+          <mass value="0.01"/>
+          <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+        </inertial>
+        <visual>
+          <geometry><box size="${wsx} ${wsy} 0.005"/></geometry>
+          <material name="red"><color rgba="1 0 0 1"/></material>
+        </visual>
+        <collision>
+          <geometry><box size="${wsx} ${wsy} 0.001"/></geometry>
+        </collision>
+      </link>
+      <joint name="${prefix}_joint_${wall_name}" type="fixed">
+        <parent link="${prefix}_base_center"/>
+        <child link="${prefix}_wall_${wall_name}"/>
+        <origin xyz="${wx} ${wy} 0" rpy="0 0 0"/>
+      </joint>
+    </xacro:macro>
+
+    <xacro:pulley_wall wall_name="n" wx="0"    wy="0.03" wsx="0.07" wsy="0.02"/>
+    <xacro:pulley_wall wall_name="s" wx="0"    wy="-0.03" wsx="0.07" wsy="0.02"/>
+    <xacro:pulley_wall wall_name="e" wx="0.03" wy="0"    wsx="0.02" wsy="0.04"/>
+    <xacro:pulley_wall wall_name="w" wx="-0.03" wy="0"    wsx="0.02" wsy="0.04"/>
+
+  </xacro:macro>
+</robot>

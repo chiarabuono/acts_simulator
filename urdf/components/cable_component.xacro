@@ -56,7 +56,7 @@
         <child link="${prefix}virtual_${current_num}"/>
         <origin xyz="0 0 ${cable_len}" rpy="0 0 0"/>
         <axis xyz="1 0 0"/>
-        <dynamics damping="0.01" friction="0.001"/>
+        <dynamics damping="2.0" friction="1.0"/>
       </joint>
     </xacro:unless>
 

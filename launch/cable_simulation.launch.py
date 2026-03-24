@@ -61,6 +61,19 @@ def generate_launch_description():
         output='screen'
     )
 
+    xacro_file = os.path.join(pkg_share, 'urdf', 'pulley.xacro')
+    robot_description_config = xacro.process_file(xacro_file)
+    robot_desc = robot_description_config.toxml()
+
+    spawn_pulley = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=[
+            '-name', 'pulley',
+            '-string', robot_desc,
+            '-z', '0.0'
+        ],
+        output='screen')
 
     """
     node_joint_state_publisher = Node(
@@ -84,5 +97,6 @@ def generate_launch_description():
         set_gz_resource_path, 
         gazebo,
         spawn_system,
+        spawn_pulley,
         shutdown_handler,
     ])

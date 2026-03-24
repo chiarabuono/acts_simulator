@@ -2,6 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts_system">
 
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
+  <xacro:include filename="$(find acts_simulator)/urdf/components/cable_guide.xacro" />
 
   <link name="world"/>
 
