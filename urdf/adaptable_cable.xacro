@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts_system">
+
+  <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
+
+  <link name="world"/>
+
+  <xacro:uav_cable 
+    prefix="" 
+    parent_link="world" 
+    is_flexible="true" 
+    segments="20" 
+    length="10" 
+    radius="0.01" 
+    mass="0.1" 
+    orientation="0" />
+  
+<ros2_control name="GazeboSimSystem" type="system">
+  <hardware>
+    <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+  </hardware>
+  <joint name="joint_pulley">
+    <command_interface name="position">
+      <param name="min">-10</param>
+      <param name="max">10</param>
+    </command_interface>
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+  </joint>
+</ros2_control>
+
+<gazebo>
+  <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
+    <parameters>$(find acts_simulator)/config/cable_controller.yaml</parameters>
+  </plugin>
+
+  <plugin
+    filename="gz-sim-joint-controller-system"
+    name="gz::sim::systems::JointController">
+    <joint_name>joint_pulley</joint_name>
+    <initial_position>0.0</initial_position>
+    <topic>/model/cable/joint/joint_pulley/0/cmd_pos</topic>
+  </plugin>
+</gazebo>
+
+</robot>
