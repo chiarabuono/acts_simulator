@@ -43,13 +43,10 @@
     </link>
 
     <xacro:if value="${current_num == 1}">
-      <joint name="${prefix}joint_pulley" type="prismatic">
+      <joint name="${prefix}joint_fixed_root" type="fixed">
         <parent link="${parent}"/>
         <child link="${prefix}virtual_${current_num}"/>
         <origin xyz="0 0 0" rpy="0 ${theta} 0"/> 
-        <axis xyz="1 0 0"/> 
-        <limit effort="10000.0" lower="-10.0" upper="10.0" velocity="5.0"/>
-        <dynamics damping="0.01" friction="0.01"/>
       </joint>
     </xacro:if>
 

@@ -56,7 +56,7 @@ def generate_launch_description():
         arguments=[
             '-name', 'cable',
             '-string', robot_desc,
-            '-z', '1.2'  # Spawn it higher so the cables have room to hang
+            '-z', '0.0'
         ],
         output='screen'
     )

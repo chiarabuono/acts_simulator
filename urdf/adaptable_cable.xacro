@@ -5,42 +5,58 @@
 
   <link name="world"/>
 
-  <xacro:uav_cable 
-    prefix="" 
-    parent_link="world" 
-    is_flexible="true" 
-    segments="20" 
-    length="10" 
-    radius="0.01" 
-    mass="0.1" 
-    orientation="0" />
+  <link name="base_x_link"><inertial><mass value="0.01"/>
+    <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/> </inertial>
+  </link>
   
-<ros2_control name="GazeboSimSystem" type="system">
-  <hardware>
-    <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-  </hardware>
-  <joint name="joint_pulley">
-    <command_interface name="position">
-      <param name="min">-10</param>
-      <param name="max">10</param>
-    </command_interface>
-    <state_interface name="position"/>
-    <state_interface name="velocity"/>
+  <joint name="joint_pulley_x" type="prismatic">
+    <parent link="world"/>
+    <child link="base_x_link"/>
+    <origin xyz="0 0 1.2" rpy="0 0 0"/><axis xyz="1 0 0"/>
+    <limit effort="1000.0" lower="-10.0" upper="10.0" velocity="2.0"/>
   </joint>
-</ros2_control>
 
-<gazebo>
-  <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
-    <parameters>$(find acts_simulator)/config/cable_controller.yaml</parameters>
-  </plugin>
+  <link name="base_y_link">
+    <inertial>
+      <mass value="0.01"/> 
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+    </inertial>
+  </link>
 
-  <plugin
-    filename="gz-sim-joint-controller-system"
-    name="gz::sim::systems::JointController">
-    <joint_name>joint_pulley</joint_name>
-    <initial_position>0.0</initial_position>
-    <topic>/model/cable/joint/joint_pulley/0/cmd_pos</topic>
-  </plugin>
-</gazebo>
+  <joint name="joint_pulley_y" type="prismatic">
+    <parent link="base_x_link"/>
+    <child link="base_y_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/><axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-10.0" upper="10.0" velocity="2.0"/>
+  </joint>
 
+  <link name="base_z_link">
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_pulley_z" type="prismatic">
+    <parent link="base_y_link"/>
+    <child link="base_z_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-1.2" upper="10.0" velocity="2.0"/>
+  </joint>
+
+  <xacro:uav_cable prefix="" parent_link="base_z_link" is_flexible="true" segments="20" length="10" radius="0.01" mass="0.1" orientation="0" />
+
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
+    <joint name="joint_pulley_x"><command_interface name="position"/><state_interface name="position"/></joint>
+    <joint name="joint_pulley_y"><command_interface name="position"/><state_interface name="position"/></joint>
+    <joint name="joint_pulley_z"><command_interface name="position"/><state_interface name="position"/></joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
+      <parameters>$(find acts_simulator)/config/cable_controller.yaml</parameters>
+    </plugin>
+  </gazebo>
 </robot>

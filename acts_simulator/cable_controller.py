@@ -1,39 +1,28 @@
 import rclpy
-from rclpy.node import Node
 from std_msgs.msg import Float64MultiArray
-from rclpy.parameter import Parameter
-
-class PulleyTester(Node):
-    def __init__(self):
-        super().__init__('pulley_tester')
-        
-        # Fondamentale: dice al nodo di aspettare il clock di Gazebo
-        self.set_parameters([Parameter('use_sim_time', Parameter.Type.BOOL, True)])
-        
-        self.publisher_ = self.create_publisher(
-            Float64MultiArray, 
-            '/forward_position_controller/commands', 
-            10
-        )
-        
-        # Timer per pubblicare costantemente (Gazebo preferisce un flusso)
-        self.timer = self.create_timer(0.1, self.timer_callback)
-        self.get_logger().info('Nodo di test avviato. Inviando posizione 2.0...')
-
-    def timer_callback(self):
-        msg = Float64MultiArray()
-        msg.data = [2.0] # Spostamento di 2 metri
-        self.publisher_.publish(msg)
+import time
 
 def main():
     rclpy.init()
-    node = PulleyTester()
+    node = rclpy.create_node('pulley_tester_xyz')
+    node.set_parameters([rclpy.parameter.Parameter('use_sim_time', rclpy.parameter.Parameter.Type.BOOL, True)])
+    
+    pub = node.create_publisher(Float64MultiArray, '/forward_position_controller/commands', 10)
+    
+    msg = Float64MultiArray()
+    msg.data = [2.0, 3.0, 4.0]                  # [X, Y, Z]
+    #print(f"Sending target XYZ: {msg.data}")
+    
+    
     try:
-        rclpy.spin(node)
+        while rclpy.ok():
+            pub.publish(msg)
+            time.sleep(1.0)
     except KeyboardInterrupt:
         pass
-    node.destroy_node()
-    rclpy.shutdown()
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
