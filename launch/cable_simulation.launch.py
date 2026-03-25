@@ -83,6 +83,26 @@ def generate_launch_description():
     )
     """
 
+    xacro_file = os.path.join(pkg_share, 'urdf', 'adaptable_cable.xacro')
+    robot_description_raw = xacro.process_file(xacro_file).toxml()
+
+    node_robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': robot_description_raw}]
+        )
+    
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+            '/model/cable/joint/joint_pulley/0/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double'
+        ],
+        output='screen'
+        ) 
+
 
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
@@ -98,5 +118,7 @@ def generate_launch_description():
         gazebo,
         spawn_system,
         spawn_pulley,
+        node_robot_state_publisher,
+        bridge,
         shutdown_handler,
     ])

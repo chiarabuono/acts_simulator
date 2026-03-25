@@ -40,6 +40,9 @@
         <mass value="0.0001"/> 
         <inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/>
       </inertial>
+      <visual name="visual">
+        <geometry><sphere radius="0.001"/></geometry>
+      </visual>
     </link>
 
     <xacro:if value="${current_num == 1}">
@@ -62,15 +65,26 @@
 
     <link name="${prefix}link_${current_num}">
       <xacro:cylinder_inertia m="${m}" r="${rad}" h="${cable_len}" />
-      <visual>
+      <visual name="visual">
         <origin xyz="0 0 ${cable_len/2.0}"/>
         <geometry><cylinder radius="${rad}" length="${cable_len}"/></geometry>
+        <material name="gray"><color rgba="0.5 0.5 0.5 1.0"/></material>
       </visual>
-      <collision>
+      <collision name="collision">
         <origin xyz="0 0 ${cable_len/2.0}"/>
         <geometry><cylinder radius="${rad}" length="${cable_len}"/></geometry>
       </collision>
     </link>
+
+    <gazebo reference="${prefix}link_${current_num}">
+      <visual>
+        <material>
+          <ambient>0.5 0.5 0.5 1.0</ambient>
+          <diffuse>0.5 0.5 0.5 1.0</diffuse>
+        </material>
+          <transparency>0</transparency>
+      </visual>
+    </gazebo>
 
     <joint name="${prefix}joint_y_${current_num}" type="continuous">
       <parent link="${prefix}virtual_${current_num}"/>

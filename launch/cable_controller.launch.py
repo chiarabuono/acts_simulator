@@ -112,17 +112,12 @@ def launch_setup(
         ]
     )
 
-    bridge = Node(
-    package='ros_gz_bridge',
-    executable='parameter_bridge',
-    arguments=[
-        '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-        '/model/cable/joint/joint_pulley/0/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double'
-    ],
-    output='screen'
-)
-
-
+    visibility_node = Node(
+        package=PACKAGE_NAME,
+        executable='cable_visibility', # Deve corrispondere al nome in setup.py
+        name='cable_visibility_manager',
+        output='screen'
+    ) 
 
     delayed_controller = RegisterEventHandler(
         event_handler=OnProcessStart(
@@ -131,15 +126,6 @@ def launch_setup(
         )
     )
 
-    xacro_file = os.path.join(pkg_share, 'urdf', 'adaptable_cable.xacro')
-    robot_description_raw = xacro.process_file(xacro_file).toxml()
-
-    node_robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        output='screen',
-        parameters=[{'robot_description': robot_description_raw}]
-        )
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -161,7 +147,9 @@ def launch_setup(
         )
     )
 
-    return [sim, bridge, node_robot_state_publisher, delayed_controller, joint_state_broadcaster_spawner, position_controller_spawner, shutdown_handler]
+    return [sim, 
+            visibility_node, delayed_controller, 
+            joint_state_broadcaster_spawner, position_controller_spawner, shutdown_handler]
 
 
 def generate_launch_description() -> LaunchDescription:
