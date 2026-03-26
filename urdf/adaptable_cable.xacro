@@ -2,58 +2,32 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts_system">
 
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
-  <xacro:include filename="$(find acts_simulator)/urdf/components/cable_guide.xacro" />
+  <xacro:include filename="$(find acts_simulator)/urdf/components/pulley.xacro" />
 
   <link name="world"/>
 
-  <link name="base_x_link"><inertial><mass value="0.01"/>
-    <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/> </inertial>
-  </link>
-  
-  <joint name="joint_pulley_x" type="prismatic">
-    <parent link="world"/>
-    <child link="base_x_link"/>
-    <origin xyz="0 0 1.2" rpy="0 0 0"/><axis xyz="1 0 0"/>
-    <limit effort="1000.0" lower="-10.0" upper="10.0" velocity="2.0"/>
-  </joint>
+  <xacro:position_controlled_pulley prefix="pulley_A" parent_link="world" />
 
-  <link name="base_y_link">
-    <inertial>
-      <mass value="0.01"/> 
-      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
-    </inertial>
-  </link>
+  <xacro:arg name="x" default="0.0"/>
+  <xacro:arg name="y" default="0.0"/>
+  <xacro:arg name="z" default="0.0"/>
+  <xacro:arg name="length" default="5.0"/>
 
-  <joint name="joint_pulley_y" type="prismatic">
-    <parent link="base_x_link"/>
-    <child link="base_y_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/><axis xyz="0 1 0"/>
-    <limit effort="1000.0" lower="-10.0" upper="10.0" velocity="2.0"/>
-  </joint>
+  <xacro:uav_cable 
+    prefix="" 
+    parent_link="base_pulley_A_z_link" 
+    is_flexible="true" 
+    x="$(arg x)" 
+    y="$(arg y)" 
+    z="$(arg z)" 
+    segments="20" 
+    length="$(arg length)" 
+    radius="0.01" 
+    mass="0.1" 
+    orientation="3.1415" />
 
-  <link name="base_z_link">
-    <inertial>
-      <mass value="0.01"/>
-      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
-    </inertial>
-  </link>
+  <!-- <xacro:position_controlled_pulley prefix="pulley_B" parent_link="link_20" /> -->
 
-  <joint name="joint_pulley_z" type="prismatic">
-    <parent link="base_y_link"/>
-    <child link="base_z_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <limit effort="1000.0" lower="-1.2" upper="10.0" velocity="2.0"/>
-  </joint>
-
-  <xacro:uav_cable prefix="" parent_link="base_z_link" is_flexible="true" segments="20" length="10" radius="0.01" mass="0.1" orientation="0" />
-
-  <ros2_control name="GazeboSimSystem" type="system">
-    <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
-    <joint name="joint_pulley_x"><command_interface name="position"/><state_interface name="position"/></joint>
-    <joint name="joint_pulley_y"><command_interface name="position"/><state_interface name="position"/></joint>
-    <joint name="joint_pulley_z"><command_interface name="position"/><state_interface name="position"/></joint>
-  </ros2_control>
 
   <gazebo>
     <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">

@@ -76,6 +76,11 @@ def launch_setup(
 
     """
 
+    init_x = "0.0"
+    init_y = "0.0"
+    init_z = "5.0"
+    cable_len = "4.0"
+
     # Get the package share directory
     pkg_share = FindPackageShare(package=PACKAGE_NAME).find(PACKAGE_NAME)
 
@@ -89,6 +94,7 @@ def launch_setup(
                 FindExecutable(name="ros2"),
                 " launch ",
                 PathJoinSubstitution([pkg_share, "launch", "cable_simulation.launch.py",]),
+                f" x:={init_x} y:={init_y} z:={init_z} length:={cable_len}",
                 " headless:=false",
                 " use_rviz:=false",
                 f" fixed:={fixed}",
@@ -99,13 +105,21 @@ def launch_setup(
         output="screen",
     )
 
-    controller_node = Node(
+    position_controller_node = Node(
         package=PACKAGE_NAME,
         executable="cable_controller",
         name="cable_controller",
         output="screen",
         parameters=[{
-            "mass": 0.001,
+            "current_x": float(init_x),
+            "current_y": float(init_y),
+            "current_z": float(init_z),
+            "available_cable_len": float(cable_len),
+
+            # We set the pulley at the same height of the start of the cable (cable full unwinded)
+            "pulley_x": float(init_x),
+            "pulley_y": float(init_y),
+            "pulley_z": float(init_z),
         }],
 
         remappings=[
@@ -122,7 +136,7 @@ def launch_setup(
     delayed_controller = RegisterEventHandler(
         event_handler=OnProcessStart(
             target_action=sim,
-            on_start=TimerAction(period=WAIT_TIME, actions=[controller_node]),
+            on_start=TimerAction(period=WAIT_TIME, actions=[position_controller_node]),
         )
     )
 
@@ -142,13 +156,13 @@ def launch_setup(
         OnShutdown(
             on_shutdown=[
                 OpaqueFunction(function=clean_function),
-                LogInfo(msg=["UAV Simulation - Cleaning up after shutdown!"]),
+                LogInfo(msg=["Cable Simulation - Cleaning up after shutdown!"]),
             ]
         )
     )
 
-    return [sim, 
-            visibility_node, delayed_controller, 
+    return [sim, # visibility_node, 
+            delayed_controller, 
             joint_state_broadcaster_spawner, position_controller_spawner, shutdown_handler]
 
 

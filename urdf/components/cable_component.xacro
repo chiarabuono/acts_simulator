@@ -33,7 +33,7 @@
 
 
 <!-- ____________   Flexible cable  _______________________-->
-  <xacro:macro name="flexible_chain_generator" params="prefix parent current_num total_num cable_len rad m theta">
+  <xacro:macro name="flexible_chain_generator" params="prefix parent current_num x y z total_num cable_len rad m theta">
   
     <link name="${prefix}virtual_${current_num}">
       <inertial>
@@ -49,7 +49,7 @@
       <joint name="${prefix}joint_fixed_root" type="fixed">
         <parent link="${parent}"/>
         <child link="${prefix}virtual_${current_num}"/>
-        <origin xyz="0 0 0" rpy="0 ${theta} 0"/> 
+        <origin xyz="${x} ${y} ${z}" rpy="0 ${theta} 0"/> 
       </joint>
     </xacro:if>
 
@@ -99,16 +99,18 @@
         prefix="${prefix}" 
         parent="${prefix}link_${current_num}" 
         current_num="${current_num + 1}" 
+        x="0" y="0" z="0"
         total_num="${total_num}" 
         cable_len="${cable_len}" rad="${rad}" m="${m}" 
         theta="${theta}" />
     </xacro:if>
   </xacro:macro>
 
-  <xacro:macro name="uav_cable" params="prefix parent_link is_flexible segments length radius mass orientation">
+  <xacro:macro name="uav_cable" params="prefix parent_link is_flexible x y z segments length radius mass orientation">
     <xacro:if value="${is_flexible}">
       <xacro:flexible_chain_generator 
-        prefix="${prefix}" parent="${parent_link}" current_num="1" 
+        prefix="${prefix}" parent="${parent_link}" current_num="1"
+        x="${x}" y="${y}" z="${z}" 
         total_num="${segments}" cable_len="${length/segments}" rad="${radius}" m="${mass/segments}" theta="${orientation}" />
     </xacro:if>
     <xacro:unless value="${is_flexible}">

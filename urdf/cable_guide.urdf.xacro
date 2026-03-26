@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts_system">
+
+  <xacro:include filename="$(find acts_simulator)/urdf/components/cable_guide.xacro" />
+
+  <link name="world"/>
+
+  <xacro:cable_guide prefix="winding_pulley" 
+    parent_link="world"
+    x="0" y="0" z="5"
+  />
+
+  <xacro:cable_guide prefix="unwinding_pulley" 
+    parent_link="world"
+    x="0" y="0" z="2"
+  />
+
+
+ 
+</robot>

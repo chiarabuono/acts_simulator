@@ -11,7 +11,7 @@ controller_manager:
 forward_position_controller:
   ros__parameters:
     joints:
-      - joint_pulley_x
-      - joint_pulley_y
-      - joint_pulley_z
+      - joint_pulley_A_x
+      - joint_pulley_A_y
+      - joint_pulley_A_z
     interface_name: position

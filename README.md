@@ -17,7 +17,9 @@ colcon build --packages-select acts_simulator --symlink-install && source instal
 2 - check_urdf test.urdf
 3 - urdf_to_graphiz test.urdf
 
-All together: xacro acts.urdf.xacro > test.urdf && check_urdf test.urdf && urdf_to_graphiz test.urdf
+All together: 
+- ACTS system: xacro acts.urdf.xacro > test.urdf && check_urdf test.urdf && urdf_to_graphiz test.urdf
+- Cable-pulley system: xacro adaptable_cable.xacro > test.urdf && check_urdf test.urdf && urdf_to_graphiz test.urdf
 
 ## To see the state of the system
 gz model -m acts_system -l
