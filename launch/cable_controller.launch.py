@@ -39,7 +39,7 @@ from launch.substitutions import (
 )
 
 PACKAGE_NAME = "acts_simulator"
-WAIT_TIME = 10.0
+WAIT_TIME = 20.0
 
 
 def clean_function(_: LaunchContext) -> None:
@@ -78,8 +78,28 @@ def launch_setup(
 
     init_x = "0.0"
     init_y = "0.0"
-    init_z = "5.0"
+    init_z = "3.0"
+
+    # PULLEY A
+    pulley_x = "0.0"
+    pulley_y = "0.0"
+    pulley_z = "5.0"
+
+
     cable_len = "4.0"
+    unwinded_len = "2.0"
+    cable_extreme = "link_last" # OR "link_last"
+    if cable_extreme == "link_first": orientation = "3.1415"
+    else: orientation = "0.0"
+
+
+
+    # PULLEY B
+    # init_x = "0.0"
+    # init_y = "0.0"
+    # init_z = "2.0"
+    # cable_len = "4.0"
+    # unwinded_len = "4.0"
 
     # Get the package share directory
     pkg_share = FindPackageShare(package=PACKAGE_NAME).find(PACKAGE_NAME)
@@ -94,7 +114,7 @@ def launch_setup(
                 FindExecutable(name="ros2"),
                 " launch ",
                 PathJoinSubstitution([pkg_share, "launch", "cable_simulation.launch.py",]),
-                f" x:={init_x} y:={init_y} z:={init_z} length:={cable_len}",
+                f" x:={init_x} y:={init_y} z:={init_z} length:={cable_len} orientation:={orientation}",
                 " headless:=false",
                 " use_rviz:=false",
                 f" fixed:={fixed}",
@@ -108,21 +128,24 @@ def launch_setup(
     position_controller_node = Node(
         package=PACKAGE_NAME,
         executable="cable_controller",
-        name="cable_controller",
+        name="controller_pulley_a",
         output="screen",
         parameters=[{
             "current_x": float(init_x),
             "current_y": float(init_y),
             "current_z": float(init_z),
-            "available_cable_len": float(cable_len),
-
-            # We set the pulley at the same height of the start of the cable (cable full unwinded)
-            "pulley_x": float(init_x),
-            "pulley_y": float(init_y),
-            "pulley_z": float(init_z),
+            "total_cable_len": float(cable_len),
+            "cable_extreme": cable_extreme,
+            "mode": "UNWIND",
+            "vel": 0.01,
+            "unwinded_cable_len": float(unwinded_len),
+            "pulley_x": float(pulley_x),
+            "pulley_y": float(pulley_y),
+            "pulley_z": float(pulley_z),            
         }],
 
         remappings=[
+            ("motor_commands", "/forward_position_controller/commands")
         ]
     )
 

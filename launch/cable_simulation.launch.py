@@ -36,6 +36,7 @@ def launch_setup(context: LaunchContext, *args, **kwargs):
     y_str = LaunchConfiguration('y').perform(context)
     z_str = LaunchConfiguration('z').perform(context)
     length_str = LaunchConfiguration('length').perform(context)
+    orientation_str = LaunchConfiguration('orientation').perform(context)
 
     # 2. Process the primary Xacro (Cable System) with mappings
     xacro_file = os.path.join(pkg_share, 'urdf', 'adaptable_cable.xacro')
@@ -45,7 +46,8 @@ def launch_setup(context: LaunchContext, *args, **kwargs):
             'x': x_str, 
             'y': y_str, 
             'z': z_str, 
-            'length': length_str
+            'length': length_str,
+            'orientation': orientation_str
         }
     )
     robot_desc = robot_description_config.toxml()
@@ -138,6 +140,7 @@ def generate_launch_description():
         DeclareLaunchArgument('y', default_value='1.0', description='Initial Y offset'),
         DeclareLaunchArgument('z', default_value='1.0', description='Initial Z offset'),
         DeclareLaunchArgument('length', default_value='5.0', description='Total cable length'),
+        DeclareLaunchArgument('orientation', default_value='0.0', description='Cable orientation'),
         
         set_gz_resource_path, 
         gazebo,

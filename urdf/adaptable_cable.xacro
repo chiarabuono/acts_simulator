@@ -12,6 +12,7 @@
   <xacro:arg name="y" default="0.0"/>
   <xacro:arg name="z" default="0.0"/>
   <xacro:arg name="length" default="5.0"/>
+  <xacro:arg name="orientation" default="0.0"/>
 
   <xacro:uav_cable 
     prefix="" 
@@ -24,9 +25,9 @@
     length="$(arg length)" 
     radius="0.01" 
     mass="0.1" 
-    orientation="3.1415" />
+    orientation="$(arg orientation)" />
 
-  <!-- <xacro:position_controlled_pulley prefix="pulley_B" parent_link="link_20" /> -->
+  <xacro:position_controlled_pulley prefix="pulley_B" parent_link="link_20" />
 
 
   <gazebo>
