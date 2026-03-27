@@ -88,6 +88,7 @@ def launch_setup(
 
     cable_len = "4.0"
     unwinded_len = "2.0"
+    final_unwinded_cable_len = "3.0"
     cable_extreme = "link_last" # OR "link_last"
     if cable_extreme == "link_first": orientation = "3.1415"
     else: orientation = "0.0"
@@ -136,9 +137,10 @@ def launch_setup(
             "current_z": float(init_z),
             "total_cable_len": float(cable_len),
             "cable_extreme": cable_extreme,
-            "mode": "UNWIND",
+            # "mode": "UNWIND",
             "vel": 0.01,
             "unwinded_cable_len": float(unwinded_len),
+            "final_cable_len": float(final_unwinded_cable_len),
             "pulley_x": float(pulley_x),
             "pulley_y": float(pulley_y),
             "pulley_z": float(pulley_z),            
