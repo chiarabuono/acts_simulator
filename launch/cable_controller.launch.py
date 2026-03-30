@@ -76,36 +76,32 @@ def launch_setup(
 
     """
 
+    pulley_a_extreme = "link_first"
+    pulley_b_extreme = "link_last"
+
+    # Pulley A (Position) setup
+    orientation_a = "3.1415" if pulley_a_extreme == "link_first" else "0.0"
+
     init_x = "0.0"
     init_y = "0.0"
-    init_z = "3.0"
+    init_z = "7.0"              # Make it consistent with pulley_z, cable_len and unwinded_cable_len
 
     # PULLEY A
     pulley_x = "0.0"
     pulley_y = "0.0"
     pulley_z = "5.0"
 
-
     cable_len = "4.0"
     unwinded_len = "2.0"
     final_unwinded_cable_len = "3.0"
-    cable_extreme = "link_last" # OR "link_last"
-    if cable_extreme == "link_first": orientation = "3.1415"
-    else: orientation = "0.0"
-
-
 
     # PULLEY B
     # init_x = "0.0"
     # init_y = "0.0"
     # init_z = "2.0"
-    # cable_len = "4.0"
-    # unwinded_len = "4.0"
 
-    # Get the package share directory
+
     pkg_share = FindPackageShare(package=PACKAGE_NAME).find(PACKAGE_NAME)
-
-
     fixed = LaunchConfiguration("fixed").perform(context)
 
 
@@ -115,7 +111,7 @@ def launch_setup(
                 FindExecutable(name="ros2"),
                 " launch ",
                 PathJoinSubstitution([pkg_share, "launch", "cable_simulation.launch.py",]),
-                f" x:={init_x} y:={init_y} z:={init_z} length:={cable_len} orientation:={orientation}",
+                f" x:={init_x} y:={init_y} z:={init_z} length:={cable_len} orientation:={orientation_a}",
                 " headless:=false",
                 " use_rviz:=false",
                 f" fixed:={fixed}",
@@ -136,8 +132,7 @@ def launch_setup(
             "current_y": float(init_y),
             "current_z": float(init_z),
             "total_cable_len": float(cable_len),
-            "cable_extreme": cable_extreme,
-            # "mode": "UNWIND",
+            "cable_extreme": pulley_a_extreme,
             "vel": 0.01,
             "unwinded_cable_len": float(unwinded_len),
             "final_cable_len": float(final_unwinded_cable_len),
@@ -157,10 +152,14 @@ def launch_setup(
         name="controller_pulley_b",
         output="screen",
         parameters=[{    
-            "target_tension": 10.0,
+            "target_tension": 20.0,
             "max_effort": 100.0,
-            "Kp": 50.0, # Start higher to see real movement
-            "joint_name": 'joint_pulley_B_z'
+            "Kp": 5.0,
+            "Ki": 2.0, 
+            "Kd": 0.5, 
+            "joint_name": 'joint_pulley_B_z',
+            "cable_extreme": pulley_b_extreme,
+            "winding_type" : "under"
         }],
 
         remappings=[
@@ -170,7 +169,7 @@ def launch_setup(
 
     visibility_node = Node(
         package=PACKAGE_NAME,
-        executable='cable_visibility', # Deve corrispondere al nome in setup.py
+        executable='cable_visibility',
         name='cable_visibility_manager',
         output='screen'
     ) 

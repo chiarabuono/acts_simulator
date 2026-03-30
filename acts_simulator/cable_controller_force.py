@@ -13,15 +13,46 @@ class CableController(Node):
         self.pub_effort = self.create_publisher(Float64MultiArray, 'motor_commands', qos_profile)
         self.sub_joint_states = self.create_subscription(JointState, '/joint_states', self.joint_state_callback, 10)
 
-        self.target_tension = 20.0
-        self.Kp = 5.0
-        self.Ki = 2.0
-        self.integral_error = 0.0
+        self.declare_parameters(
+            namespace='',
+            parameters=[
+                ('joint_name', "joint_pulley"),
+                ('target_tension', 0.0),
+                ('Kp', 0.0),
+                ('Ki', 0.0),
+                ('Kd', 0.0),
+                ('num_segments', 20),
+                ('cable_extreme', 'link_first'),
+                ('winding_type', 'under')
+            ]
+        )
+ 
+        self.cable_extreme = self.get_parameter('cable_extreme').get_parameter_value().string_value
+        self.joint_name = self.get_parameter('joint_name').get_parameter_value().string_value
 
-        self.joint_name = "joint_pulley_B_z" 
+        if self.cable_extreme == 'link_first':
+            self.direction_factor = 1.0
+        else:
+            self.direction_factor = -1.0
+
+        winding_type = self.get_parameter('winding_type').value
+        if winding_type == 'over':
+            self.direction_factor *= -1.0
+           
+        # Controller params
+        self.Kp = self.get_parameter('Kp').get_parameter_value().double_value
+        self.Kd = self.get_parameter('Kd').get_parameter_value().double_value
+        self.Ki = self.get_parameter('Ki').get_parameter_value().double_value
+
+        self.target_tension = self.get_parameter('target_tension').get_parameter_value().double_value
+
+        self.integral_error = 0.0
+        self.last_error = 0.0
+        self.max_effort = 1000.0
         
         self.current_effort = None 
-        self.timer = self.create_timer(0.1, self.control_loop)
+        self.timer_period = 0.1
+        self.timer = self.create_timer(self.timer_period, self.control_loop)
 
     def joint_state_callback(self, msg):
         try:
@@ -38,12 +69,31 @@ class CableController(Node):
         if self.current_effort is None:
             # self.get_logger().info(f"No effort coming")
             return 
+        
+        # P Controller
+        # effort_command = (error * self.Kp)
 
-        error = self.target_tension - self.current_effort
-        self.integral_error += error * 0.1 # 0.1 is your timer period
-        effort_command = (error * self.Kp) + (self.integral_error * self.Ki)
+        position_error = self.target_tension - self.current_effort
+        self.integral_error += position_error * self.timer_period
+        
+        # PI Controller
+        # effort_command = (error * self.Kp) + (self.integral_error * self.Ki)
+
+        derivative = (position_error - self.last_error) / self.timer_period
+        self.last_error = position_error
+
+        # PID Controller
+        effort_command = (position_error * self.Kp) + (self.integral_error * self.Ki) + (derivative * self.Kd)
+        
+
+        effort_command = np.clip(effort_command, -self.max_effort, self.max_effort)
 
         self.get_logger().info(f"Sending Effort: {effort_command:.2f}")
+
+        if self.target_tension < 0:
+            effort_command = effort_command * self.direction_factor * -1.0
+        else:
+            effort_command = effort_command * self.direction_factor
 
         msg = Float64MultiArray()
         msg.data = [float(effort_command)]
