@@ -9,9 +9,8 @@ controller_manager:
     forward_position_controller:
       type: position_controllers/JointGroupPositionController
 
-    # Controller for Pulley B (Currently Position, soon Torque)
-    pulley_b_controller:
-      type: position_controllers/JointGroupPositionController
+    effort_controller:
+      type: effort_controllers/JointGroupEffortController
 
 forward_position_controller:
   ros__parameters:
@@ -20,9 +19,7 @@ forward_position_controller:
       - joint_pulley_A_y
       - joint_pulley_A_z
 
-pulley_b_controller:
+effort_controller:
   ros__parameters:
     joints:
-      - joint_pulley_B_x
-      - joint_pulley_B_y
       - joint_pulley_B_z

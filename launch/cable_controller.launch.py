@@ -39,7 +39,7 @@ from launch.substitutions import (
 )
 
 PACKAGE_NAME = "acts_simulator"
-WAIT_TIME = 20.0
+WAIT_TIME = 5.0
 
 
 def clean_function(_: LaunchContext) -> None:
@@ -128,7 +128,7 @@ def launch_setup(
 
     position_controller_node = Node(
         package=PACKAGE_NAME,
-        executable="cable_controller",
+        executable="cable_controller_position",
         name="controller_pulley_a",
         output="screen",
         parameters=[{
@@ -151,6 +151,23 @@ def launch_setup(
         ]
     )
 
+    force_controller_node = Node(
+        package=PACKAGE_NAME,
+        executable="cable_controller_force",
+        name="controller_pulley_b",
+        output="screen",
+        parameters=[{    
+            "target_tension": 10.0,
+            "max_effort": 100.0,
+            "Kp": 50.0, # Start higher to see real movement
+            "joint_name": 'joint_pulley_B_z'
+        }],
+
+        remappings=[
+            ("motor_commands", "effort_controller/commands")
+        ]
+    )
+
     visibility_node = Node(
         package=PACKAGE_NAME,
         executable='cable_visibility', # Deve corrispondere al nome in setup.py
@@ -161,7 +178,7 @@ def launch_setup(
     delayed_controller = RegisterEventHandler(
         event_handler=OnProcessStart(
             target_action=sim,
-            on_start=TimerAction(period=WAIT_TIME, actions=[position_controller_node]),
+            on_start=TimerAction(period=WAIT_TIME, actions=[force_controller_node]),
         )
     )
 
@@ -177,6 +194,12 @@ def launch_setup(
         arguments=["forward_position_controller", "--controller-manager", "/controller_manager"],
     )
 
+    effort_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["effort_controller", "--controller-manager", "/controller_manager"],
+    )
+
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
             on_shutdown=[
@@ -188,7 +211,9 @@ def launch_setup(
 
     return [sim, # visibility_node, 
             delayed_controller, 
-            joint_state_broadcaster_spawner, position_controller_spawner, shutdown_handler]
+            joint_state_broadcaster_spawner, 
+            position_controller_spawner, effort_controller_spawner, 
+            shutdown_handler]
 
 
 def generate_launch_description() -> LaunchDescription:

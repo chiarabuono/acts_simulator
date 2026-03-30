@@ -27,7 +27,7 @@
     mass="0.1" 
     orientation="$(arg orientation)" />
 
-  <xacro:position_controlled_pulley prefix="pulley_B" parent_link="link_20" />
+  <xacro:forceTorque_controlled_pulley prefix="pulley_B" parent_link="link_20" />
 
 
   <gazebo>

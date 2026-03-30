@@ -50,7 +50,8 @@ setup(
         'console_scripts': [
             'controller_node = acts_simulator.controller_node:main',
             'drone_start = acts_simulator.drone_start:main', 
-            'cable_controller = acts_simulator.cable_controller:main',
+            'cable_controller_position = acts_simulator.cable_controller:main',
+            'cable_controller_force = acts_simulator.cable_controller_force:main',
             #'cable_visibility = acts_simulator.cable_visibility:main',
         ],
     },
