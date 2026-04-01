@@ -36,10 +36,7 @@
   <xacro:macro name="flexible_chain_generator" params="prefix parent current_num x y z total_num cable_len rad m theta">
   
     <link name="${prefix}virtual_${current_num}">
-      <inertial>
-        <mass value="0.0001"/> 
-        <inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/>
-      </inertial>
+      <xacro:cylinder_inertia m="${m}" r="${rad}" h="${cable_len}" />
       <visual name="visual">
         <geometry><sphere radius="0.001"/></geometry>
       </visual>
@@ -50,6 +47,7 @@
         <parent link="${parent}"/>
         <child link="${prefix}virtual_${current_num}"/>
         <origin xyz="${x} ${y} ${z}" rpy="0 ${theta} 0"/> 
+        <dynamics damping="2.0" friction="1.0"/>
       </joint>
     </xacro:if>
 

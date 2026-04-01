@@ -6,20 +6,40 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
 
     # Controller for Pulley A (Position)
-    forward_position_controller:
+    pulley_position_controller:
       type: position_controllers/JointGroupPositionController
 
-    effort_controller:
+    # Controller for Pulley B (Torque/Effort)
+    pulley_torque_controller:
+      type: effort_controllers/JointGroupEffortController
+    
+    pulley_xy_effort_controller:
       type: effort_controllers/JointGroupEffortController
 
-forward_position_controller:
+pulley_xy_effort_controller:
+  ros__parameters:
+    joints:
+      - joint_pulley_B_x
+      - joint_pulley_B_y
+
+# Configuration for Pulley A
+pulley_position_controller:
   ros__parameters:
     joints:
       - joint_pulley_A_x
       - joint_pulley_A_y
       - joint_pulley_A_z
+    interface_name: position
 
-effort_controller:
+# Configuration for Pulley B Torque
+pulley_torque_controller:
   ros__parameters:
     joints:
       - joint_pulley_B_z
+
+# Configuration for Pulley B X/Y Anchor
+pulley_xy_effort_controller:
+  ros__parameters:
+    joints:
+      - joint_pulley_B_x
+      - joint_pulley_B_y

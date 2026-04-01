@@ -94,20 +94,20 @@ Copyright ©2025 nknab
 
 		<!-- Fixed Support Model for Detachable Joint -->
 		<model name="fixed_support">
+			<static>true</static> 
 			<pose>0 0 1.0 0 0 0</pose>
 			<link name="fixed_support_link">
-				<inertial>
-					<mass>0.00001</mass>
-				</inertial>
-				<inertia>
-					<ixx>0.000000001</ixx>
-					<ixy>0</ixy>
-					<ixz>0</ixz>
-					<iyy>0.000000001</iyy>
-					<iyz>0</iyz>
-					<izz>0.000000001</izz>
-				</inertia>
-			</link>
+					<inertial>
+						<mass>1.0</mass> <inertia>
+							<ixx>0.01</ixx>
+							<ixy>0</ixy>
+							<ixz>0</ixz>
+							<iyy>0.01</iyy>
+							<iyz>0</iyz>
+							<izz>0.01</izz>
+						</inertia>
+					</inertial>
+				</link>
 			<joint name="work_harder" type="ball">
 				<parent>world</parent>
 				<child>fixed_support_link</child>

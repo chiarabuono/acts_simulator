@@ -39,7 +39,7 @@ from launch.substitutions import (
 )
 
 PACKAGE_NAME = "acts_simulator"
-WAIT_TIME = 5.0
+WAIT_TIME = 20.0
 
 
 def clean_function(_: LaunchContext) -> None:
@@ -84,21 +84,22 @@ def launch_setup(
 
     init_x = "0.0"
     init_y = "0.0"
-    init_z = "7.0"              # Make it consistent with pulley_z, cable_len and unwinded_cable_len
+    init_z = "18.0"              # Make it consistent with pulley_z, cable_len and unwinded_cable_len
 
     # PULLEY A
     pulley_x = "0.0"
     pulley_y = "0.0"
-    pulley_z = "5.0"
+    pulley_z = "11.0"
 
-    cable_len = "4.0"
-    unwinded_len = "2.0"
-    final_unwinded_cable_len = "3.0"
+    cable_len = "10.0"
+    unwinded_len = "3.0"
+    final_unwinded_cable_len = "10.0"
+    segments = "30"
 
     # PULLEY B
     # init_x = "0.0"
     # init_y = "0.0"
-    # init_z = "2.0"
+    # init_z = "8.0"
 
 
     pkg_share = FindPackageShare(package=PACKAGE_NAME).find(PACKAGE_NAME)
@@ -111,7 +112,7 @@ def launch_setup(
                 FindExecutable(name="ros2"),
                 " launch ",
                 PathJoinSubstitution([pkg_share, "launch", "cable_simulation.launch.py",]),
-                f" x:={init_x} y:={init_y} z:={init_z} length:={cable_len} orientation:={orientation_a}",
+                f" x:={init_x} y:={init_y} z:={init_z} length:={cable_len} orientation:={orientation_a} segments:={segments}",
                 " headless:=false",
                 " use_rviz:=false",
                 f" fixed:={fixed}",
@@ -138,11 +139,12 @@ def launch_setup(
             "final_cable_len": float(final_unwinded_cable_len),
             "pulley_x": float(pulley_x),
             "pulley_y": float(pulley_y),
-            "pulley_z": float(pulley_z),            
+            "pulley_z": float(pulley_z),  
+            "num_segments": int(segments),         
         }],
 
         remappings=[
-            ("motor_commands", "/forward_position_controller/commands")
+            ("motor_commands", "/pulley_position_controller/commands")
         ]
     )
 
@@ -153,17 +155,17 @@ def launch_setup(
         output="screen",
         parameters=[{    
             "target_tension": 20.0,
-            "max_effort": 100.0,
-            "Kp": 5.0,
-            "Ki": 2.0, 
-            "Kd": 0.5, 
+            "max_effort": 900.0,
+            "Kp": 50.0,                 #17.0
+            "Ki": 0.0,                     # 2.5
+            "Kd": 0.0,                  #13.0  
             "joint_name": 'joint_pulley_B_z',
             "cable_extreme": pulley_b_extreme,
             "winding_type" : "under"
         }],
 
         remappings=[
-            ("motor_commands", "effort_controller/commands")
+            ("motor_commands", "/pulley_torque_controller/commands")
         ]
     )
 
@@ -190,14 +192,47 @@ def launch_setup(
     position_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["forward_position_controller", "--controller-manager", "/controller_manager"],
+        arguments=["pulley_position_controller", "--controller-manager", "/controller_manager"],
     )
 
-    effort_controller_spawner = Node(
+    pulley_torque_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["effort_controller", "--controller-manager", "/controller_manager"],
+        arguments=["pulley_torque_controller", "--controller-manager", "/controller_manager"],
     )
+
+    pulley_xy_effort_spawner = Node(
+    package="controller_manager",
+    executable="spawner",
+    arguments=["pulley_xy_effort_controller", "--controller-manager", "/controller_manager"],
+)
+
+    set_xy_effort_zero = ExecuteProcess(
+        cmd=['ros2', 'topic', 'pub', '-1', '/pulley_xy_effort_controller/commands', 'std_msgs/msg/Float64MultiArray', '{data: [0.0, 0.0]}'],
+        output='screen'
+    )
+
+    xy_zero_handler = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=pulley_xy_effort_spawner,
+            on_start=[set_xy_effort_zero]
+        )
+    )
+
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            # Clock bridge (essential for sim time)
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+            # World control (allows resetting and jumping joints)
+            '/world/empty/control@ros_gz_interfaces/srv/ControlWorld',
+            '/world/empty/state@ros_gz_interfaces/msg/WorldState[gz.msgs.WorldState',
+            # Link states (to see where things actually are in Gazebo)
+            '/model/acts_system/pose@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'
+        ],
+        output='screen'
+        )
 
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
@@ -208,11 +243,17 @@ def launch_setup(
         )
     )
 
-    return [sim, # visibility_node, 
-            delayed_controller, 
-            joint_state_broadcaster_spawner, 
-            position_controller_spawner, effort_controller_spawner, 
-            shutdown_handler]
+
+    return [
+        sim, bridge,
+        joint_state_broadcaster_spawner, 
+        position_controller_spawner, 
+        pulley_torque_controller_spawner, 
+        pulley_xy_effort_spawner, # <--- Use the new effort spawner
+        xy_zero_handler,          # <--- Use the new handler
+        delayed_controller, 
+        shutdown_handler
+    ]
 
 
 def generate_launch_description() -> LaunchDescription:

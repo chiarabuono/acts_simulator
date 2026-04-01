@@ -5,14 +5,14 @@
 
   <link name="world"/>
 
-  <xacro:cable_guide prefix="winding_pulley" 
+  <xacro:cable_guide prefix="pulleyA" 
     parent_link="world"
-    x="0" y="0" z="5"
+    x="0" y="0" z="11"
   />
 
-  <xacro:cable_guide prefix="unwinding_pulley" 
+  <xacro:cable_guide prefix="pulleyB" 
     parent_link="world"
-    x="0" y="0" z="2"
+    x="0" y="0" z="8"
   />
 
 
