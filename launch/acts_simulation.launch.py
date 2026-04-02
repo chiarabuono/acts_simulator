@@ -57,7 +57,7 @@ def generate_launch_description():
         arguments=[
             '-name', 'acts_system',
             '-string', robot_desc,
-            '-z', '1.2'  # Spawn it higher so the cables have room to hang
+            '-z', '0.0'  # Spawn it higher so the cables have room to hang
         ],
         output='screen'
     )
@@ -68,6 +68,21 @@ def generate_launch_description():
         output='screen',
         parameters=[{'robot_description': robot_desc}]
     )
+
+    xacro_file2 = os.path.join(pkg_share, 'urdf', 'track.xacro')
+    robot_description_config2 = xacro.process_file(xacro_file2)
+    robot_desc2 = robot_description_config2.toxml()
+    spawn_reference = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=[
+            '-name', 'ref',
+            '-string', robot_desc2,
+            '-z', '0.0'  # Spawn it higher so the cables have room to hang
+        ],
+        output='screen'
+    )
+
 
     """
     node_joint_state_publisher = Node(
@@ -105,6 +120,7 @@ def generate_launch_description():
         set_gz_resource_path, 
         gazebo,
         spawn_system,
+        spawn_reference,
         node_robot_state_publisher,
         shutdown_handler,
     ])

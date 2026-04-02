@@ -87,7 +87,7 @@ def parse_float_list(value: str, expected_length: int, name: str) -> list[float]
 
 
 PACKAGE_NAME = "acts_simulator"
-WAIT_TIME = 10.0
+WAIT_TIME = 5.0
 
 
 def clean_function(_: LaunchContext) -> None:
@@ -154,6 +154,7 @@ def launch_setup(
         shell=True,
         output="screen",
     )
+    mass = 1.0
 
     controller_node = Node(
         package=PACKAGE_NAME,
@@ -163,7 +164,7 @@ def launch_setup(
         parameters=[{
             "desired_position": d_position,
             "desired_velocity": d_velocity,
-            "mass": 1.0,
+            "mass": mass,
         }],
 
         remappings=[
@@ -178,6 +179,10 @@ def launch_setup(
         executable="drone_start",
         name="drone_start",
         output="screen",
+        parameters=[{
+            "action_time": WAIT_TIME
+        }],
+
     )
 
     # 2. The ROS-GZ Bridge Node
@@ -211,7 +216,7 @@ def launch_setup(
     )
 
     return [sim, bridge_node, 
-            drone_start, 
+            delayed_controller, 
             shutdown_handler] #delayed_controller,
 
 
@@ -228,7 +233,7 @@ def generate_launch_description() -> LaunchDescription:
     return LaunchDescription([
         DeclareLaunchArgument(
             "desired_position",
-            default_value="[0.0, 0.0, 0.0]",
+            default_value="[1.0, 1.0, 5.0]",
             description="Desired position the drone should reach",
         ),
         DeclareLaunchArgument(

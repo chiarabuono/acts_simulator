@@ -38,7 +38,7 @@ class ControllerNode(Node):
 
         # Constants (Defined in hpp)
         self.GRAVITY = 9.81
-        self.MAX_ROTOR_VELOCITY = 800.0
+        self.MAX_ROTOR_VELOCITY = 2000.0
 
         # Parameters
         self.declare_parameter("arm_length", 0.17)
@@ -74,10 +74,10 @@ class ControllerNode(Node):
 
         # Publishers
         actuator_qos = QoSProfile(reliability=ReliabilityPolicy.RELIABLE, history=HistoryPolicy.KEEP_LAST, depth=10)
-        self.actuators_pub = self.create_publisher(Actuators, "command/motor_speed", actuator_qos)
+        self.actuators_pub = self.create_publisher(Actuators, "/command/motor_speed", actuator_qos)
 
         # Subscribers
-        self.odom_sub = self.create_subscription(Odometry, "mocap/odom", self.odom_callback, self.SENSOR_QOS)
+        self.odom_sub = self.create_subscription(Odometry, "/mocap/odom", self.odom_callback, self.SENSOR_QOS)
 
         # Timers
         self.timer_period = 0.005  # seconds
@@ -89,17 +89,8 @@ class ControllerNode(Node):
         return (0 < val) - (val < 0)
 
     def odom_callback(self, msg):
-        q = msg.pose.pose.orientation
-    # If the drone is upright, w should be near 1.0, and x, y, z near 0.0
-
-        self.get_logger().warn(f"ODOM says {q}")
-        new_z = msg.pose.pose.position.z
-        if hasattr(self, 'last_z') and new_z == self.last_z:
-            # If the drone is moving in Gz but this log stays the same, 
-            # the plugin fix above is mandatory.
-            self.get_logger().debug(f"Odom Frozen at Z: {new_z}")
-        
-        self.last_z = new_z
+        self.last_z = msg.pose.pose.position.z
+        self.get_logger().warn(f"ODOM says {self.last_z}")
         self.current_odometry = msg
         self.odom_received = True
 
@@ -111,11 +102,15 @@ class ControllerNode(Node):
             [-kd, -kd, kd, kd]
         ])
         return np.linalg.inv(mixer)
+    
+    def compute_propulsion_force(self):
+
+        return np.array([0, 0, 1.0])
 
     def position_controller(self, desired, current):
         # Gains from C++ implementation
-        Kp = np.diag([0.0, 0.0, 0.0])
-        Kd = np.diag([0.0, 0.0, 0.0])
+        Kp = np.diag([10, 10, 10])
+        Kd = np.diag([2.0, 2.0, 2.0])
 
         pd = np.array([desired.pose.pose.position.x, desired.pose.pose.position.y, desired.pose.pose.position.z])
         p  = np.array([current.pose.pose.position.x, current.pose.pose.position.y, current.pose.pose.position.z])
@@ -124,8 +119,8 @@ class ControllerNode(Node):
 
         g = np.array([0, 0, self.GRAVITY])
         
-        # Calculate force vector
         f = Kd @ (vd - v) + Kp @ (pd - p) + (self.drone_mass * g)
+        # f = self.compute_propulsion_force()
         scalar_force = np.linalg.norm(f)
 
         # Cap thrust
@@ -153,8 +148,8 @@ class ControllerNode(Node):
         return desired_quat, scalar_force
 
     def attitude_controller(self, desired_orientation_quat, current_odom):
-        Kp = np.diag([0.0, 0.0, 0.0])
-        Kd = np.diag([0.0, 0.0, 0.0])
+        Kp = np.diag([8.5, 8.5, 8.5])
+        Kd = np.diag([2.0, 2.0, 2.0])
 
         q = current_odom.pose.pose.orientation
         current_q = R.from_quat([q.x, q.y, q.z, q.w])
@@ -190,7 +185,7 @@ class ControllerNode(Node):
 
         # Apply constraints and sqrt
         speeds = np.sqrt(np.maximum(w_squared, 0.0))
-        speeds = np.minimum(speeds, self.MAX_ROTOR_VELOCITY)
+        #speeds = np.minimum(speeds, self.MAX_ROTOR_VELOCITY)
         
         return speeds
 
@@ -202,21 +197,21 @@ class ControllerNode(Node):
         platform_z = 0.5 
         
         # 1. Check the platform condition FIRST
-        if current_z < (platform_z + 0.05):
-            self.get_logger().info("Hovering low to stabilize...", once=True)
-            lift_off_speed = 600.0 
-            msg = Actuators()
-            msg.velocity = [lift_off_speed] * 4
-            self.actuators_pub.publish(msg)
-            return # Exit here so the 'crazy' math below never runs
+        # if current_z < (platform_z + 0.05):
+        #     self.get_logger().info("Hovering low to stabilize...", once=True)
+        #     lift_off_speed = 600.0 
+        #     msg = Actuators()
+        #     msg.velocity = [lift_off_speed] * 4
+        #     self.actuators_pub.publish(msg)
+        #     return # Exit here so the 'crazy' math below never runs
 
         # 2. Only if we are safely above the platform do we run the PID
         speeds = self.compute_actuator_speeds(self.desired_odometry, self.current_odometry)
+        self.get_logger().warn(f"SPEED {speeds}")
         msg = Actuators()
         msg.velocity = speeds.tolist()
         self.actuators_pub.publish(msg)
 
 
     def __del__(self):
-        # Matches C++ destructor
         print("Shutting down Controller Node...")

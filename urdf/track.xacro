@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="reference_marker">
+
+  <xacro:include filename="components/ugv_component.xacro" />
+
+  <link name="ref_root"/>
+
+  <xacro:ugv_component 
+    prefix="obstacle_"
+    x="1.0"
+    y="1.0"
+    z="5.0" 
+  />
+
+  <joint name="ref_joint" type="fixed">
+    <parent link="ref_root"/>
+    <child link="obstacle_base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo>
+    <static>true</static>
+  </gazebo>
+
+</robot>

@@ -3,11 +3,11 @@
 
   <xacro:include filename="panel.urdf.xacro" />
   <xacro:include filename="uav_cable_assembly.urdf.xacro" />
-
+  
 
   <xacro:panel_platform 
     prefix="main_panel_" 
-    mass="10.0" width="3.0" depth="3.0" height="0.2" />
+    mass="0.1" width="3.0" depth="3.0" height="0.2" />
 
   <xacro:add_drone 
     id="1" 
