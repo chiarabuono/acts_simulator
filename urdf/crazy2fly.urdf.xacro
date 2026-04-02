@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
+This files has been modified starting from:
 File: crazy2fly.urdf.xacro
 Project: Quadrotor Control Lab
 File Created: Tuesday, 25th November 2025 9:06:25 AM
@@ -56,11 +57,11 @@ Copyright ©2025 nknab
 			<origin xyz="0 0 0" rpy="0 0 0" />
 			<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.02" />
 		</inertial>
-		<visual>
+		<!-- <visual>
 			<geometry>
 			<box size="0.2 0.2 0.1"/>
 			</geometry>
-		</visual>
+		</visual> -->
 		<collision name="${prefix}base_collision">
 			<geometry>
 			<box size="0.3 0.3 0.15"/>

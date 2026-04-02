@@ -210,7 +210,9 @@ def launch_setup(
         )
     )
 
-    return [sim, bridge_node, drone_start, shutdown_handler] #delayed_controller,
+    return [sim, bridge_node, 
+            drone_start, 
+            shutdown_handler] #delayed_controller,
 
 
 def generate_launch_description() -> LaunchDescription:

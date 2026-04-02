@@ -22,15 +22,5 @@
       <origin xyz="${x_off} ${y_off} ${float(z_off)}" rpy="0 0 0"/>
     </joint>
 
-    <gazebo reference="${prefix}cable_to_drone_joint">
-      <preserveFixedJoint>true</preserveFixedJoint>
-      <disableFixedJointLumping>true</disableFixedJointLumping>
-    </gazebo>
-
-    <gazebo reference="${prefix}base_link">
-      <self_collide>true</self_collide>
-    </gazebo>
-
-    
   </xacro:macro>
 </robot>

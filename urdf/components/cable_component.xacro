@@ -37,20 +37,17 @@
   
   <link name="${prefix}virtual_${current_num}">
     <inertial>
-      <mass value="0.0001"/> <inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/>
+      <mass value="0.0001"/> 
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
     </inertial>
   </link>
 
   <joint name="${prefix}joint_x_${current_num}" type="continuous">
     <parent link="${parent}"/>
     <child link="${prefix}virtual_${current_num}"/>
-    <xacro:if value="${current_num == 1}">
-      <origin xyz="0 0 0" rpy="0 0 0"/> </xacro:if>
-    <xacro:unless value="${current_num == 1}">
-      <origin xyz="0 0 ${cable_len}" rpy="0 0 0"/>
-    </xacro:unless>
+    <origin xyz="0 0 ${current_num == 1 and 0 or cable_len}" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <dynamics damping="0.01" friction="0.001"/>
+    <dynamics damping="0.05" friction="0.01"/>
   </joint>
 
   <link name="${prefix}link_${current_num}">
@@ -59,20 +56,21 @@
       <origin xyz="0 0 ${cable_len/2.0}"/>
       <geometry><cylinder radius="${rad}" length="${cable_len}"/></geometry>
     </visual>
-    <collision>
-      <origin xyz="0 0 ${cable_len/2.0}"/>
-      <geometry><cylinder radius="${rad}" length="${cable_len}"/></geometry>
-    </collision>
-    <self_collide>false</self_collide>
-  </link>
+    </link>
 
   <joint name="${prefix}joint_y_${current_num}" type="continuous">
     <parent link="${prefix}virtual_${current_num}"/>
     <child link="${prefix}link_${current_num}"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <dynamics damping="0.01" friction="0.001"/>
+    <dynamics damping="0.05" friction="0.01"/>
   </joint>
+
+  <gazebo reference="${prefix}joint_x_${current_num}">
+    <implicitSpringDamper>true</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="${prefix}joint_y_${current_num}">
+    <implicitSpringDamper>true</implicitSpringDamper>
+  </gazebo>
 
   <xacro:if value="${current_num &lt; total_num}">
     <xacro:flexible_chain_generator 

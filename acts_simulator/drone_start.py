@@ -19,7 +19,7 @@ class DroneJumpstart(Node):
         elapsed = now - self.start_time
         
         # Apply full thrust for 3 seconds to clear the platform
-        if elapsed.nanoseconds < 8e9:  
+        if elapsed.nanoseconds < 3e9:  
             msg = Actuators()
             # Sending 3000.0 to all 4 motors (adjust if 3000 isn't enough to lift)
             msg.velocity = [3500.0, 3500.0, 3500.0, 3500.0]
