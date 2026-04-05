@@ -143,7 +143,7 @@ def launch_setup(
                 PathJoinSubstitution([
                     pkg_share,
                     "launch",
-                    "acts_simulation.launch.py",
+                    "multi_uav_simulation.launch.py",
                 ]),
                 " headless:=false",
                 " use_rviz:=false",

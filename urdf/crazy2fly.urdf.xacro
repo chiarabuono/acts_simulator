@@ -121,7 +121,7 @@ Copyright ©2025 nknab
 			<dimensions>3</dimensions>
 			
 			<odom_frame>world</odom_frame>
-			<robot_base_frame>acts_system::drone1_link_10</robot_base_frame>
+			<robot_base_frame>acts_system::${prefix}base_link</robot_base_frame>
 			
 			<odom_topic>${ns}${prefix}mocap/odom</odom_topic>
 			<tf_topic>${ns}${prefix}tf</tf_topic>
