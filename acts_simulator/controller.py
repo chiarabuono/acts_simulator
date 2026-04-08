@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 This files has been modified starting from:
- * File: controller.cpp
+ * File: controller.cpp and controller_node.cpp
  * Project: Quadrotor Control Lab
  * File Created: Tuesday, 25th November 2025 11:57:05 AM
  * Author: nknab
@@ -202,3 +202,24 @@ class ControllerNode(Node):
 
     def __del__(self):
         print("Shutting down Controller Node...")
+
+
+
+def main(args=None):
+    rclpy.init(args=args)
+
+    try:
+        controller_node = ControllerNode()
+        rclpy.spin(controller_node)
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if 'controller_node' in locals():
+            controller_node.destroy_node()
+        
+        # Shutdown ROS2
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
