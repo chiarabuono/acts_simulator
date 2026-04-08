@@ -165,59 +165,45 @@ def launch_setup(
         )
     )
 
-
-
-
-    positions = ['drone1_', 'drone2_', 'drone3_', 'drone4_']
     
     actions = [sim, shutdown_handler]
 
-    for name in positions:
-        # 1. Unique Bridge for each drone
-        # Match the nested Gazebo topic: /name/name/command/motor_speed
-        nested_topic = f"/{name}/{name}command/motor_speed"
-        odom_topic = f"/{name}/mocap/odom"
+    drone_start = Node(
+        package=PACKAGE_NAME,
+        executable="drone_start",
+        name="drone_start",
+        output="screen",
+        parameters=[{
+            "action_time": WAIT_TIME
+        }],
 
-        bridge_node = Node(
-            package="ros_gz_bridge",
-            executable="parameter_bridge",
-            arguments=[
-                f"{nested_topic}@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
-                f"{odom_topic}/mocap/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry"
-            ],
-            output="screen"
+    )
+
+    delayed_drone_start = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=sim,
+            on_start=TimerAction(period=WAIT_TIME, actions=[drone_start]),
         )
-        actions.append(bridge_node)
+    )
 
-        # 2. Unique Controller
-        controller_node = Node(
-            package=PACKAGE_NAME,
-            executable="controller_node",
-            name=f"controller_{name}",
-            parameters=[{
-                "desired_position": d_position,
-                "desired_velocity": d_velocity,
-                "mass": 1.0,
-            }],
-            remappings=[
-                ("command/motor_speed", nested_topic),
-                ("mocap/odom", odom_topic),
-            ]
-        )
-        actions.append(TimerAction(period=WAIT_TIME, actions=[controller_node]))
+    # 2. The ROS-GZ Bridge Node
+    # This replaces the manual 'ros2 run ros_gz_bridge...' command
+    bridge_node = Node(
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        arguments=[
+            # Motor Speed: ROS -> GZ (@ is bidirectional, which works fine here)
+            "/drone1_/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
+            # Odometry: GZ -> ROS ([ means Gazebo to ROS)
+            "/drone1_mocap/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry"
+        ],
+        output="screen"
+    )
 
-        # 3. Unique Drone Start (Fixing the name collision)
-        drone_start = Node(
-            package=PACKAGE_NAME,
-            executable="drone_start",
-            name=f"drone_start_{name}", # Added suffix to prevent node name collision
-            output="screen",
-            parameters=[{"action_time": WAIT_TIME}],
-            # Ensure drone_start also knows which drone to talk to!
-            remappings=[("command/motor_speed", nested_topic)]
-        )
-        actions.append(TimerAction(period=WAIT_TIME, actions=[drone_start]))
+    actions.append(delayed_drone_start)
+    actions.append(bridge_node)
 
+    
     return actions
 
 

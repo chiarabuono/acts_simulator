@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="multi_crazy2fly">
-    <xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
-
-    <xacro:crazy2fly prefix="" />
-
-</robot>
