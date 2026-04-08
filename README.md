@@ -129,13 +129,4 @@ All together: xacro acts.urdf.xacro > test.urdf && check_urdf test.urdf && urdf_
 ## To see the state of the system
 gz model -m acts_system -l
 
-## To create videos of the simulation
-sudo apt install ros-jazzy-ros-gzsim-vendors libgz-sim8-plugins
-sudo apt install ros-jazzy-ros-gz-sim libgz-sim8-gui-plugins-all
-sudo apt install ros-jazzy-image-view
-
-sudo apt update && sudo apt install wl-screenrec
-sudo apt update && sudo apt install gnome-monitor-recorder
-
-
 ros2 topic pub /drone1_/command/motor_speed actuator_msgs/msg/Actuators "{velocity: [0, 200, 0, 200]}" 

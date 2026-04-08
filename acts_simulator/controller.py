@@ -90,7 +90,7 @@ class ControllerNode(Node):
 
     def odom_callback(self, msg):
         self.last_z = msg.pose.pose.position.z
-        self.get_logger().warn(f"ODOM says {self.last_z}")
+        # self.get_logger().warn(f"ODOM says {self.last_z}")
         self.current_odometry = msg
         self.odom_received = True
 
@@ -109,8 +109,8 @@ class ControllerNode(Node):
 
     def position_controller(self, desired, current):
         # Gains from C++ implementation
-        Kp = np.diag([10, 10, 10])
-        Kd = np.diag([2.0, 2.0, 2.0])
+        Kp = 10 * np.diag([1.0, 1.0, 2.0])
+        Kd = 5 * np.diag([1.0, 1.0, 1.0])
 
         pd = np.array([desired.pose.pose.position.x, desired.pose.pose.position.y, desired.pose.pose.position.z])
         p  = np.array([current.pose.pose.position.x, current.pose.pose.position.y, current.pose.pose.position.z])
@@ -148,8 +148,8 @@ class ControllerNode(Node):
         return desired_quat, scalar_force
 
     def attitude_controller(self, desired_orientation_quat, current_odom):
-        Kp = np.diag([8.5, 8.5, 8.5])
-        Kd = np.diag([2.0, 2.0, 2.0])
+        Kp = 15.0 * np.diag([1.0, 1.0, 1.0])
+        Kd = 3.0* np.diag([1.0, 1.0, 1.0])
 
         q = current_odom.pose.pose.orientation
         current_q = R.from_quat([q.x, q.y, q.z, q.w])
@@ -192,22 +192,9 @@ class ControllerNode(Node):
     def publish_actuator_speeds(self):
         if not self.odom_received:
             return
-        
-        current_z = self.current_odometry.pose.pose.position.z
-        platform_z = 0.5 
-        
-        # 1. Check the platform condition FIRST
-        # if current_z < (platform_z + 0.05):
-        #     self.get_logger().info("Hovering low to stabilize...", once=True)
-        #     lift_off_speed = 600.0 
-        #     msg = Actuators()
-        #     msg.velocity = [lift_off_speed] * 4
-        #     self.actuators_pub.publish(msg)
-        #     return # Exit here so the 'crazy' math below never runs
 
-        # 2. Only if we are safely above the platform do we run the PID
         speeds = self.compute_actuator_speeds(self.desired_odometry, self.current_odometry)
-        self.get_logger().warn(f"SPEED {speeds}")
+        #self.get_logger().warn(f"SPEED {speeds}")
         msg = Actuators()
         msg.velocity = speeds.tolist()
         self.actuators_pub.publish(msg)

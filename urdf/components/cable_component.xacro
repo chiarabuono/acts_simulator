@@ -53,7 +53,7 @@
   <link name="${prefix}link_${current_num}">
     <xacro:cylinder_inertia m="${m}" r="${rad}" h="${cable_len}" />
     <visual>
-      <origin xyz="0 0 ${cable_len/2.0}"/>
+      <origin xyz="0 0 ${-cable_len/2.0}"/>
       <geometry><cylinder radius="${rad}" length="${cable_len}"/></geometry>
     </visual>
     </link>

@@ -87,7 +87,7 @@ def parse_float_list(value: str, expected_length: int, name: str) -> list[float]
 
 
 PACKAGE_NAME = "acts_simulator"
-WAIT_TIME = 5.0
+WAIT_TIME = 8.0
 
 
 def clean_function(_: LaunchContext) -> None:
@@ -223,8 +223,8 @@ def launch_setup(
     )
 
     return [sim, bridge_node, 
-            delayed_drone_start,
-            #delayed_controller, 
+            #delayed_drone_start,
+            delayed_controller, 
             shutdown_handler] #delayed_controller,
 
 
