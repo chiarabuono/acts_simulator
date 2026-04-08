@@ -5,7 +5,7 @@ from actuator_msgs.msg import Actuators
 class DroneJumpstart(Node):
     def __init__(self):
         super().__init__('drone_jumpstart')
-        self.publisher_ = self.create_publisher(Actuators, '/drone1_/command/motor_speed', 10)
+        self.publisher_ = self.create_publisher(Actuators, "command/motor_speed", 10)
         self.declare_parameter("action_time", 0.0)
         
         self.timer = self.create_timer(0.1, self.takeoff_kick)

@@ -103,6 +103,46 @@ def clean_function(_: LaunchContext) -> None:
     popen("pkill -x gz")
     popen("pkill -x ruby")
 
+def get_drone_nodes_control(sim, prefix, actions):
+    drone_start = Node(
+        package=PACKAGE_NAME,
+        executable="drone_start",
+        name=f"{prefix}start",
+        output="screen",
+        parameters=[{
+            "action_time": WAIT_TIME
+        }],
+        remappings=[
+            ("command/motor_speed", f"/{prefix}/command/motor_speed"),
+            ("mocap/odom", f"/{prefix}mocap/odom"),
+        ]
+
+    )
+
+    delayed_drone_start = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=sim,
+            on_start=TimerAction(period=WAIT_TIME, actions=[drone_start]),
+        )
+    )
+
+    # 2. The ROS-GZ Bridge Node
+    # This replaces the manual 'ros2 run ros_gz_bridge...' command
+    bridge_node = Node(
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        arguments=[
+            # Motor Speed: ROS -> GZ (@ is bidirectional, which works fine here)
+            f"/{prefix}/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
+            # Odometry: GZ -> ROS ([ means Gazebo to ROS)
+            f"/{prefix}mocap/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry"
+        ],
+        output="screen"
+    )
+
+    actions.append(delayed_drone_start)
+    actions.append(bridge_node)
+
 
 def launch_setup(
     context: LaunchContext,
@@ -168,40 +208,8 @@ def launch_setup(
     
     actions = [sim, shutdown_handler]
 
-    drone_start = Node(
-        package=PACKAGE_NAME,
-        executable="drone_start",
-        name="drone_start",
-        output="screen",
-        parameters=[{
-            "action_time": WAIT_TIME
-        }],
-
-    )
-
-    delayed_drone_start = RegisterEventHandler(
-        event_handler=OnProcessStart(
-            target_action=sim,
-            on_start=TimerAction(period=WAIT_TIME, actions=[drone_start]),
-        )
-    )
-
-    # 2. The ROS-GZ Bridge Node
-    # This replaces the manual 'ros2 run ros_gz_bridge...' command
-    bridge_node = Node(
-        package="ros_gz_bridge",
-        executable="parameter_bridge",
-        arguments=[
-            # Motor Speed: ROS -> GZ (@ is bidirectional, which works fine here)
-            "/drone1_/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
-            # Odometry: GZ -> ROS ([ means Gazebo to ROS)
-            "/drone1_mocap/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry"
-        ],
-        output="screen"
-    )
-
-    actions.append(delayed_drone_start)
-    actions.append(bridge_node)
+    get_drone_nodes_control(sim, "drone1_", actions)
+    get_drone_nodes_control(sim, "drone2_", actions)
 
     
     return actions

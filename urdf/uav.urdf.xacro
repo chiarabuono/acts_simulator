@@ -5,7 +5,7 @@
     <xacro:arg name="prefix" default="drone1_"/>
     <xacro:arg name="x" default="0.0"/>
     <xacro:arg name="y" default="0.0"/>
-    <!-- <xacro:arg name="z" default="0.0"/> -->
+    <xacro:arg name="z" default="0.0"/>
     
     <xacro:arg name="prefix" default="drone1"/>
 
