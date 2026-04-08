@@ -49,24 +49,45 @@ def generate_launch_description():
         launch_arguments={'gz_args': '-r empty.sdf'}.items(),
     )
 
-    # SPAWN THE ENTIRE SYSTEM
-    spawn_system = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=[
-            '-name', 'multi_uavs',
-            '-string', robot_desc,
-            '-z', '0.0'  # Spawn it higher so the cables have room to hang
-        ],
-        output='screen'
-    )
+    pkg_path = get_package_share_directory(PACKAGE_NAME)
+    urdf_file = os.path.join(pkg_path, 'urdf', 'multi_uavs.urdf.xacro')
 
-    node_robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        output='screen',
-        parameters=[{'robot_description': robot_desc}]
-    )
+    # Define starting positions for the 4 elements
+    positions = [
+        {'name': 'drone1_', 'x': '1.0', 'y': '1.0'},
+        {'name': 'drone2_', 'x': '-1.0', 'y': '1.0'},
+        {'name': 'drone3_', 'x': '1.0', 'y': '-1.0'},
+        {'name': 'drone4_', 'x': '-1.0', 'y': '-1.0'},
+    ]
+
+    nodes = []
+    for pos in positions:
+        robot_description_config = xacro.process_file(
+            urdf_file, 
+            mappings={
+                'namespace': pos['name'], # 'drone1'
+                'prefix': ''              # Leave prefix empty to avoid 'drone1_'
+            }
+        )
+        robot_desc = robot_description_config.toxml()
+
+        # 3. Spawn the entity
+        nodes.append(
+            Node(
+                package='ros_gz_sim',
+                executable='create',
+                arguments=[
+                    '-name', pos['name'], 
+                    '-string', robot_desc,
+                    '-x', pos['x'],
+                    '-y', pos['y'],
+                    '-z', '0.0'
+                ],
+                output='screen'
+            )
+        )
+
+
 
 
     shutdown_handler = RegisterEventHandler(
@@ -78,10 +99,8 @@ def generate_launch_description():
         )
     )
 
-    return LaunchDescription([
-        set_gz_resource_path, 
-        gazebo,
-        spawn_system,
-        node_robot_state_publisher,
-        shutdown_handler,
-    ])
+    nodes.append(shutdown_handler)
+    nodes.append(set_gz_resource_path)
+    nodes.append(gazebo)
+
+    return LaunchDescription(nodes)
