@@ -87,7 +87,7 @@ def parse_float_list(value: str, expected_length: int, name: str) -> list[float]
 
 
 PACKAGE_NAME = "acts_simulator"
-WAIT_TIME = 8.0
+WAIT_TIME = 1.0
 
 
 def clean_function(_: LaunchContext) -> None:
@@ -103,7 +103,7 @@ def clean_function(_: LaunchContext) -> None:
     popen("pkill -x gz")
     popen("pkill -x ruby")
 
-def get_drone_nodes_control(sim, prefix, actions):
+def get_drone_nodes_control(sim, prefix, d_position, d_velocity, actions):
     drone_start = Node(
         package=PACKAGE_NAME,
         executable="drone_start",
@@ -126,21 +126,47 @@ def get_drone_nodes_control(sim, prefix, actions):
         )
     )
 
-    # 2. The ROS-GZ Bridge Node
-    # This replaces the manual 'ros2 run ros_gz_bridge...' command
+    base_namespace = f"/{prefix.strip('/')}"
+    control = Node(
+        package=PACKAGE_NAME,
+        executable="controller_node",
+        name="controller",
+        namespace=prefix.strip('/'),
+        output="screen",
+        parameters=[{
+            "desired_position": d_position,
+            "desired_velocity": d_velocity,
+            "mass": 1.0,
+            "use_sim_time": True
+        }],
+        remappings=[
+            ("command/motor_speed", f"{base_namespace}/command/motor_speed"),
+            ("mocap/odom", f"/{prefix.strip('/')}mocap/odom"),
+        ]
+    )
+
+    delayed_drone_control = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=sim,
+            on_start=TimerAction(period=WAIT_TIME, actions=[control]),
+        )
+    )
+
     bridge_node = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
+        name="parameter_bridge",
+        namespace=prefix.strip('/'),
         arguments=[
-            # Motor Speed: ROS -> GZ (@ is bidirectional, which works fine here)
-            f"/{prefix}/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
-            # Odometry: GZ -> ROS ([ means Gazebo to ROS)
-            f"/{prefix}mocap/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry"
+            f"/{prefix.strip('/')}/command/motor_speed@actuator_msgs/msg/Actuators]gz.msgs.Actuators",
+
+            f"/{prefix.strip('/')}mocap/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry"
         ],
         output="screen"
     )
 
-    actions.append(delayed_drone_start)
+    #actions.append(delayed_drone_start)
+    actions.append(delayed_drone_control)
     actions.append(bridge_node)
 
 
@@ -208,8 +234,11 @@ def launch_setup(
     
     actions = [sim, shutdown_handler]
 
-    get_drone_nodes_control(sim, "drone1_", actions)
-    get_drone_nodes_control(sim, "drone2_", actions)
+    d_position = [2.0, 2.0, 2.0]
+    d_velocity = [0.0, 0.0, 0.0]
+
+    get_drone_nodes_control(sim, "drone1_", d_position, d_velocity, actions)
+    #get_drone_nodes_control(sim, "drone2_", actions)
 
     
     return actions

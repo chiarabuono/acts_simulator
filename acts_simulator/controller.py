@@ -74,10 +74,10 @@ class ControllerNode(Node):
 
         # Publishers
         actuator_qos = QoSProfile(reliability=ReliabilityPolicy.RELIABLE, history=HistoryPolicy.KEEP_LAST, depth=10)
-        self.actuators_pub = self.create_publisher(Actuators, "/command/motor_speed", actuator_qos)
+        self.actuators_pub = self.create_publisher(Actuators, "command/motor_speed", actuator_qos)
 
         # Subscribers
-        self.odom_sub = self.create_subscription(Odometry, "/mocap/odom", self.odom_callback, self.SENSOR_QOS)
+        self.odom_sub = self.create_subscription(Odometry, "mocap/odom", self.odom_callback, 10)
 
         # Timers
         self.timer_period = 0.005  # seconds
@@ -90,7 +90,6 @@ class ControllerNode(Node):
 
     def odom_callback(self, msg):
         self.last_z = msg.pose.pose.position.z
-        # self.get_logger().warn(f"ODOM says {self.last_z}")
         self.current_odometry = msg
         self.odom_received = True
 
@@ -190,11 +189,13 @@ class ControllerNode(Node):
         return speeds
 
     def publish_actuator_speeds(self):
+        # self.get_logger().info("Timer Ticked") 
         if not self.odom_received:
+            self.get_logger().warn("Waiting for ODOM...")
             return
 
         speeds = self.compute_actuator_speeds(self.desired_odometry, self.current_odometry)
-        #self.get_logger().warn(f"SPEED {speeds}")
+        self.get_logger().info(f"Calculated Speeds: {speeds}")
         msg = Actuators()
         msg.velocity = speeds.tolist()
         self.actuators_pub.publish(msg)
