@@ -84,6 +84,24 @@ def get_drone_nodes(xacro_path, prefix, x, y, z):
         }]
     )
 
+    # This is wrong
+    bridge_node = Node(
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        name="parameter_bridge",
+        namespace=prefix.strip('/'),
+        arguments=[
+            # Motor Commands
+            f"/{prefix.strip('/')}/command/motor_speed@actuator_msgs/msg/Actuators]gz.msgs.Actuators",
+            # Odometry
+            f"/{prefix.strip('/')}mocap/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            # ADD THIS: Joint States Bridge
+            # Note: We use the EXACT name seen in 'gz topic -l'
+            f"/{prefix.strip('/')}joint_states@sensor_msgs/msg/JointState[gz.msgs.Model" 
+        ],
+        output="screen"
+    )
+
     return [spawn_uav, rsp]
 
 def launch_setup(
@@ -132,10 +150,10 @@ def launch_setup(
     ]
 
     # Drone 1
-    actions.extend(get_drone_nodes(xacro_path, "drone1_", 1.0, 1.0, 0.2))
+    actions.extend(get_drone_nodes(xacro_path, "drone1_", 0.0, 0.0, 0.1))
     
     # Drone 2
-    actions.extend(get_drone_nodes(xacro_path, "drone2_", 0.0, 0.0, 0.2))
+    actions.extend(get_drone_nodes(xacro_path, "drone2_", 1.0, 1.0, 0.1))
 
     # Cleanup logic
     shutdown_handler = RegisterEventHandler(

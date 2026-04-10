@@ -25,6 +25,8 @@ from scipy.spatial.transform import Rotation as R
 from nav_msgs.msg import Odometry
 from actuator_msgs.msg import Actuators
 
+from rclpy.callback_groups import ReentrantCallbackGroup
+
 class ControllerNode(Node):
     # Static QoS profile for sensor data (Matches C++ sensor_qos_)
     SENSOR_QOS = QoSProfile(
@@ -45,7 +47,7 @@ class ControllerNode(Node):
         self.declare_parameter("kt", 5.5e-6)
         self.declare_parameter("kd", 3.299e-7)
         self.declare_parameter("mass", 1.0)
-        self.declare_parameter("desired_position", [0.0, 0.0, 0.0])
+        self.declare_parameter("desired_position", [0.0, 0.0, 1.0])
         self.declare_parameter("desired_velocity", [0.0, 0.0, 0.0])
 
         # Get parameter values
@@ -55,6 +57,8 @@ class ControllerNode(Node):
         self.drone_mass = self.get_parameter("mass").value
         d_pos = self.get_parameter("desired_position").value
         d_vel = self.get_parameter("desired_velocity").value
+
+        # self.get_logger().info(f"MASS: {self.drone_mass} | type {type(self.drone_mass)}")
 
         # Initialize Odometry Objects
         self.desired_odometry = Odometry()
@@ -66,6 +70,14 @@ class ControllerNode(Node):
         self.desired_odometry.twist.twist.linear.y = d_vel[1] if len(d_vel) > 1 else 0.0
         self.desired_odometry.twist.twist.linear.z = d_vel[2] if len(d_vel) > 2 else 0.0
 
+        times = 4.0
+
+        self.Kp_pos = times * 5.0 * np.diag([1.0, 1.0, 2.0]) # Matches C++ 5, 5, 10
+        self.Kd_pos = times * 4.0 * np.diag([1.0, 1.0, 1.25])  # Matches C++ 4, 4, 5
+        self.Kp_att = times * 4.0 * np.diag([1.0, 1.0, 1.0]) # Matches C++ 4, 4, 4
+        self.Kd_att = times * 0.5 * np.diag([1.0, 1.0, 1.0]) # Matches C++ 0.5, 0.5, 0.5
+
+
         self.current_odometry = Odometry()
         self.odom_received = False
 
@@ -74,14 +86,21 @@ class ControllerNode(Node):
 
         # Publishers
         actuator_qos = QoSProfile(reliability=ReliabilityPolicy.RELIABLE, history=HistoryPolicy.KEEP_LAST, depth=10)
-        self.actuators_pub = self.create_publisher(Actuators, "command/motor_speed", actuator_qos)
+        # self.actuators_pub = self.create_publisher(Actuators, "command/motor_speed", actuator_qos)
+        self.actuators_pub = self.create_publisher(Actuators, "command/motor_speed", 10)
 
         # Subscribers
-        self.odom_sub = self.create_subscription(Odometry, "mocap/odom", self.odom_callback, 10)
+        # self.odom_sub = self.create_subscription(Odometry, "mocap/odom", self.odom_callback, 10)
 
         # Timers
         self.timer_period = 0.005  # seconds
-        self.pub_actuator_timer = self.create_timer(self.timer_period, self.publish_actuator_speeds)
+        # self.pub_actuator_timer = self.create_timer(self.timer_period, self.publish_actuator_speeds)
+
+
+        self.callback_group = ReentrantCallbackGroup()
+        self.odom_sub = self.create_subscription(Odometry, "mocap/odom", self.odom_callback, 10, callback_group=self.callback_group)
+
+        self.pub_actuator_timer = self.create_timer(self.timer_period, self.publish_actuator_speeds, callback_group=self.callback_group)
 
         self.get_logger().info("Controller Node started.")
 
@@ -107,9 +126,6 @@ class ControllerNode(Node):
         return np.array([0, 0, 1.0])
 
     def position_controller(self, desired, current):
-        # Gains from C++ implementation
-        Kp = 10 * np.diag([1.0, 1.0, 2.0])
-        Kd = 5 * np.diag([1.0, 1.0, 1.0])
 
         pd = np.array([desired.pose.pose.position.x, desired.pose.pose.position.y, desired.pose.pose.position.z])
         p  = np.array([current.pose.pose.position.x, current.pose.pose.position.y, current.pose.pose.position.z])
@@ -117,14 +133,20 @@ class ControllerNode(Node):
         v  = np.array([current.twist.twist.linear.x, current.twist.twist.linear.y, current.twist.twist.linear.z])
 
         g = np.array([0, 0, self.GRAVITY])
-        
-        f = Kd @ (vd - v) + Kp @ (pd - p) + (self.drone_mass * g)
+        self.get_logger().info(f"pd: {pd} | p: {p} | vd: {vd} | v: {v} | g: {g}")
+
+        # Try a 10% boost to the assumed weight
+        effective_mass = self.drone_mass * 2
+
+        f = self.Kd_pos @ (vd - v) + self.Kp_pos @ (pd - p) + (effective_mass * g)
         # f = self.compute_propulsion_force()
         scalar_force = np.linalg.norm(f)
 
         # Cap thrust
-        max_thrust = 12.0
+        max_thrust = 20.0
         scalar_force = min(scalar_force, max_thrust)
+
+        self.get_logger().info(f"Thrust: {scalar_force}")
 
         # Orientation Matrix construction
         norm_f = np.linalg.norm(f)
@@ -147,8 +169,6 @@ class ControllerNode(Node):
         return desired_quat, scalar_force
 
     def attitude_controller(self, desired_orientation_quat, current_odom):
-        Kp = 15.0 * np.diag([1.0, 1.0, 1.0])
-        Kd = 3.0* np.diag([1.0, 1.0, 1.0])
 
         q = current_odom.pose.pose.orientation
         current_q = R.from_quat([q.x, q.y, q.z, q.w])
@@ -166,7 +186,7 @@ class ControllerNode(Node):
 
         # sign * error.vec()
         sign = 1.0 if error_q[3] >= 0 else -1.0
-        tau = -Kd @ angular_vel + Kp @ (sign * error_q[:3])
+        tau = -self.Kd_att @ angular_vel + self.Kp_att @ (sign * error_q[:3])
 
         return tau
 
@@ -189,13 +209,12 @@ class ControllerNode(Node):
         return speeds
 
     def publish_actuator_speeds(self):
-        # self.get_logger().info("Timer Ticked") 
         if not self.odom_received:
             self.get_logger().warn("Waiting for ODOM...")
             return
 
         speeds = self.compute_actuator_speeds(self.desired_odometry, self.current_odometry)
-        self.get_logger().info(f"Calculated Speeds: {speeds}")
+        # self.get_logger().info(f"Calculated Speeds: {speeds}")
         msg = Actuators()
         msg.velocity = speeds.tolist()
         self.actuators_pub.publish(msg)

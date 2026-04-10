@@ -87,7 +87,7 @@ def parse_float_list(value: str, expected_length: int, name: str) -> list[float]
 
 
 PACKAGE_NAME = "acts_simulator"
-WAIT_TIME = 1.0
+WAIT_TIME = 8.0
 
 
 def clean_function(_: LaunchContext) -> None:
@@ -126,7 +126,6 @@ def get_drone_nodes_control(sim, prefix, d_position, d_velocity, actions):
         )
     )
 
-    base_namespace = f"/{prefix.strip('/')}"
     control = Node(
         package=PACKAGE_NAME,
         executable="controller_node",
@@ -140,8 +139,8 @@ def get_drone_nodes_control(sim, prefix, d_position, d_velocity, actions):
             "use_sim_time": True
         }],
         remappings=[
-            ("command/motor_speed", f"{base_namespace}/command/motor_speed"),
-            ("mocap/odom", f"/{prefix.strip('/')}mocap/odom"),
+            ("command/motor_speed", f"/{prefix}/command/motor_speed"),
+            ("mocap/odom", f"/{prefix}mocap/odom"),
         ]
     )
 
@@ -155,19 +154,29 @@ def get_drone_nodes_control(sim, prefix, d_position, d_velocity, actions):
     bridge_node = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
-        name="parameter_bridge",
-        namespace=prefix.strip('/'),
         arguments=[
-            f"/{prefix.strip('/')}/command/motor_speed@actuator_msgs/msg/Actuators]gz.msgs.Actuators",
-
-            f"/{prefix.strip('/')}mocap/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry"
+            # Motor Speed: ROS -> GZ (@ is bidirectional, which works fine here)
+            f"/{prefix}/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
+            # Odometry: GZ -> ROS ([ means Gazebo to ROS)
+            f"/{prefix}mocap/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry",
+            f"/{prefix}tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V"
         ],
         output="screen"
     )
 
-    #actions.append(delayed_drone_start)
+    clock_bridge = Node(
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        name="clock_bridge",
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen'
+    )
+
+
+    #actions.append(drone_start)
     actions.append(delayed_drone_control)
     actions.append(bridge_node)
+    actions.append(clock_bridge)
 
 
 def launch_setup(
@@ -234,7 +243,7 @@ def launch_setup(
     
     actions = [sim, shutdown_handler]
 
-    d_position = [2.0, 2.0, 2.0]
+    d_position = [2.0, 2.0, 3.0]
     d_velocity = [0.0, 0.0, 0.0]
 
     get_drone_nodes_control(sim, "drone1_", d_position, d_velocity, actions)

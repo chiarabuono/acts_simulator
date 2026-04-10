@@ -21,20 +21,21 @@ from rclpy.node import Node
 
 from acts_simulator.controller import ControllerNode
 
+from rclpy.executors import SingleThreadedExecutor
+
 def main(args=None):
     rclpy.init(args=args)
+    node = ControllerNode()
+    
+    executor = SingleThreadedExecutor()
+    executor.add_node(node)
 
     try:
-        controller_node = ControllerNode()
-        rclpy.spin(controller_node)
-
+        executor.spin()
     except KeyboardInterrupt:
         pass
     finally:
-        if 'controller_node' in locals():
-            controller_node.destroy_node()
-        
-        # Shutdown ROS2
+        node.destroy_node()
         rclpy.shutdown()
 
 if __name__ == '__main__':
