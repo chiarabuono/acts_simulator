@@ -19,17 +19,26 @@ This files has been modified starting from:
 import rclpy
 from rclpy.node import Node
 
-from acts_simulator.controller import ControllerNode
+from acts_simulator.position_controller import PositionControllerNode
+from acts_simulator.force_controller import ForceControllerNode
 
 from rclpy.executors import SingleThreadedExecutor
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ControllerNode()
-    
+
+    param_node = rclpy.create_node('param_reader')
+    param_node.declare_parameter('control_mode', 'position')  # default
+    control_mode = param_node.get_parameter('control_mode').value
+    param_node.destroy_node()
+
+    if control_mode == 'force':
+        node = ForceControllerNode()
+    else:
+        node = PositionControllerNode()
+
     executor = SingleThreadedExecutor()
     executor.add_node(node)
-
     try:
         executor.spin()
     except KeyboardInterrupt:
@@ -37,6 +46,3 @@ def main(args=None):
     finally:
         node.destroy_node()
         rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
