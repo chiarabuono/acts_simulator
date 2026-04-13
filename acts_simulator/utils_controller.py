@@ -118,7 +118,7 @@ def get_drone_nodes_position_control(sim, prefix, d_position, d_velocity, action
             "control_mode": "position",
             "desired_position": d_position,
             "desired_velocity": d_velocity,
-            "mass": 2.0,
+            "mass": 2.0 + 0.1,
             "use_sim_time": True
         }],
         remappings=[

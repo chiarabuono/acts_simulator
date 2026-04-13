@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="crazy2fly_with_cable_usable">
+    <xacro:include filename="uav_cable_assembly.urdf.xacro" />
+
+    <xacro:arg name="prefix" default="drone1_"/>
+    <xacro:arg name="id" default="1"/>
+    <xacro:arg name="x" default="0.0"/>
+    <xacro:arg name="y" default="0.0"/>
+    <xacro:arg name="z" default="0.0"/>
+    
+
+    <xacro:add_drone 
+    id="$(arg id)" 
+    segments="10" 
+    length="1.0" 
+    panel_link="" 
+    x_off="$(arg x)" 
+    y_off="$(arg y)" 
+    z_off="$(arg z)"/> 
+
+</robot>

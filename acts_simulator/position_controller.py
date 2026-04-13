@@ -68,7 +68,7 @@ class PositionControllerNode(Node):
         self.desired_odometry.twist.twist.linear.y = d_vel[1] if len(d_vel) > 1 else 0.0
         self.desired_odometry.twist.twist.linear.z = d_vel[2] if len(d_vel) > 2 else 0.0
 
-        times = 4.0
+        times = 1.0
 
         self.Kp_pos = times * 5.0 * np.diag([1.0, 1.0, 2.0]) # Matches C++ 5, 5, 10
         self.Kd_pos = times * 4.0 * np.diag([1.0, 1.0, 1.25])  # Matches C++ 4, 4, 5

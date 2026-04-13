@@ -51,8 +51,15 @@ def get_drone_nodes(xacro_path, prefix, x, y, z):
     
     # Process Xacro once per drone instance
     robot_description_config = xacro.process_file(
-        xacro_path, 
-        mappings={'prefix': prefix}
+        xacro_path,
+        mappings={
+            'id':        prefix.split('e')[1].strip("_"),
+            'prefix':    prefix,
+            #'namespace': prefix,                
+            # 'x': str(x),
+            # 'y': str(y),
+            # 'z': str(z),
+        }
     )
     robot_desc = robot_description_config.toxml()
 
@@ -63,6 +70,7 @@ def get_drone_nodes(xacro_path, prefix, x, y, z):
         namespace=prefix,
         arguments=[
             '-name', prefix,
+            '-id', id,
             '-string', robot_desc,
             '-x', str(x),
             '-y', str(y),
@@ -125,7 +133,7 @@ def launch_setup(
     """
     
     pkg_share = FindPackageShare(package=PACKAGE_NAME).find(PACKAGE_NAME)
-    xacro_path = os.path.join(pkg_share, 'urdf', 'uav.urdf.xacro')
+    xacro_path = os.path.join(pkg_share, 'urdf', 'uav_cable_usable.urdf.xacro')
     
     # Add URDF models to Gazebo path
     model_path = os.path.dirname(pkg_share)

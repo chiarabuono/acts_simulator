@@ -120,12 +120,13 @@ def launch_setup(
     d_position = parse_float_list(desired_position, 3, "xyz")
     d_velocity = parse_float_list(desired_velocity, 3, "xyz")
 
-    d1_position = [2.0, 2.0, 10.0]
-    d2_position = [-2.0, -1.0, 2.0]
+    d1_position = [-2.0, -2.0, 2.0]
+    d2_position = [2.0, 1.0, 2.0]
     # d_velocity = [0.0, 0.0, 0.0]
     d1_force = [0.0, 0.0, 2.0 * 9.81]
 
     get_drone_nodes_force_control(sim, "drone1_", d1_force, d_velocity, actions)
+    # get_drone_nodes_position_control(sim, "drone1_", d1_position, d_velocity, actions)
     get_drone_nodes_position_control(sim, "drone2_", d2_position, d_velocity, actions)
 
     
