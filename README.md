@@ -4,6 +4,11 @@ To be able to use the TurtleBot3 package use:
 sudo apt update
 sudo apt install ros-jazzy-turtlebot3-description ros-jazzy-turtlebot3-gazebo ros-jazzy-turtlebot3-msgs
 sudo apt install ros-jazzy-ros-gz
+sudo apt-get install libgz-sim8-plugins
+
+Not sure that it is needed
+echo 'export GZ_SIM_SYSTEM_PLUGIN_PATH=$GZ_SIM_SYSTEM_PLUGIN_PATH:/usr/lib/x86_64-linux-gnu/gz-sim-8/plugins' >> ~/.bashrc
+source ~/.bashrc
 
 ## Commands to run it
 colcon build --packages-select acts_simulator --symlink-install && source install/setup.bash && ros2 launch acts_simulator acts_simulation.launch.py
