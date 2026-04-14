@@ -72,8 +72,8 @@ class PositionControllerNode(Node):
 
         self.Kp_pos = times * 5.0 * np.diag([1.0, 1.0, 2.0]) # Matches C++ 5, 5, 10
         self.Kd_pos = times * 4.0 * np.diag([1.0, 1.0, 1.25])  # Matches C++ 4, 4, 5
-        self.Kp_att = times * 4.0 * np.diag([1.0, 1.0, 1.0]) # Matches C++ 4, 4, 4
-        self.Kd_att = times * 0.5 * np.diag([1.0, 1.0, 1.0]) # Matches C++ 0.5, 0.5, 0.5
+        self.Kp_att = times * np.diag([6.0, 6.0, 4.0]) # Matches C++ 4, 4, 4
+        self.Kd_att = times * np.diag([1, 1, 0.5]) # Matches C++ 0.5, 0.5, 0.5
 
 
         self.current_odometry = Odometry()
