@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
 
   <xacro:macro name="panel_box_inertia" params="m w d h">
     <inertial>
@@ -8,41 +9,59 @@
                iyy="${(m/12) * (w*w + h*h)}" iyz="0.0"
                izz="${(m/12) * (w*w + d*d)}"/>
     </inertial>
-  </xacro:macro>
+    </xacro:macro>
 
-  <xacro:macro name="handle" params="prefix suffix x y z">
-    <link name="${prefix}handle_${suffix}">
-      <inertial>
-        <mass value="0.001"/>
-        <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
-      </inertial>
-    </link>
+  <xacro:macro name="panel_cylinder_inertia" params="m r h">
+        <inertial>
+            <mass value="${m}"/>
+            <inertia ixx="${(m/12) * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+                     iyy="${(m/12) * (3*r*r + h*h)}" iyz="0.0"
+                     izz="${(m/2) * (r*r)}"/>
+    </inertial>
+    </xacro:macro>
 
-    <joint name="${prefix}handle_${suffix}_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}handle_${suffix}"/>
-      <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
-    </joint>
-  </xacro:macro>
-
-  <xacro:macro name="panel_platform" params="prefix mass width depth height">
+    <xacro:macro name="handle" params="prefix suffix x y z">
     
-    <link name="${prefix}base_link">
-      <xacro:panel_box_inertia m="${mass}" w="${width}" d="${depth}" h="${height}" />
-      <visual>
-        <geometry><box size="${width} ${depth} ${height}"/></geometry>
-        <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
-      </visual>
-      <collision name="panel_collision">
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry> <box size="${width} ${depth} ${height}"/> </geometry>
-      </collision>
-    </link>
+      <!-- Handle sits on top of link_1 — drone cable attaches here  -->
+        <link name="${prefix}handle_${suffix}">
+            <inertial>
+                <mass value="0.0001"/>
+                <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+            </inertial>
+        </link>
 
-    <gazebo reference="${prefix}base_link">
-      <static>false</static> 
-      <self_collide>true</self_collide>
-    </gazebo>
+        <joint name="${prefix}handle_${suffix}_joint" type="fixed">
+            <parent link="${prefix}link_1"/>
+            <child link="${prefix}handle_${suffix}"/>
+            <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="panel_platform" params="prefix mass radius height">
+
+        <!-- Free-floating root — exactly like PDF1's main_panel_cable_root_link -->
+        <link name="${prefix}cable_root_link">
+            <inertial>
+                <mass value="0.0001"/>
+                <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+            </inertial>
+        </link>
+
+        <!-- Panel body as a single cable segment — gives it the flexible joint -->
+        <xacro:uav_cable 
+            prefix="${prefix}" 
+            parent_link="${prefix}cable_root_link"
+            is_flexible="true"
+            segments="1" 
+            length="${height}" 
+            radius="${radius}"
+            mass="${mass}" />
+
+        <!-- link_1 is now the panel body, add visual/collision to it -->
+        <gazebo reference="${prefix}link_1">
+            <static>false</static>
+            <self_collide>true</self_collide>
+        </gazebo>
 
     <xacro:handle prefix="${prefix}" suffix="1" x="0"  y="0"  z="${height/2}" />
     <!-- <xacro:handle prefix="${prefix}" suffix="2" x="1"  y="1" z="${height/2}" /> -->

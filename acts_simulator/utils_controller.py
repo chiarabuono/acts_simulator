@@ -57,8 +57,6 @@ def parse_float_list(value: str, expected_length: int, name: str) -> list[float]
             f"Invalid numeric value in '{name}': '{value}'. Ensure all entries are numeric (e.g., '[0, 0, 0.056]')."
         ) from e
 
-
-
 def get_drone_start(sim, prefix, actions):
     drone_start = Node(
         package=PACKAGE_NAME,
@@ -104,9 +102,7 @@ def get_drone_start(sim, prefix, actions):
     actions.append(bridge_node)
     actions.append(clock_bridge)
 
-
-
-def get_drone_nodes_position_control(sim, prefix, d_position, d_velocity, actions):
+def get_drone_nodes_position_control(sim, prefix, mass, d_position, d_velocity, actions):
 
     control = Node(
         package=PACKAGE_NAME,
@@ -118,7 +114,7 @@ def get_drone_nodes_position_control(sim, prefix, d_position, d_velocity, action
             "control_mode": "position",
             "desired_position": d_position,
             "desired_velocity": d_velocity,
-            "mass": 2.0 + 0.1,
+            "mass": mass,
             "use_sim_time": True
         }],
         remappings=[
@@ -157,8 +153,7 @@ def get_drone_nodes_position_control(sim, prefix, d_position, d_velocity, action
     actions.append(bridge_node)
     actions.append(clock_bridge)
 
-
-def get_drone_nodes_force_control(sim, prefix, d_force, d_velocity, actions):
+def get_drone_nodes_force_control(sim, prefix, mass, d_force, d_velocity, actions):
     control = Node(
         package=PACKAGE_NAME,
         executable="controller_node",
@@ -169,7 +164,7 @@ def get_drone_nodes_force_control(sim, prefix, d_force, d_velocity, actions):
             "control_mode": "force",      # <-- add this
             "desired_force": d_force,
             "desired_velocity": d_velocity,
-            "mass": 2.0,
+            "mass": mass,
             "use_sim_time": True
         }],
         remappings=[

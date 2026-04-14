@@ -4,38 +4,40 @@
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
 
   <xacro:macro name="add_drone" params="id segments length x_off y_off z_off panel_link:=''">
-
     <xacro:property name="prefix" value="drone${id}_" />
     <xacro:crazy2fly prefix="${prefix}" />
 
-    <!-- When no panel_link, create a free-floating root link for the cable top -->
-    <xacro:if value="${panel_link == ''}">
         <link name="${prefix}cable_root_link">
             <inertial>
                 <mass value="0.0001"/>
                 <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
             </inertial>
         </link>
-        <xacro:property name="cable_parent" value="${prefix}cable_root_link" />
-    </xacro:if>
+
+        <!-- If panel provided, attach panel to cable root -->
     <xacro:unless value="${panel_link == ''}">
-        <xacro:property name="cable_parent" value="${panel_link}" />
+        <joint name="${prefix}panel_to_cable_joint" type="fixed">
+            <parent link="${panel_link}"/>
+            <child link="${prefix}cable_root_link"/>
+            <origin xyz="${x_off} ${y_off} ${float(z_off)}" rpy="0 0 0"/>
+        </joint>
     </xacro:unless>
 
+    <!-- Cable hangs from cable_root_link -->
     <xacro:uav_cable 
         prefix="${prefix}" 
-        parent_link="${cable_parent}"    
-        is_flexible="true" 
+        parent_link="${prefix}cable_root_link"
+        is_flexible="true"
         segments="${segments}" 
         length="${length}" 
         radius="0.005" mass="0.01" />
 
-    <!-- Cable tip attaches to drone base -->
+    <!-- Drone is child of cable tip link_${segments} -->
     <joint name="${prefix}cable_to_drone_joint" type="fixed">
         <parent link="${prefix}link_${segments}"/>
         <child link="${prefix}base_link"/>
-        <origin xyz="${x_off} ${y_off} ${float(z_off)}" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
-</xacro:macro>
+    </xacro:macro>
 </robot>

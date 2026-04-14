@@ -124,10 +124,11 @@ def launch_setup(
     d2_position = [2.0, 1.0, 2.0]
     # d_velocity = [0.0, 0.0, 0.0]
     d1_force = [0.0, 0.0, 2.0 * 9.81]
+    mass = 2.0
 
-    get_drone_nodes_force_control(sim, "drone1_", d1_force, d_velocity, actions)
-    # get_drone_nodes_position_control(sim, "drone1_", d1_position, d_velocity, actions)
-    get_drone_nodes_position_control(sim, "drone2_", d2_position, d_velocity, actions)
+    get_drone_nodes_force_control(sim, "drone1_", mass, d1_force, d_velocity, actions)
+    # get_drone_nodes_position_control(sim, "drone1_", mass, d1_position, d_velocity, actions)
+    get_drone_nodes_position_control(sim, "drone2_", mass, d2_position, d_velocity, actions)
 
     
     return actions

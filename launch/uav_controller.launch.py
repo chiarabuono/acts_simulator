@@ -36,54 +36,7 @@ from launch.substitutions import (
     PathJoinSubstitution,
 )
 
-def parse_float_list(value: str, expected_length: int, name: str) -> list[float]:
-    """
-    Parse a string representing a list of floats.
-
-    Parameters
-    ----------
-    value : str
-        The string to parse.
-    expected_length : int
-        How many floats to expect.
-    name : str
-        The name of the parameter (used for error messages).
-
-    Raises
-    ------
-    ValueError
-        If parsing fails or the wrong number of values is provided.
-
-    Returns
-    -------
-    List[float]
-        Parsed floats.
-
-    """
-    if value is None:
-        raise ValueError(
-            f"Missing value for '{name}'. Expected {expected_length} comma-separated numbers."
-        )
-
-    s = value.strip()
-
-    if s.startswith("[") and s.endswith("]"):
-        s = s[1:-1]
-
-    parts = [p.strip() for p in s.split(",") if p.strip() != ""]
-
-    if len(parts) != expected_length:
-        raise ValueError(
-            f"Invalid format for '{name}': expected {expected_length} comma-separated values but got {len(parts)}."
-            f" Example: '[{', '.join(['0'] * expected_length)}]'"
-        )
-
-    try:
-        return [float(p) for p in parts]
-    except ValueError as e:
-        raise ValueError(
-            f"Invalid numeric value in '{name}': '{value}'. Ensure all entries are numeric (e.g., '[0, 0, 0.056]')."
-        ) from e
+from acts_simulator.utils_controller import parse_float_list, get_drone_nodes_position_control, get_drone_start
 
 
 PACKAGE_NAME = "acts_simulator"
@@ -154,64 +107,6 @@ def launch_setup(
         shell=True,
         output="screen",
     )
-    mass = 1.0
-
-    controller_node = Node(
-        package=PACKAGE_NAME,
-        executable="controller_node",
-        name="controller",
-        output="screen",
-        parameters=[{
-            "desired_position": d_position,
-            "desired_velocity": d_velocity,
-            "mass": mass,
-        }],
-
-        remappings=[
-            ("command/motor_speed", "/drone1_/command/motor_speed"),
-            ("mocap/odom", "/drone1_mocap/odom"),
-        ]
-    )
-
-
-    drone_start = Node(
-        package=PACKAGE_NAME,
-        executable="drone_start",
-        name="drone_start",
-        output="screen",
-        parameters=[{
-            "action_time": WAIT_TIME
-        }],
-
-    )
-
-    delayed_drone_start = RegisterEventHandler(
-        event_handler=OnProcessStart(
-            target_action=sim,
-            on_start=TimerAction(period=WAIT_TIME, actions=[drone_start]),
-        )
-    )
-
-    # 2. The ROS-GZ Bridge Node
-    # This replaces the manual 'ros2 run ros_gz_bridge...' command
-    bridge_node = Node(
-        package="ros_gz_bridge",
-        executable="parameter_bridge",
-        arguments=[
-            # Motor Speed: ROS -> GZ (@ is bidirectional, which works fine here)
-            "/drone1_/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
-            # Odometry: GZ -> ROS ([ means Gazebo to ROS)
-            "/drone1_mocap/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry"
-        ],
-        output="screen"
-    )
-
-    delayed_controller = RegisterEventHandler(
-        event_handler=OnProcessStart(
-            target_action=sim,
-            on_start=TimerAction(period=WAIT_TIME, actions=[controller_node]),
-        )
-    )
 
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
@@ -222,10 +117,13 @@ def launch_setup(
         )
     )
 
-    return [sim, bridge_node, 
-            #delayed_drone_start,
-            delayed_controller, 
-            shutdown_handler] #delayed_controller,
+    actions = [sim, shutdown_handler]
+
+    #get_drone_start(sim, "drone1_", actions)
+    get_drone_nodes_position_control(sim, "drone1_", 2.0 + 0.5, [2.0, 2.0, 2.0], [0.0, 0.0, 0.0], actions)
+
+
+    return actions
 
 
 def generate_launch_description() -> LaunchDescription:

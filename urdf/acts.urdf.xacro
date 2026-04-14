@@ -7,16 +7,18 @@
 
   <xacro:panel_platform 
     prefix="main_panel_" 
-    mass="0.0001" width="3.0" depth="3.0" height="0.2" />
+    mass="0.001" 
+    radius="0.5"    
+    height="0.2" />
 
   <xacro:add_drone 
     id="1" 
     segments="10" 
     length="1.0" 
-    panel_link="main_panel_base_link" 
+    panel_link="main_panel_handle_1"
     x_off="0.0" 
     y_off="0.0" 
-    z_off="0.0"/> 
+    z_off="0.0"/>
 
   <gazebo>
     <self_collide>true</self_collide>

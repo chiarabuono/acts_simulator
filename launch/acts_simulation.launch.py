@@ -57,7 +57,7 @@ def generate_launch_description():
         arguments=[
             '-name', 'acts_system',
             '-string', robot_desc,
-            '-z', '0.0'  # Spawn it higher so the cables have room to hang
+            '-z', '0.0' 
         ],
         output='screen'
     )
@@ -69,19 +69,19 @@ def generate_launch_description():
         parameters=[{'robot_description': robot_desc}]
     )
 
-    xacro_file2 = os.path.join(pkg_share, 'urdf', 'track.xacro')
-    robot_description_config2 = xacro.process_file(xacro_file2)
-    robot_desc2 = robot_description_config2.toxml()
-    spawn_reference = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=[
-            '-name', 'ref',
-            '-string', robot_desc2,
-            '-z', '0.0'  # Spawn it higher so the cables have room to hang
-        ],
-        output='screen'
-    )
+    # xacro_file2 = os.path.join(pkg_share, 'urdf', 'track.xacro')
+    # robot_description_config2 = xacro.process_file(xacro_file2)
+    # robot_desc2 = robot_description_config2.toxml()
+    # spawn_reference = Node(
+    #     package='ros_gz_sim',
+    #     executable='create',
+    #     arguments=[
+    #         '-name', 'ref',
+    #         '-string', robot_desc2,
+    #         '-z', '0.0'  # Spawn it higher so the cables have room to hang
+    #     ],
+    #     output='screen'
+    # )
 
 
     """
@@ -93,19 +93,19 @@ def generate_launch_description():
     """
 
     # TURTLEBOT SETUP
-    tb3_pkg_path = get_package_share_directory('turtlebot3_description')
-    tb3_urdf_path = os.path.join(tb3_pkg_path, 'urdf', 'turtlebot3_burger.urdf')
+    # tb3_pkg_path = get_package_share_directory('turtlebot3_description')
+    # tb3_urdf_path = os.path.join(tb3_pkg_path, 'urdf', 'turtlebot3_burger.urdf')
 
-    spawn_turtlebot = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=[
-            '-name', 'my_turtlebot',
-            '-file', tb3_urdf_path,
-            '-x', '2.0', '-y', '0.0', '-z', '0.1'
-        ],
-        output='screen',
-    )
+    # spawn_turtlebot = Node(
+    #     package='ros_gz_sim',
+    #     executable='create',
+    #     arguments=[
+    #         '-name', 'my_turtlebot',
+    #         '-file', tb3_urdf_path,
+    #         '-x', '2.0', '-y', '0.0', '-z', '0.1'
+    #     ],
+    #     output='screen',
+    # )
 
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
@@ -120,7 +120,6 @@ def generate_launch_description():
         set_gz_resource_path, 
         gazebo,
         spawn_system,
-        spawn_reference,
         node_robot_state_publisher,
         shutdown_handler,
     ])

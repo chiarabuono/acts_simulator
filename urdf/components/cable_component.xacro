@@ -10,27 +10,6 @@
     </inertial>
   </xacro:macro>
 
-<!-- ____________   Rigid cable  _______________________-->
-  <xacro:macro name="rigid_cable" params="prefix parent_link length radius mass">
-    <link name="${prefix}rigid_link">
-      <xacro:cylinder_inertia m="${mass}" r="${radius}" h="${length}" />
-      <visual>
-        <origin xyz="0 0 ${-length/2.0}"/>
-        <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
-      </visual>
-      <collision>
-        <origin xyz="0 0 ${-length/2.0}"/>
-        <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
-      </collision>
-    </link>
-
-    <joint name="${prefix}rigid_joint" type="universal">
-      <parent link="${parent_link}"/>
-      <child link="${prefix}rigid_link"/>
-      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
-    </joint>
-  </xacro:macro>
-
 
 <!-- ____________   Flexible cable  _______________________-->
   <xacro:macro name="flexible_chain_generator" params="prefix parent current_num total_num cable_len rad m">
@@ -91,8 +70,9 @@
         total_num="${segments}" cable_len="${length/segments}" rad="${radius}" m="${mass/segments}" />
     </xacro:if>
     <xacro:unless value="${is_flexible}">
-      <xacro:rigid_cable prefix="${prefix}" parent_link="${parent_link}" 
-        length="${length}" radius="${radius}" mass="${mass}" />
+      <xacro:flexible_chain_generator 
+      prefix="${prefix}" parent="${parent_link}" current_num="1" 
+      total_num="1" cable_len="${length}" rad="${radius}" m="${mass}" />
     </xacro:unless>
   </xacro:macro>
 </robot>
