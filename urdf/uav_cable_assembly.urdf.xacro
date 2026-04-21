@@ -3,7 +3,7 @@
   <xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
 
-<xacro:macro name="add_drone" params="id segments length x_off y_off z_off cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:=''">
+<xacro:macro name="add_drone" params="id segments length x_off:=0 y_off:=0 z_off:=0 cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:=''">
     <xacro:property name="prefix" value="drone${id}_" />
     <xacro:crazy2fly prefix="${prefix}" />
 
@@ -29,7 +29,10 @@
         parent_link="${prefix}cable_root_link"
         is_flexible="true"
         segments="${segments}" 
-        length="${length}" 
+        length="${length}"
+        cable_roll="${cable_roll}" 
+        cable_pitch="${cable_pitch}"
+        cable_yaw="${cable_yaw}"
         radius="0.005" mass="0.01" />
 
     <!-- Drone is child of cable tip link_${segments} -->
