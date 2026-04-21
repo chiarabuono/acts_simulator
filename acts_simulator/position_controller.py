@@ -72,8 +72,8 @@ class PositionControllerNode(Node):
 
         self.Kp_pos = times * 5.0 * np.diag([1.0, 1.0, 2.0]) # Matches C++ 5, 5, 10
         self.Kd_pos = times * 4.0 * np.diag([1.0, 1.0, 1.25])  # Matches C++ 4, 4, 5
-        self.Kp_att = times * np.diag([6.0, 6.0, 4.0]) # Matches C++ 4, 4, 4
-        self.Kd_att = times * np.diag([1, 1, 0.5]) # Matches C++ 0.5, 0.5, 0.5
+        self.Kp_att = times * np.diag([5.6, 5.6, 5.6]) # Matches C++ 4, 4, 4
+        self.Kd_att = times * np.diag([1.0, 1.0, 1.0]) # Matches C++ 0.5, 0.5, 0.5
 
 
         self.current_odometry = Odometry()
@@ -204,23 +204,3 @@ class PositionControllerNode(Node):
     def __del__(self):
         print("Shutting down Controller Node...")
 
-
-
-def main(args=None):
-    rclpy.init(args=args)
-
-    try:
-        controller_node = ControllerNode()
-        rclpy.spin(controller_node)
-
-    except KeyboardInterrupt:
-        pass
-    finally:
-        if 'controller_node' in locals():
-            controller_node.destroy_node()
-        
-        # Shutdown ROS2
-        rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()

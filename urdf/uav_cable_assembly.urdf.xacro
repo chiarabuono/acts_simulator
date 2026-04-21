@@ -3,7 +3,7 @@
   <xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
 
-  <xacro:macro name="add_drone" params="id segments length x_off y_off z_off panel_link:=''">
+<xacro:macro name="add_drone" params="id segments length x_off y_off z_off cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:=''">
     <xacro:property name="prefix" value="drone${id}_" />
     <xacro:crazy2fly prefix="${prefix}" />
 

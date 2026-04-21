@@ -113,6 +113,11 @@ Copyright ©2025 nknab
 		<joint_name>${prefix}back_cw_propeller_joint</joint_name>
 		<joint_name>${prefix}right_ccw_propeller_joint</joint_name>
 		<joint_name>${prefix}left_ccw_propeller_joint</joint_name>
+
+		<!-- <joint_name>${prefix}joint_x_1</joint_name>
+		<joint_name>${prefix}joint_y_1</joint_name>
+		<joint_name>${prefix}joint_x_2</joint_name>
+		<joint_name>${prefix}joint_y_2</joint_name> -->
 	</plugin>
 
 		<!-- ODOMETRY PUBLISHER -->

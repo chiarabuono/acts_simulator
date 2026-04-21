@@ -118,9 +118,12 @@ def launch_setup(
     )
 
     actions = [sim, shutdown_handler]
+    mass = 2.031400 # Received from the actual mass of the entire system 1 drone + 1 cable + 1 payload with 0.001 mass
 
-    #get_drone_start(sim, "drone1_", actions)
-    get_drone_nodes_position_control(sim, "drone1_", 2.0 + 0.5, [2.0, 2.0, 2.0], [0.0, 0.0, 0.0], actions)
+    # get_drone_start(sim, "drone1_", actions)
+    # get_drone_start(sim, "drone2_", actions)
+    get_drone_nodes_position_control(sim, "drone1_", mass, [2.0, 2.0, 2.0], [0.0, 0.0, 0.0], actions)
+    #get_drone_nodes_position_control(sim, "drone2_", mass, [2.5, 2.5, 2.5], [0.0, 0.0, 0.0], actions)
 
 
     return actions

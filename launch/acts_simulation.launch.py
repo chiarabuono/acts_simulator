@@ -15,6 +15,7 @@ from launch.actions import (
 from launch.event_handlers import OnShutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
+from acts_simulator.utils import get_drone_spawn_data
 
 
 # CONSTANTS
@@ -32,8 +33,6 @@ def generate_launch_description():
     
     # PROCESS THE ACTS SYSTEM (UAV + Panel + Cable)
     xacro_file = os.path.join(pkg_share, 'urdf', 'acts.urdf.xacro')
-    robot_description_config = xacro.process_file(xacro_file)
-    robot_desc = robot_description_config.toxml()
 
     # START GAZEBO
     model_path = os.path.dirname(pkg_share)
@@ -49,6 +48,37 @@ def generate_launch_description():
         ),
         launch_arguments={'gz_args': '-r empty.sdf'}.items(),
     )
+
+    config_file_path = os.path.join(pkg_share, 'config', 'acts_config.json')
+    drones, p_xyz, p_rpy, cable_rpys = get_drone_spawn_data(config_file_path)
+
+    xacro_mappings = {
+        'panel_x': str(p_xyz[0]),
+        'panel_y': str(p_xyz[1]),
+        'panel_z': str(p_xyz[2]),
+        'panel_R': str(p_rpy[0]),
+        'panel_P': str(p_rpy[1]),
+        'panel_Y': str(p_rpy[2]),
+    }
+
+    for i, (drone, (cr, cp, cy)) in enumerate(zip(drones, cable_rpys)):
+        prefix = f"drone{drone['id']}_"
+        xacro_mappings.update({
+            f'{prefix}id' : str(drone['id']), 
+            f'{prefix}x': str(drone['drone_xyz_world'][0]),
+            f'{prefix}y': str(drone['drone_xyz_world'][1]),
+            f'{prefix}z': str(drone['drone_xyz_world'][2]),
+            f'{prefix}attach_x': str(drone['attach_xyz_panel'][0]),
+            f'{prefix}attach_y': str(drone['attach_xyz_panel'][1]),
+            f'{prefix}attach_z': str(drone['attach_xyz_panel'][2]),
+            f'{prefix}panel_link': str(drone['panel_link']),
+            f'{prefix}len': str(drone['length']),
+            f'{prefix}roll': str(cr),
+            f'{prefix}pitch': str(cp),
+            f'{prefix}yaw': str(cy),
+        })
+
+    robot_desc = xacro.process_file(xacro_file, mappings=xacro_mappings).toxml()
 
     # SPAWN THE ENTIRE SYSTEM
     spawn_system = Node(
@@ -84,13 +114,12 @@ def generate_launch_description():
     # )
 
 
-    """
+    
     node_joint_state_publisher = Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
         output='screen'
     )
-    """
 
     # TURTLEBOT SETUP
     # tb3_pkg_path = get_package_share_directory('turtlebot3_description')
@@ -121,5 +150,7 @@ def generate_launch_description():
         gazebo,
         spawn_system,
         node_robot_state_publisher,
+        node_joint_state_publisher, 
+        # spawn_reference,
         shutdown_handler,
     ])

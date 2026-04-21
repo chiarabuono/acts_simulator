@@ -3,26 +3,42 @@
 
   <xacro:include filename="panel.urdf.xacro" />
   <xacro:include filename="uav_cable_assembly.urdf.xacro" />
-  
+
+  <xacro:arg name="drone1_id" default="1"/>
+
+  <xacro:arg name="drone1_x" default="0.0"/>
+  <xacro:arg name="drone1_y" default="0.0"/>
+  <xacro:arg name="drone1_z" default="0.0"/>
+
+  <!-- TODO: implement the platform receiving these values -->
+  <xacro:arg name="drone1_attach_x" default="0.0"/>
+  <xacro:arg name="drone1_attach_y" default="0.0"/>
+  <xacro:arg name="drone1_attach_z" default="0.0"/>
+
+  <xacro:arg name="drone1_panel_link" default="main_panel_handle_1"/>
+  <xacro:arg name="drone1_len" default="1.0"/>
+
+  <xacro:arg name="drone1_roll" default="0.0"/>
+  <xacro:arg name="drone1_pitch" default="0.0"/>
+  <xacro:arg name="drone1_yaw" default="0.0"/>
+
 
   <xacro:panel_platform 
-    prefix="main_panel_" 
-    mass="0.001" 
-    radius="0.5"    
-    height="0.2" />
+  prefix="main_panel_" 
+  mass="0.001" 
+  radius="0.7" 
+  height="0.2" />
 
   <xacro:add_drone 
-    id="1" 
+    id="$(arg drone1_id)" 
     segments="10" 
-    length="1.0" 
-    panel_link="main_panel_handle_1"
-    x_off="0.0" 
-    y_off="0.0" 
-    z_off="0.0"/>
+    length="$(arg drone1_len)" 
+    panel_link="$(arg drone1_panel_link)"
+    x_off="$(arg drone1_x)" 
+    y_off="$(arg drone1_y)" 
+    z_off="$(arg drone1_z)"
+    cable_roll="$(arg drone1_roll)"
+    cable_pitch="$(arg drone1_pitch)"
+    cable_yaw="$(arg drone1_yaw)"/>
 
-  <gazebo>
-    <self_collide>true</self_collide>
-  </gazebo>
-
-
-</robot>
+  </robot>
