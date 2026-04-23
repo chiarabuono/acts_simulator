@@ -18,6 +18,7 @@ setup(
     (os.path.join('share', package_name, 'urdf/components'), glob('urdf/components/*.xacro')),
     (os.path.join('share', package_name, 'urdf/sensors'), glob('urdf/sensors/*.xacro')),
     (os.path.join('share', package_name, 'urdf/macros'), glob('urdf/macros/*.xacro')),
+    (os.path.join('share', package_name, 'urdf', 'special_cases'), glob('urdf/special_cases/*.xacro')),
     
     (os.path.join('share', package_name, 'meshes/core'), glob('meshes/core/*')),
     (os.path.join('share', package_name, 'meshes/propellers/ccw'), glob('meshes/propellers/ccw/*')),

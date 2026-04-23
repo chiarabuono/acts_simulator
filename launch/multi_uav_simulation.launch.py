@@ -133,7 +133,7 @@ def launch_setup(
     """
     
     pkg_share = FindPackageShare(package=PACKAGE_NAME).find(PACKAGE_NAME)
-    xacro_path = os.path.join(pkg_share, 'urdf', 'uav_cable_usable.urdf.xacro')
+    xacro_path = os.path.join(pkg_share, 'urdf', 'special_cases/uav_cable_usable.urdf.xacro')
     
     # Add URDF models to Gazebo path
     model_path = os.path.dirname(pkg_share)

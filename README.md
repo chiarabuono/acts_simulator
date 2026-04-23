@@ -40,3 +40,9 @@ To see the state of joints
 ```bash
 ros2 run tf2_ros tf2_echo drone1_base_link drone1_link_5 -r 1.0
 ```
+
+To see the topic on ROS2 and Gazebo part
+```bash
+ros2 topic list
+gz topic -l
+```
