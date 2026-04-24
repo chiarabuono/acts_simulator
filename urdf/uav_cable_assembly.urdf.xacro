@@ -35,12 +35,46 @@
         cable_yaw="${cable_yaw}"
         radius="0.005" mass="0.01" />
 
-    <!-- Drone is child of cable tip link_${segments} -->
     <joint name="${prefix}cable_to_drone_joint" type="fixed">
         <parent link="${prefix}link_${segments}"/>
         <child link="${prefix}base_link"/>
         <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
+
+    <!-- <link name="${prefix}cable_drone_virtual">
+        <inertial>
+            <mass value="0.0001"/>
+            <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+        </inertial>
+    </link>
+
+    <joint name="${prefix}cable_to_drone_joint_x" type="continuous">
+        <parent link="${prefix}link_${segments}"/>
+        <child link="${prefix}cable_drone_virtual"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="1 0 0"/>
+        <dynamics damping="10.0" friction="0.01"/>
+    </joint>
+
+    <joint name="${prefix}cable_to_drone_joint_y" type="continuous">
+        <parent link="${prefix}cable_drone_virtual"/>
+        <child link="${prefix}base_link"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="10.0" friction="0.01"/>
+    </joint> -->
+
+    <gazebo reference="${prefix}base_link">
+    <plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
+        <publish_link_pose>true</publish_link_pose>
+        <publish_sensor_pose>false</publish_sensor_pose>
+        <publish_collision_pose>false</publish_collision_pose>
+        <publish_visual_pose>false</publish_visual_pose>
+        <publish_nested_model_pose>false</publish_nested_model_pose>
+        <use_pose_vector_msg>true</use_pose_vector_msg>
+        <static_publisher>false</static_publisher>
+        <publish_frequency>100</publish_frequency>
+    </plugin>
+</gazebo>
 
     </xacro:macro>
 </robot>

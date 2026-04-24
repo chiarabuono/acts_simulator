@@ -79,12 +79,13 @@ def get_drone_start(sim, prefix, actions):
         )
     )
 
+    gz_pose_topic = "/model/uav_to_ground/pose"
     bridge_node = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
         arguments=[
             f"/{prefix}/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
-            f"/{prefix}mocap/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry",
+            f"{gz_pose_topic}@geometry_msgs/msg/PoseArray[gz.msgs.Pose_V",
             f"/{prefix}tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V",
         ],
         output="screen"
@@ -98,7 +99,7 @@ def get_drone_start(sim, prefix, actions):
         output='screen'
     )
 
-    actions.append(delayed_drone_start)
+    actions.append(drone_start)
     actions.append(bridge_node)
     actions.append(clock_bridge)
 
@@ -153,7 +154,7 @@ def get_drone_nodes_position_control(sim, prefix, mass, d_position, d_velocity, 
     actions.append(bridge_node)
     actions.append(clock_bridge)
 
-def get_drone_nodes_force_control(sim, prefix, mass, d_force, d_velocity, actions):
+def get_drone_nodes_force_control(sim, prefix, mass, d_force, Kv, Kp, actions):
     control = Node(
         package=PACKAGE_NAME,
         executable="controller_node",
@@ -161,11 +162,12 @@ def get_drone_nodes_force_control(sim, prefix, mass, d_force, d_velocity, action
         namespace=prefix.strip('/'),
         output="screen",
         parameters=[{
-            "control_mode": "force",      # <-- add this
+            "control_mode": "force",
             "desired_force": d_force,
-            "desired_velocity": d_velocity,
             "mass": mass,
-            "use_sim_time": True
+            "use_sim_time": True,
+            "Kv" : Kv,
+            "Kp" : Kp
         }],
         remappings=[
             ("command/motor_speed", f"/{prefix}/command/motor_speed"),
@@ -180,12 +182,14 @@ def get_drone_nodes_force_control(sim, prefix, mass, d_force, d_velocity, action
         )
     )
 
+    # Bridge the Gazebo pose topic → ROS2 PoseArray
+    gz_pose_topic = "/model/uav_to_ground/pose"
     bridge_node = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
         arguments=[
             f"/{prefix}/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
-            f"/{prefix}mocap/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry",
+            f"{gz_pose_topic}@geometry_msgs/msg/PoseArray[gz.msgs.Pose_V",
             f"/{prefix}tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V",
         ],
         output="screen"
@@ -199,6 +203,25 @@ def get_drone_nodes_force_control(sim, prefix, mass, d_force, d_velocity, action
         output='screen'
     )
 
+    # Converter: PoseArray → Odometry (differentiates pose to get velocity)
+    pose_to_odom = Node(
+        package=PACKAGE_NAME,
+        executable="gz_pose_to_odom",
+        name=f"{prefix}pose_to_odom",
+        output="screen",
+        parameters=[{
+            "link_name": f"{prefix}base_link",
+            "odom_frame": "world",
+            "base_frame": f"{prefix}base_link",
+            "use_sim_time": True,
+        }],
+        remappings=[
+            ("pose_array", gz_pose_topic),
+            ("odom", f"/{prefix}mocap/odom"),
+        ]
+    )
+
     actions.append(delayed_drone_control)
     actions.append(bridge_node)
     actions.append(clock_bridge)
+    actions.append(pose_to_odom)

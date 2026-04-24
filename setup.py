@@ -50,6 +50,7 @@ setup(
         'console_scripts': [
             'controller_node = acts_simulator.controller_node:main',
             'drone_start = acts_simulator.drone_start:main', 
+            'gz_pose_to_odom = acts_simulator.gz_pose_to_odom:main',
         ],
     },
 )

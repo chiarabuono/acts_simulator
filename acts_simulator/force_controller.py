@@ -38,56 +38,54 @@ class ForceControllerNode(Node):
         super().__init__('controller_node')
         self.get_logger().info("Starting Controller Node...")
 
-        # Constants (Defined in hpp)
         self.GRAVITY = 9.81
+        self.e3 = np.array([0, 0, 1])
         self.MAX_ROTOR_VELOCITY = 2000.0
 
-        # Parameters
+        self.declare_parameter("Kv", 0.2)
+        self.declare_parameter("Kp", 3.2)
         self.declare_parameter("arm_length", 0.17)
         self.declare_parameter("kt", 5.5e-6)
         self.declare_parameter("kd", 3.299e-7)
         self.declare_parameter("mass", 1.0)
-        self.declare_parameter("desired_velocity", [0.0, 0.0, 0.0])
         self.drone_mass = self.get_parameter("mass").value
-        self.declare_parameter("desired_force", [0.0, 0.0, self.drone_mass * self.GRAVITY])
-        d_force = self.get_parameter("desired_force").value
-        self.desired_force = np.array(d_force)
 
+        self.declare_parameter("desired_force", [0.0, 0.0, self.drone_mass * self.GRAVITY])
+        
         # Get parameter values
+        self.desired_force = np.array(self.get_parameter("desired_force").value)
         arm_length = self.get_parameter("arm_length").value
         kt = self.get_parameter("kt").value
         kd = self.get_parameter("kd").value
+        self.Kv = self.get_parameter("Kv").value
+        self.Kp = self.get_parameter("Kp").value
+        self.last_F_prop = np.zeros(3)
 
 
-        times = 4.0
+        times = 1.0
 
         self.Kp_att = times * 4.0 * np.diag([1.0, 1.0, 1.0]) # Matches C++ 4, 4, 4
         self.Kd_att = times * 0.5 * np.diag([1.0, 1.0, 1.0]) # Matches C++ 0.5, 0.5, 0.5
 
-
-        self.current_odometry = Odometry()
-        self.odom_received = False
-
-        # Variables Initialization
         self.inv_mixer = self.build_inverse_mixer_matrix(arm_length, kt, kd)
 
         # Publishers
         self.actuators_pub = self.create_publisher(Actuators, "command/motor_speed", 10)
 
         # Subscribers
+        self.current_odometry = Odometry()
+        self.odom_received = False
         self.callback_group = ReentrantCallbackGroup()
         self.odom_sub = self.create_subscription(Odometry, "mocap/odom", self.odom_callback, 10, callback_group=self.callback_group)
+        
         # Timers
         self.timer_period = 0.005  # seconds
         self.pub_actuator_timer = self.create_timer(self.timer_period, self.publish_actuator_speeds, callback_group=self.callback_group)
 
         self.get_logger().info("Force Controller Node started.")
 
-    def sgn(self, val):
-        return (0 < val) - (val < 0)
 
     def odom_callback(self, msg):
-        self.last_z = msg.pose.pose.position.z
         self.current_odometry = msg
         self.odom_received = True
 
@@ -100,13 +98,62 @@ class ForceControllerNode(Node):
         ])
         return np.linalg.inv(mixer)
     
+    def estimate_tau(self, u):
+        return float(np.dot(u, self.last_F_prop - self.drone_mass * self.GRAVITY * self.e3))
+    
+    def compute_force_propulsion(self, desired_force, current_odom):
+        Kv = self.Kv
+        Kp = self.Kp
 
-    def force_controller(self, desired_force):
-        f = desired_force
+        Kv = 1.0
+        Kp = 0.6
+        Ktau = 0.1
+
+        tau_desired = np.linalg.norm(desired_force)
+        u_desired = desired_force/tau_desired
+        
+    
+        drone_pose = np.array([
+            current_odom.pose.pose.position.x,
+            current_odom.pose.pose.position.y,
+            current_odom.pose.pose.position.z
+        ])
+        b = np.array([0, 0, 0])   # TODO: hardcoded as we suppose  cable attachment point at [0, 0, 0]
+        u = drone_pose - b
+        norm_u = np.linalg.norm(u)
+
+        if norm_u > 1e-6: u = u / norm_u
+        else: u = np.zeros(3)
+
+        error_u = (np.eye(3) - np.outer(u_desired, u_desired)) @ (drone_pose - b)
+
+        tau = self.estimate_tau(u)     # TODO: take it from somewhere
+        error_tau = tau_desired - tau
+        tau_input = tau_desired + Ktau * error_tau
+
+        linear_vel_des = - Kp * error_u
+        linear_vel = np.array([
+            current_odom.twist.twist.linear.x,
+            current_odom.twist.twist.linear.y,
+            current_odom.twist.twist.linear.z
+        ])
+        error_v = linear_vel_des - linear_vel
+        # print(f"lin vel: {linear_vel} | drone pose: {drone_pose}")
+        # print(f"{tau_input} * {u} + {self.drone_mass * self.GRAVITY * self.e3} + {Kv * error_v} = {tau_input * u + self.drone_mass * self.GRAVITY * self.e3 + Kv * error_v}")
+        print(f"{error_tau=} | tau={tau:.4f} | tau_desired={tau_desired:.4f}")
+        print(f"{error_u=} | u={u} | u_desired={u_desired}")
+        
+        return tau_input * u + self.drone_mass * self.GRAVITY * self.e3 + Kv * error_v
+
+    def force_controller(self, desired_force, current_odom):
+        f = self.compute_force_propulsion(desired_force, current_odom)
+        self.last_F_prop = f.copy()
+        # f = np.array([0, 100, 100])
+        # print(f"Force: {f}")
 
         scalar_force = np.linalg.norm(f)
         max_thrust = 20.0
-        scalar_force = min(scalar_force, max_thrust)
+        #scalar_force = min(scalar_force, max_thrust)
 
         norm_f = np.linalg.norm(f)
         if norm_f < 1e-6:
@@ -149,10 +196,7 @@ class ForceControllerNode(Node):
 
     def compute_actuator_speeds(self, current_odom):
         
-        # Position Control
-        att_desired, thrust = self.force_controller(self.desired_force)
-        
-        # Attitude Control
+        att_desired, thrust = self.force_controller(self.desired_force, self.current_odometry)
         torques = self.attitude_controller(att_desired, current_odom)
 
         w_vec = np.array([thrust, torques[0], torques[1], torques[2]])
