@@ -172,6 +172,7 @@ def get_drone_nodes_force_control(sim, prefix, mass, d_force, Kv, Kp, actions):
         remappings=[
             ("command/motor_speed", f"/{prefix}/command/motor_speed"),
             ("mocap/odom", f"/{prefix}mocap/odom"),
+            ("/imu" , f"/{prefix}/imu")
         ]
     )
 
@@ -191,6 +192,7 @@ def get_drone_nodes_force_control(sim, prefix, mass, d_force, Kv, Kp, actions):
             f"/{prefix}/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
             f"{gz_pose_topic}@geometry_msgs/msg/PoseArray[gz.msgs.Pose_V",
             f"/{prefix}tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V",
+            f"/{prefix}/imu@sensor_msgs/msg/Imu[gz.msgs.IMU"
         ],
         output="screen"
     )

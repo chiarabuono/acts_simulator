@@ -36,12 +36,12 @@ Copyright ©2025 nknab
 
 		<plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu" />
 
-		<plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
+		<!-- <plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
 			<publish_link_poses>true</publish_link_poses>
 			<publish_visual_poses>false</publish_visual_poses>
 			<publish_collision_poses>false</publish_collision_poses>
 			<publish_sensor_poses>false</publish_sensor_poses>
-		</plugin>
+		</plugin> -->
 
 		<gravity>0 0 -9.81</gravity>
 
@@ -62,10 +62,10 @@ Copyright ©2025 nknab
 			<direction>-0.5 0.1 -0.9</direction>
 		</light>
 
-		<include>
+		<!-- <include>
 			<uri>model://acts_system</uri> 
 			<pose>0 0 0 0 0 0</pose> 
-		</include>
+		</include> -->
 
 		<!-- Ground Plane -->
 		<model name="ground_plane">

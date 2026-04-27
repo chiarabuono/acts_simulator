@@ -16,7 +16,7 @@ Copyright ©2025 nknab
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-	<xacro:macro name="imu" params="parent_link drone_prefix:='' prefix:='' sensor *joint_pose">
+	<xacro:macro name="imu" params="parent_link drone_prefix:='' prefix:='' sensor ns:='' *joint_pose">
 
 		<xacro:property name="imu_yaml_file" value="${BASE_CONFIG_PATH}/sensors/imu.yaml" />
 		<xacro:property name="props" value="${xacro.load_yaml(imu_yaml_file)}" />
@@ -119,7 +119,7 @@ Copyright ©2025 nknab
 						</z>
 					</linear_acceleration>
 				</imu>
-				<topic>${ns}${drone_prefix}${props.topic}</topic>
+				<topic>${drone_prefix}/${props.topic}</topic>
 				<gz_frame_id>${resolved_prefix}_link</gz_frame_id>
 			</sensor>
 		</gazebo>

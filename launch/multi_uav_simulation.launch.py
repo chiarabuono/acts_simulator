@@ -37,6 +37,8 @@ from launch_ros.substitutions import FindPackageShare
 from launch.substitutions import LaunchConfiguration
 
 PACKAGE_NAME = "acts_simulator"
+GAZEBO_VERBOSE_LEVEL = 4
+WORLD = "simple"
 
 def clean_function(_: LaunchContext) -> None:
     """Cleans up background processes on shutdown."""
@@ -142,13 +144,12 @@ def launch_setup(
         value=model_path
     )
 
-    # Start Gazebo Sim (Ogre2 engine is usually more efficient)
-    # Using '--verbose 1' to keep logs clean; use '4' if debugging physics
+    world_file = os.path.join(get_package_share_directory('acts_simulator'), 'worlds', f'{WORLD}.world')
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': '-r empty.sdf --verbose 1'}.items(),
+        launch_arguments={'gz_args': f'-r {world_file}'}.items(),
     )
 
     # Collect all actions
