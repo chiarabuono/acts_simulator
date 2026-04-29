@@ -115,17 +115,10 @@ def launch_setup(
     
     actions = [sim, shutdown_handler]
 
-    kp = float(os.environ.get("DRONE_KP", 1.0))
-    kv = float(os.environ.get("DRONE_KV", 0.5))
-
-    # kp = 1.0
-    # kv = 2.0
-
-
-    mass = 2.0
-    d_force = [0.0, 10.0, 20.0]
+    mass = 2.030400
+    d_force = [0.0, -5.0, 10.0]
     #get_drone_start(sim, "drone1_", actions)
-    get_drone_nodes_force_control(sim, "drone1_", mass, d_force, kv, kp, actions)
+    get_drone_nodes_force_control(sim, "drone1_", mass, d_force, actions)
 
     
     return actions

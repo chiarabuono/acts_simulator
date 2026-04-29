@@ -46,3 +46,9 @@ To see the topic on ROS2 and Gazebo part
 ros2 topic list
 gz topic -l
 ```
+
+To see graphically
+```bash
+sudo apt install ros-jazzy-plotjuggler-ros
+ros2 run plotjuggler plotjuggler
+```

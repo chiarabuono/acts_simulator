@@ -154,7 +154,7 @@ def get_drone_nodes_position_control(sim, prefix, mass, d_position, d_velocity, 
     actions.append(bridge_node)
     actions.append(clock_bridge)
 
-def get_drone_nodes_force_control(sim, prefix, mass, d_force, Kv, Kp, actions):
+def get_drone_nodes_force_control(sim, prefix, mass, d_force, actions):
     control = Node(
         package=PACKAGE_NAME,
         executable="controller_node",
@@ -163,11 +163,9 @@ def get_drone_nodes_force_control(sim, prefix, mass, d_force, Kv, Kp, actions):
         output="screen",
         parameters=[{
             "control_mode": "force",
-            "desired_force": d_force,
+            "f_desired": d_force,
             "mass": mass,
             "use_sim_time": True,
-            "Kv" : Kv,
-            "Kp" : Kp
         }],
         remappings=[
             ("command/motor_speed", f"/{prefix}/command/motor_speed"),
