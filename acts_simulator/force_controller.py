@@ -56,14 +56,14 @@ class ForceControllerNode(Node):
         self.f_desired   = np.array(self.get_parameter("f_desired").value, dtype=float)
         self.GRAVITY_VEC = np.array([0.0, 0.0, - self.drone_mass * self.GRAVITY])
 
-        self.Kp_cable = 0.3 * np.diag([1.0, 1.0, 1.0]) # 5.0    3.0     2.0
-        self.Ki_cable = 0.3 * np.diag([1.0, 1.0, 1.0])
-        self.Kd_cable = 0.0 * np.diag([1.0, 1.0, 1.0]) # 2.5    0.0
+        self.Kp_cable = 0.0 * np.diag([1.0, 1.0, 1.0]) # 0.3
+        self.Ki_cable = 0.0 * np.diag([1.0, 1.0, 1.0]) # 0.3
+        self.Kd_cable = 0.0 * np.diag([1.0, 1.0, 1.0]) # 0.0
 
         # Attitude gains
 
-        self.Kp_att = 3.0 * np.diag([1.0, 1.0, 1.0]) #  4.5  1.5
-        self.Kd_att = 8.0 * np.diag([1.0, 1.0, 1.0]) #  4.2 2.5
+        self.Kp_att = 2.0 * np.diag([1.0, 1.0, 1.0]) #  3.0
+        self.Kd_att = 0.0 * np.diag([1.0, 1.0, 1.0]) #  8.0
 
         # --- State ---
         self.current_odometry  = Odometry()
@@ -98,6 +98,7 @@ class ForceControllerNode(Node):
 
     def odom_callback(self, msg):
         self.current_odometry = msg
+        self.get_logger().info(f"{msg}", once=True)
         self.odom_received    = True
 
     def imu_callback(self, msg):

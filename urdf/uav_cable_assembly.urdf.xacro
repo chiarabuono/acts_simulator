@@ -35,33 +35,46 @@
         cable_yaw="${cable_yaw}"
         radius="0.005" mass="0.01" />
 
-    <joint name="${prefix}cable_to_drone_joint" type="fixed">
-        <parent link="${prefix}link_${segments}"/>
-        <child link="${prefix}base_link"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint>
 
-    <!-- <link name="${prefix}cable_drone_virtual">
+    <link name="${prefix}cable_drone_virtualXY">
         <inertial>
-            <mass value="0.0001"/>
-            <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+            <mass value="0.1"/>
+            <inertia ixx="0.001" ixy="0" ixz="0" 
+                 iyy="0.001" iyz="0" 
+                 izz="0.001"/>
+        </inertial>
+    </link>
+
+    <link name="${prefix}cable_drone_virtualYZ">
+        <inertial>
+            <mass value="0.1"/>
+            <inertia ixx="0.001" ixy="0" ixz="0" 
+                 iyy="0.001" iyz="0" 
+                 izz="0.001"/>
         </inertial>
     </link>
 
     <joint name="${prefix}cable_to_drone_joint_x" type="continuous">
         <parent link="${prefix}link_${segments}"/>
-        <child link="${prefix}cable_drone_virtual"/>
+        <child link="${prefix}cable_drone_virtualXY"/>
         <origin xyz="0 0 0" rpy="0 0 0"/>
-        <axis xyz="1 0 0"/>
-        <dynamics damping="10.0" friction="0.01"/>
+        <axis xyz="0 0 1" /> 
     </joint>
 
     <joint name="${prefix}cable_to_drone_joint_y" type="continuous">
-        <parent link="${prefix}cable_drone_virtual"/>
+        <parent link="${prefix}cable_drone_virtualXY"/>
+        <child link="${prefix}cable_drone_virtualYZ"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="0 1 0" /> 
+    </joint>
+
+    <joint name="${prefix}cable_to_drone_joint_z" type="continuous">
+        <parent link="${prefix}cable_drone_virtualYZ"/>
         <child link="${prefix}base_link"/>
-        <axis xyz="0 1 0"/>
-        <dynamics damping="10.0" friction="0.01"/>
-    </joint> -->
+        <origin xyz="0 0 0" rpy="0 ${0} 0"/>
+        <axis xyz="1 0 0" /> 
+    </joint>
+
     <model>
     <gazebo reference="${prefix}base_link">
     <plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
