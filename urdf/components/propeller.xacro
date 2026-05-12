@@ -28,6 +28,7 @@
             <plugin filename="gz-sim-multicopter-motor-model-system"
                 name="gz::sim::systems::MulticopterMotorModel">
                 <robotNamespace>${ns}${drone_prefix}</robotNamespace>
+                <robotBaseLink>${drone_prefix}base_link</robotBaseLink>
                 <jointName>${resolved_prefix}_joint</jointName>
                 <linkName>${resolved_prefix}_link</linkName>
                 <turningDirection>${prop_type}</turningDirection>

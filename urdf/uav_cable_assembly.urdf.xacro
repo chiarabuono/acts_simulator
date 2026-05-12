@@ -35,47 +35,48 @@
         cable_yaw="${cable_yaw}"
         radius="0.005" mass="0.01" />
 
-    <joint name="${prefix}cable_to_drone_joint" type="fixed">
-        <parent link="${prefix}link_${segments}"/>
-        <child link="${prefix}base_link"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint>
-
-    <!-- <link name="${prefix}cable_drone_virtual">
+    <!-- virtual -->
+    <!-- Link between joint_x and joint_y -->
+    <link name="${prefix}virtual_cable_to_drone_joint">
         <inertial>
-            <mass value="0.0001"/>
+            <mass value="0.0001"/> 
             <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
         </inertial>
     </link>
 
-    <joint name="${prefix}cable_to_drone_joint_x" type="continuous">
-        <parent link="${prefix}link_${segments}"/>
-        <child link="${prefix}cable_drone_virtual"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <axis xyz="1 0 0"/>
-        <dynamics damping="10.0" friction="0.01"/>
+
+    <link name="${prefix}cable_attach_link">
+    <inertial>
+        <mass value="0.0001"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+    </link>
+
+    <!-- Fix the attachment link to the drone's base_link -->
+    <joint name="${prefix}cable_attach_fixed" type="fixed">
+    <parent link="${prefix}cable_attach_link"/>   
+    <child link="${prefix}base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
-    <joint name="${prefix}cable_to_drone_joint_y" type="continuous">
-        <parent link="${prefix}cable_drone_virtual"/>
-        <child link="${prefix}base_link"/>
-        <axis xyz="0 1 0"/>
-        <dynamics damping="10.0" friction="0.01"/>
-    </joint> -->
-    <model>
-    <gazebo reference="${prefix}base_link">
-    <plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
-        <publish_link_pose>true</publish_link_pose>
-        <publish_sensor_pose>false</publish_sensor_pose>
-        <publish_collision_pose>false</publish_collision_pose>
-        <publish_visual_pose>false</publish_visual_pose>
-        <publish_nested_model_pose>false</publish_nested_model_pose>
-        <use_pose_vector_msg>true</use_pose_vector_msg>
-        <static_publisher>false</static_publisher>
-        <publish_frequency>100</publish_frequency>
-    </plugin>
-    </gazebo>
-    </model>
+    <!-- joint_x: last cable segment to virtual -->
+    <joint name="${prefix}joint_x_cable_to_drone_joint" type="revolute">
+    <parent link="${prefix}link_${segments}"/>
+    <child link="${prefix}virtual_cable_to_drone_joint"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
+    <dynamics damping="0.05" friction="0.01"/>
+    </joint>
+
+    <!-- joint_y: virtual to cable_attach_link  -->
+    <joint name="${prefix}joint_y_cable_to_drone_joint" type="revolute">
+    <parent link="${prefix}virtual_cable_to_drone_joint"/>
+    <child link="${prefix}cable_attach_link"/> 
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
+    <dynamics damping="0.05" friction="0.01"/>
+    </joint>
+
 
     </xacro:macro>
 </robot>

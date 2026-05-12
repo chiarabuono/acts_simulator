@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-This files has been modified starting from:
+The attitude control used comes from:
  * File: controller.cpp
  * Project: Quadrotor Control Lab
  * File Created: Tuesday, 25th November 2025 11:57:05 AM
@@ -36,7 +36,7 @@ class ForceControllerNode(Node):
         self.get_logger().info("Starting Controller Node...")
 
         self.GRAVITY = 9.81
-        self.MAX_ROTOR_VELOCITY = 2000.0
+        self.MAX_ROTOR_VELOCITY = 1466.0
         self.MAX_THRUST = 40.0
 
         # --- Parameters ---
@@ -56,14 +56,14 @@ class ForceControllerNode(Node):
         self.f_desired   = np.array(self.get_parameter("f_desired").value, dtype=float)
         self.GRAVITY_VEC = np.array([0.0, 0.0, - self.drone_mass * self.GRAVITY])
 
-        self.Kp_cable = 0.3 * np.diag([1.0, 1.0, 1.0]) # 5.0    3.0     2.0
-        self.Ki_cable = 0.3 * np.diag([1.0, 1.0, 1.0])
+        self.Kp_cable = 0.0 * np.diag([1.0, 1.0, 1.0]) # 5.0    3.0     2.0
+        self.Ki_cable = 0.0 * np.diag([1.0, 1.0, 1.0])
         self.Kd_cable = 0.0 * np.diag([1.0, 1.0, 1.0]) # 2.5    0.0
 
         # Attitude gains
 
-        self.Kp_att = 3.0 * np.diag([1.0, 1.0, 1.0]) #  4.5  1.5
-        self.Kd_att = 8.0 * np.diag([1.0, 1.0, 1.0]) #  4.2 2.5
+        self.Kp_att = 5.0 * np.diag([1.0, 1.0, 1.0]) #  4.5  1.5
+        self.Kd_att = 0.0 * np.diag([1.0, 1.0, 1.0]) #  4.2 2.5
 
         # --- State ---
         self.current_odometry  = Odometry()
@@ -76,6 +76,7 @@ class ForceControllerNode(Node):
 
         # Last commanded motor speeds (for thrust reconstruction)
         self.last_wrench       = np.zeros(4)
+        self.propeller = np.array([0.0, 0.0, 0.0])
 
         self.inv_mixer = self.build_inverse_mixer_matrix(arm_length, kt, kd)
 
@@ -134,12 +135,11 @@ class ForceControllerNode(Node):
         q = current_odom.pose.pose.orientation
         R_body = R.from_quat([q.x, q.y, q.z, q.w]).as_matrix()
         
-        # Rotate IMU acceleration to world frame
         accel_world = R_body @ self.linear_accel - np.array([0, 0, self.GRAVITY])
         
-        f_prop = self.reconstruct_thrust_world(current_odom)
+        # Newton: f_cable = m*a - f_prop + GRAVITY_VEC
+        f_cable_est = -(self.drone_mass * accel_world) + self.propeller + self.GRAVITY_VEC
         
-        f_cable_est = - (self.drone_mass * accel_world) + self.GRAVITY_VEC + f_prop
         return f_cable_est
 
 
@@ -216,14 +216,12 @@ class ForceControllerNode(Node):
         desired_quat = R.from_matrix(R_mat).as_quat()   # [x, y, z, w]
         return desired_quat, scalar_force
     
-    def attitude_controller(self, desired_orientation_quat, current_odom):
-
+    def attitude_controller(self, desired_orientation_quat, current_odom, f_thrust_cmd=None):
         q = current_odom.pose.pose.orientation
         current_q = R.from_quat([q.x, q.y, q.z, q.w])
         des_q = R.from_quat(desired_orientation_quat)
 
-        error_q = (current_q.inv() * des_q).as_quat()  # [x, y, z, w]
-
+        error_q = (current_q.inv() * des_q).as_quat()
         angular_vel = np.array([
             current_odom.twist.twist.angular.x,
             current_odom.twist.twist.angular.y,
@@ -231,25 +229,28 @@ class ForceControllerNode(Node):
         ])
 
         sign = 1.0 if error_q[3] >= 0 else -1.0
-        tau = -self.Kd_att @ angular_vel + self.Kp_att @ (sign * error_q[:3])
+        error_xyz = sign * error_q[:3]
+        error_xyz[2] = 0.0          # zero out yaw error
+        angular_vel[2] = 0.0        # zero out yaw rate damping too
 
+        tau = -self.Kd_att @ angular_vel + self.Kp_att @ error_xyz
         return tau
 
 
-    def _get_yaw(self, odom) -> float:
-        """Extract current yaw from odometry quaternion."""
-        q = odom.pose.pose.orientation
-        return R.from_quat([q.x, q.y, q.z, q.w]).as_euler('ZYX')[0]
-
 
     def compute_actuator_speeds(self, f_desired, current_odom, dt):
-
         f_estimated = self.estimate_cable_force(current_odom)
-        pid_correction = self.cable_force_pid(f_desired, f_estimated, dt) # Introduces closed loop correction
-
-        f_prop_desired  = f_desired - self.GRAVITY_VEC 
+        pid_correction = self.cable_force_pid(f_desired, f_estimated, dt)
+        f_prop_desired = f_desired - self.GRAVITY_VEC
         f_thrust_cmd = f_prop_desired + pid_correction
+
+        # self.get_logger().info(f"f_est={np.round(f_estimated,2)} corr={np.round(pid_correction,2)} f_cmd={np.round(f_thrust_cmd,2)}")
+        # self.get_logger().info(f"integral={np.round(self.force_error_integral,2)}")
+
         att_desired, thrust = self.force_controller(f_thrust_cmd)
+        q = current_odom.pose.pose.orientation
+        R_body = R.from_quat([q.x, q.y, q.z, q.w]).as_matrix()
+        self.propeller = R_body @ np.array([0.0, 0.0, thrust]) 
         torques = self.attitude_controller(att_desired, current_odom)
 
         w_vec = np.array([thrust, torques[0], torques[1], torques[2]])
@@ -258,20 +259,8 @@ class ForceControllerNode(Node):
 
         speeds = np.sqrt(np.maximum(w_squared, 0.0))
         speeds = np.minimum(speeds, self.MAX_ROTOR_VELOCITY)
-
-        # # Publish d error
-        # lista = np.array([self.last_wrench[0], 
-        #         self.reconstruct_thrust_world(current_odom)[2],
-        #         f_estimated[0],
-        #         f_estimated[1],
-        #         f_estimated[2],
-        #         max(speeds)
-        #         ])
-        
-        # d_error_msg = Float32MultiArray()
-        # d_error_msg.data = lista.tolist()
-        # self.info_pub.publish(d_error_msg)
-
+        # self.get_logger().info(f"thrust={thrust:.2f} torques={np.round(torques,2)}")
+        # self.get_logger().info(f"w_squared={np.round(w_squared,1)}")
         return speeds
 
     def publish_actuator_speeds(self):
