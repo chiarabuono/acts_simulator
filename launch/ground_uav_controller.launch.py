@@ -116,9 +116,13 @@ def launch_setup(
     actions = [sim, shutdown_handler]
 
     mass = 2.030400
-    d_force = [0.0, -5.0, 10.0]
+    d_force = [0.0, 0.0, 10.0]
+    anchor_pos = [0.0, 0.0, 0.0]
     #get_drone_start(sim, "drone1_", actions)
-    get_drone_nodes_force_control(sim, "drone1_", mass, d_force, actions)
+
+    get_drone_nodes_force_to_position_control(sim, "drone1_", mass, d_force, anchor_pos, 1.0, actions)
+
+    # get_drone_nodes_force_control(sim, "drone1_", mass, d_force, actions)
 
     
     return actions

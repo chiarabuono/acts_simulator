@@ -20,6 +20,7 @@ import rclpy
 from rclpy.node import Node
 
 from acts_simulator.position_controller import PositionControllerNode
+from acts_simulator.forceToPosition_controller import ForceToPositionControllerNode
 from acts_simulator.force_controller import ForceControllerNode
 
 from rclpy.executors import SingleThreadedExecutor
@@ -34,8 +35,10 @@ def main(args=None):
 
     if control_mode == 'force':
         node = ForceControllerNode()
-    else:
+    elif control_mode == "position":
         node = PositionControllerNode()
+    else:
+        node = ForceToPositionControllerNode()
 
     executor = SingleThreadedExecutor()
     executor.add_node(node)

@@ -225,3 +225,73 @@ def get_drone_nodes_force_control(sim, prefix, mass, d_force, actions):
     actions.append(bridge_node)
     actions.append(clock_bridge)
     actions.append(pose_to_odom)
+
+def get_drone_nodes_force_to_position_control(sim, prefix, mass, f_desired, anchor_pos, cable_length, actions):
+
+    control = Node(
+        package=PACKAGE_NAME,
+        executable="controller_node",
+        name="controller",
+        namespace=prefix.strip('/'),
+        output="screen",
+        parameters=[{
+            "control_mode": "force_to_position",
+            "f_desired": f_desired,
+            "anchor_pos": anchor_pos,
+            "cable_length": cable_length,
+            "mass": mass,
+            "use_sim_time": True
+        }],
+        remappings=[
+            ("command/motor_speed", f"/{prefix}/command/motor_speed"),
+            ("mocap/odom", f"/{prefix}mocap/odom"),
+        ]
+    )
+
+    delayed_drone_control = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=sim,
+            on_start=TimerAction(period=WAIT_TIME, actions=[control]),
+        )
+    )
+    gz_pose_topic = "/model/uav_to_ground/pose"
+    bridge_node = Node(
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        arguments=[
+            f"/{prefix}/command/motor_speed@actuator_msgs/msg/Actuators@gz.msgs.Actuators",
+            f"/{prefix}mocap/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry",
+            f"/{prefix}tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V",
+            f"{gz_pose_topic}@geometry_msgs/msg/PoseArray[gz.msgs.Pose_V",
+        ],
+        output="screen"
+    )
+    clock_bridge = Node(
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        name="clock_bridge",
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen'
+    )
+
+    pose_to_odom = Node(
+        package=PACKAGE_NAME,
+        executable="gz_pose_to_odom",
+        name=f"{prefix}pose_to_odom",
+        output="screen",
+        parameters=[{
+            "link_name": f"{prefix}base_link",
+            "odom_frame": "world",
+            "base_frame": f"{prefix}base_link",
+            "use_sim_time": True,
+        }],
+        remappings=[
+            ("pose_array", gz_pose_topic),
+            ("odom", f"/{prefix}mocap/odom"),
+        ]
+    )
+
+    actions.append(delayed_drone_control)
+    actions.append(bridge_node)
+    actions.append(clock_bridge)
+    actions.append(pose_to_odom)
