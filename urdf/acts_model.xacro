@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts">
+
+  <xacro:include filename="components/panel.xacro" />
+  <xacro:include filename="uav_cable_assembly.urdf.xacro" /> 
+  <xacro:include filename="ugv_cable_assembly.urdf.xacro" />
+  
+
+  <xacro:property name="sqrt3" value="${3**0.5}"/>
+  <xacro:property name="cable_segments" value="5"/>
+
+  <xacro:property name="hook1_x" value="0.0"/>   
+  <xacro:property name="hook1_y" value="${sqrt3 / 3}"/>  
+  <xacro:property name="hook1_z" value="0.10"/>
+
+  <xacro:property name="hook2_x" value="-0.5"/>   
+  <xacro:property name="hook2_y" value="${-sqrt3 / 6}"/>  
+  <xacro:property name="hook2_z" value="0.10"/>     
+
+  <xacro:property name="hook3_x" value="0.5"/>   
+  <xacro:property name="hook3_y" value="${-sqrt3 / 6}"/>  
+  <xacro:property name="hook3_z" value="0.10"/>
+
+  <xacro:property name="ground_anchor_x" value="0.0"/>   
+  <xacro:property name="ground_anchor_y" value="0.0"/>  
+  <xacro:property name="ground_anchor_z" value="0.1"/>
+
+  <xacro:property name="target1_x" value="-1.2"/>
+  <xacro:property name="target1_y" value="0.0"/>
+  <xacro:property name="target1_z" value="0.0"/>  
+  
+  <link name="base_link"/>
+
+  <xacro:panel
+    link_name="chassis_link" 
+    mass="1.0" 
+    x="2" y="2" z="0.2" 
+    material_name="Blue" 
+    material_color="0.0 0.0 0.8 0.0" />
+
+  <joint name="base_to_chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis_link"/>
+    <origin xyz="0 0 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <xacro:add_ugv
+    id="4" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${ground_anchor_x}" 
+    y_off="${ground_anchor_y}" 
+    z_off="${ground_anchor_z}"
+    cable_roll="0.0" cable_pitch="0" cable_yaw="0" />
+
+  <xacro:add_drone 
+    id="1" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${hook1_x}" 
+    y_off="${hook1_y}" 
+    z_off="${hook1_z}"
+    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+  <xacro:add_drone 
+    id="2" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${hook2_x}" 
+    y_off="${hook2_y}" 
+    z_off="${hook2_z}"
+    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+  <xacro:add_drone 
+    id="3" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${hook3_x}" 
+    y_off="${hook3_y}" 
+    z_off="${hook3_z}"
+    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+</robot>

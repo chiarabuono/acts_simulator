@@ -1,20 +1,25 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
+  <xacro:include filename="$(find acts_simulator)/urdf/components/ugv_component.xacro" />
 
-<xacro:macro name="add_drone" params="id segments length x_off:=0 y_off:=0 z_off:=0 cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:=''">
-    <xacro:property name="prefix" value="drone${id}_" />
-    <xacro:crazy2fly prefix="${prefix}" />
+  <xacro:macro name="add_ugv" params="id segments length x_off:=0 y_off:=0 z_off:=0 cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:=''">
+    <xacro:property name="prefix" value="ugv${id}_" />
 
-        <link name="${prefix}cable_root_link">
-            <inertial>
-                <mass value="0.0001"/>
-                <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-            </inertial>
-        </link>
+    <xacro:ugv_component 
+    prefix="${prefix}"
+    x="0" 
+    y="0" 
+    z="0"
+    />
 
-        <!-- If panel provided, attach panel to cable root -->
+    <link name="${prefix}cable_root_link">
+        <inertial>
+            <mass value="0.0001"/>
+            <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+        </inertial>
+    </link>
+
     <xacro:unless value="${panel_link == ''}">
         <joint name="${prefix}panel_to_cable_joint" type="fixed">
             <parent link="${panel_link}"/>
@@ -23,9 +28,8 @@
         </joint>
     </xacro:unless>
 
-    <!-- Cable hangs from cable_root_link -->
-    <xacro:uav_cable 
-        prefix="${prefix}" 
+    <xacro:ugv_cable 
+        prefix="${prefix}"
         parent_link="${prefix}cable_root_link"
         is_flexible="true"
         segments="${segments}" 
@@ -35,9 +39,7 @@
         cable_yaw="${cable_yaw}"
         radius="0.005" mass="0.01" />
 
-    <!-- virtual -->
-    <!-- Link between joint_x and joint_y -->
-    <link name="${prefix}virtual_cable_to_drone_joint">
+       <link name="${prefix}virtual_cable_to_ugv_joint">
         <inertial>
             <mass value="0.0001"/> 
             <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
@@ -52,7 +54,7 @@
     </inertial>
     </link>
 
-    <!-- Fix the attachment link to the drone's base_link -->
+    <!-- Fix the attachment link to the ugv's base_link -->
     <joint name="${prefix}cable_attach_fixed" type="fixed">
     <parent link="${prefix}cable_attach_link"/>   
     <child link="${prefix}base_link"/>
@@ -60,17 +62,17 @@
     </joint>
 
     <!-- joint_x: last cable segment to virtual -->
-    <joint name="${prefix}joint_x_cable_to_drone_joint" type="revolute">
+    <joint name="${prefix}joint_x_cable_to_ugv_joint" type="revolute">
     <parent link="${prefix}link_${segments}"/>
-    <child link="${prefix}virtual_cable_to_drone_joint"/>
+    <child link="${prefix}virtual_cable_to_ugv_joint"/>
     <axis xyz="1 0 0"/>
     <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
     <dynamics damping="0.05" friction="0.01"/>
     </joint>
 
     <!-- joint_y: virtual to cable_attach_link  -->
-    <joint name="${prefix}joint_y_cable_to_drone_joint" type="revolute">
-    <parent link="${prefix}virtual_cable_to_drone_joint"/>
+    <joint name="${prefix}joint_y_cable_to_ugv_joint" type="revolute">
+    <parent link="${prefix}virtual_cable_to_ugv_joint"/>
     <child link="${prefix}cable_attach_link"/> 
     <axis xyz="0 1 0"/>
     <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
@@ -84,5 +86,5 @@
         <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
 
-    </xacro:macro>
+  </xacro:macro> 
 </robot>

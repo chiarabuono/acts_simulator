@@ -10,10 +10,10 @@
     </inertial>
   </xacro:macro>
 
-
-<!-- ____________   Flexible cable  _______________________-->
-  <xacro:macro name="flexible_chain_generator" params="prefix parent cable_roll:=0 cable_pitch:=0 cable_yaw:=0 current_num total_num cable_len rad m">
+<xacro:macro name="flexible_chain_generator" params="prefix parent cable_roll:=0 cable_pitch:=0 cable_yaw:=0 current_num total_num cable_len rad m type:='uav'">
   
+  <xacro:property name="dir" value="${-1 if type == 'ugv' else 1}" />
+
   <link name="${prefix}virtual_${current_num}">
     <inertial>
       <mass value="0.0001"/> 
@@ -22,23 +22,23 @@
   </link>
 
   <joint name="${prefix}joint_x_${current_num}" type="continuous">
-  <parent link="${parent}"/>
-  <child link="${prefix}virtual_${current_num}"/>
-  <origin xyz="0 0 ${current_num == 1 and 0 or cable_len}"
-          rpy="${current_num == 1 and cable_roll or 0}
-               ${current_num == 1 and cable_pitch or 0}
-               ${current_num == 1 and cable_yaw or 0}"/>
-  <axis xyz="1 0 0"/>
-  <dynamics damping="0.05" friction="0.01"/>
-</joint>
+    <parent link="${parent}"/>
+    <child link="${prefix}virtual_${current_num}"/>
+    <origin xyz="0 0 ${current_num == 1 and 0 or (cable_len * dir)}"
+            rpy="${current_num == 1 and cable_roll or 0}
+                 ${current_num == 1 and cable_pitch or 0}
+                 ${current_num == 1 and cable_yaw or 0}"/>
+    <axis xyz="1 0 0"/>
+    <dynamics damping="0.05" friction="0.01"/>
+  </joint>
 
   <link name="${prefix}link_${current_num}">
     <xacro:cylinder_inertia m="${m}" r="${rad}" h="${cable_len}" />
     <visual>
-      <origin xyz="0 0 ${-cable_len/2.0}"/>
+      <origin xyz="0 0 ${-cable_len / 2.0 * dir}"/>
       <geometry><cylinder radius="${rad}" length="${cable_len}"/></geometry>
     </visual>
-    </link>
+  </link>
 
   <joint name="${prefix}joint_y_${current_num}" type="continuous">
     <parent link="${prefix}virtual_${current_num}"/>
@@ -55,22 +55,42 @@
   </gazebo>
 
   <xacro:if value="${current_num &lt; total_num}">
-  <xacro:flexible_chain_generator 
-    prefix="${prefix}" 
-    parent="${prefix}link_${current_num}" 
-    cable_roll="0" cable_pitch="0" cable_yaw="0"
-    current_num="${current_num + 1}" 
-    total_num="${total_num}" 
-    cable_len="${cable_len}" rad="${rad}" m="${m}" />
-  </xacro:if>
+    <xacro:flexible_chain_generator 
+      prefix="${prefix}" 
+      parent="${prefix}link_${current_num}" 
+      cable_roll="0" cable_pitch="0" cable_yaw="0"
+      current_num="${current_num + 1}" 
+      total_num="${total_num}" 
+      cable_len="${cable_len}" rad="${rad}" m="${m}"
+      type="${type}" />
+      </xacro:if>
 </xacro:macro>
 
 
-<!-- ____________   Cable macro  _______________________-->
 <xacro:macro name="uav_cable" params="prefix parent_link is_flexible segments length radius mass cable_roll:=0 cable_pitch:=0 cable_yaw:=0">
   <xacro:if value="${is_flexible}">
     <xacro:flexible_chain_generator 
       prefix="${prefix}" parent="${parent_link}" 
+      type="uav"
+      cable_roll="${cable_roll}" cable_pitch="${cable_pitch}" cable_yaw="${cable_yaw}"
+      current_num="1" total_num="${segments}" 
+      cable_len="${length/segments}" rad="${radius}" m="${mass/segments}" />
+  </xacro:if>
+  <xacro:unless value="${is_flexible}">
+    <xacro:flexible_chain_generator 
+      prefix="${prefix}" parent="${parent_link}"
+      type="uav" 
+      cable_roll="${cable_roll}" cable_pitch="${cable_pitch}" cable_yaw="${cable_yaw}"
+      current_num="1" total_num="1" 
+      cable_len="${length}" rad="${radius}" m="${mass}" />
+  </xacro:unless>
+</xacro:macro>
+
+<xacro:macro name="ugv_cable" params="prefix parent_link is_flexible segments length radius mass cable_roll:=0 cable_pitch:=0 cable_yaw:=0">
+  <xacro:if value="${is_flexible}">
+    <xacro:flexible_chain_generator 
+      prefix="${prefix}" parent="${parent_link}"
+      type="ugv" 
       cable_roll="${cable_roll}" cable_pitch="${cable_pitch}" cable_yaw="${cable_yaw}"
       current_num="1" total_num="${segments}" 
       cable_len="${length/segments}" rad="${radius}" m="${mass/segments}" />
@@ -78,6 +98,7 @@
   <xacro:unless value="${is_flexible}">
     <xacro:flexible_chain_generator 
       prefix="${prefix}" parent="${parent_link}" 
+      type="ugv"
       cable_roll="${cable_roll}" cable_pitch="${cable_pitch}" cable_yaw="${cable_yaw}"
       current_num="1" total_num="1" 
       cable_len="${length}" rad="${radius}" m="${mass}" />

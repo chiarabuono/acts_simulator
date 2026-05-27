@@ -6,7 +6,7 @@ from launch.actions import (
 from launch.event_handlers import OnProcessStart
 
 PACKAGE_NAME = "acts_simulator"
-WAIT_TIME = 8.0
+WAIT_TIME = 15.0
 
 def parse_float_list(value: str, expected_length: int, name: str) -> list[float]:
     """
@@ -99,7 +99,7 @@ def get_drone_start(sim, prefix, actions):
         output='screen'
     )
 
-    actions.append(drone_start)
+    actions.append(delayed_drone_start)
     actions.append(bridge_node)
     actions.append(clock_bridge)
 

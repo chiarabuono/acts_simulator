@@ -1,16 +1,23 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="reference_marker">
 
-  <xacro:include filename="components/ugv_component.xacro" />
+  
 
   <link name="ref_root"/>
 
-  <xacro:ugv_component 
-    prefix="obstacle_"
-    x="2.0"
-    y="2.0"
-    z="2.0" 
-  />
+  <link name="obstacle_base_link">
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.05" ixy="0.0" ixz="0.0" iyy="0.05" iyz="0.0" izz="0.08"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="-0.5 0.0 0.1" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.1 0.1"/></geometry>
+      <material name="blue"><color rgba="0 0 1 1"/></material>
+    </visual>
+
+  </link>
 
   <joint name="ref_joint" type="fixed">
     <parent link="ref_root"/>

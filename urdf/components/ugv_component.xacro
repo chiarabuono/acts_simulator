@@ -4,21 +4,21 @@
 
     <link name="${prefix}base_link">
       <inertial>
-        <mass value="2.0"/>
-        <inertia ixx="0.05" ixy="0.0" ixz="0.0" iyy="0.05" iyz="0.0" izz="0.08"/>
+        <mass value="10.0" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.02" />
       </inertial>
-
       <visual>
-        <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
-        <geometry><box size="0.2 0.2 0.2"/></geometry>
-        <material name="blue"><color rgba="0 0 1 1"/></material>
-      </visual>
-      <!-- <collision>
         <geometry>
-          <box size="0.5 0.5 0.2"/>
+        <box size="0.2 0.2 0.1"/>
         </geometry>
-      </collision> -->
-    </link>
+      </visual>
+		<!-- <collision name="${prefix}base_collision">
+			<geometry>
+			<box size="0.3 0.3 0.15"/>
+			</geometry>
+		</collision> -->
+	</link>
 
   </xacro:macro>
 </robot>
