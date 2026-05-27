@@ -6,7 +6,6 @@ from launch import LaunchDescription, LaunchContext
 from launch_ros.actions import Node
 from launch.actions import (
     IncludeLaunchDescription, 
-    DeclareLaunchArgument, 
     OpaqueFunction, 
     RegisterEventHandler,
     LogInfo,
@@ -15,8 +14,6 @@ from launch.actions import (
 from launch.event_handlers import OnShutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
-from acts_simulator.utils_simulation import get_drone_spawn_data, send_actsInfo_toxacro, create_actsXacro_file
-
 
 # CONSTANTS
 PACKAGE_NAME = "acts_simulator"
@@ -47,9 +44,6 @@ def generate_launch_description():
         launch_arguments={'gz_args': f'-r {world_file}'}.items(),
     )
 
-    # config_file_path = os.path.join(pkg_share, 'config', 'acts_config.json')
-    # drones, p_xyz, p_rpy, cable_rpys = get_drone_spawn_data(config_file_path)
-
     # USE acts.urdf.xacro file - send info
     xacro_file = os.path.join(pkg_share, 'urdf', 'acts_model.xacro')
     # robot_desc = send_actsInfo_toxacro(xacro_file, p_xyz, p_rpy, drones, cable_rpys)
@@ -64,12 +58,10 @@ def generate_launch_description():
         arguments=[
             '-name', 'acts',
             '-string', robot_desc,
-            '-z', '0.5' 
+            '-z', '0.0' 
         ],
         output='screen'
     )
-
-
 
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
