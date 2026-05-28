@@ -49,14 +49,26 @@
   </joint>
 
   <xacro:add_ugv
-    id="4" 
+    id="1" 
     segments="${cable_segments}" 
     length="1.5" 
     panel_link="chassis_link"
     x_off="${ground_anchor_x}" 
     y_off="${ground_anchor_y}" 
     z_off="${ground_anchor_z+system_heigth}"
-    cable_roll="0.0" cable_pitch="0" cable_yaw="0" />
+    cable_roll="0.0" cable_pitch="0" cable_yaw="0"
+    target_hook="hook1" />
+
+    <xacro:add_ugv
+    id="2" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${ground_anchor_x+0.5}" 
+    y_off="${ground_anchor_y+0.5}" 
+    z_off="${ground_anchor_z+system_heigth}"
+    cable_roll="0.0" cable_pitch="0" cable_yaw="0"
+    target_hook="hook2" />
 
   <xacro:add_drone 
     id="1" 
@@ -87,5 +99,15 @@
     y_off="${hook3_y}" 
     z_off="${hook3_z+system_heigth}"
     cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+    <!-- <gazebo>
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
+      <parameters>$(find acts_simulator)/config/cable_controller.yaml</parameters>
+    </plugin>
+  </gazebo> -->
+<!-- 
+    <gazebo>
+    <plugin filename="gz-sim-apply-link-wrench-system" name="gz::sim::systems::ApplyLinkWrench"/>
+  </gazebo> -->
 
 </robot>

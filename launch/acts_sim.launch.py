@@ -41,17 +41,13 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': f'-r {world_file}'}.items(),
+        launch_arguments={'gz_args': f'-r {world_file}'}.items()
     )
 
-    # USE acts.urdf.xacro file - send info
-    xacro_file = os.path.join(pkg_share, 'urdf', 'acts_model.xacro')
-    # robot_desc = send_actsInfo_toxacro(xacro_file, p_xyz, p_rpy, drones, cable_rpys)
+    # 2. Spawn Main Assets Model
+    xacro_file = os.path.join(get_package_share_directory('acts_simulator'), 'urdf', 'acts_model.xacro')
+    robot_desc = xacro.process_file(xacro_file).toxml()
 
-    robot_description_config = xacro.process_file(xacro_file)
-    robot_desc = robot_description_config.toxml()
-
-    # SPAWN THE ENTIRE SYSTEM
     spawn_system = Node(
         package='ros_gz_sim',
         executable='create',
@@ -70,11 +66,24 @@ def generate_launch_description():
         parameters=[{'robot_description': robot_desc}]
     )
     
-    node_joint_state_publisher = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
+    # Corr. of cable guide
+    hooks_xacro_path = os.path.join(get_package_share_directory('acts_simulator'), 'urdf', 'ground_hooks.xacro')
+    robot_desc_hooks = xacro.process_file(hooks_xacro_path).toxml()
+    spawn_hooks = Node(
+        package='ros_gz_sim', executable='create',
+        arguments=['-name', 'ground_hooks', '-string', robot_desc_hooks],
         output='screen'
     )
+
+    # bridge = Node(
+    #     package='ros_gz_bridge',
+    #     executable='parameter_bridge',
+    #     arguments=[
+    #         '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+    #         '/model/acts/joint/ugv1_extreme_motor_joint/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double'
+    #     ],
+    #     output='screen'
+    # )
 
     shutdown_handler = RegisterEventHandler(
         OnShutdown(
@@ -88,8 +97,9 @@ def generate_launch_description():
     return LaunchDescription([
         set_gz_resource_path, 
         gazebo,
+        # spawn_hooks,
         spawn_system,
+        # bridge,
         node_robot_state_publisher,
-        node_joint_state_publisher, 
         shutdown_handler,
     ])

@@ -3,15 +3,8 @@
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
   <xacro:include filename="$(find acts_simulator)/urdf/components/ugv_component.xacro" />
 
-  <xacro:macro name="add_ugv" params="id segments length x_off:=0 y_off:=0 z_off:=0 cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:=''">
+  <xacro:macro name="add_ugv" params="id segments length x_off:=0 y_off:=0 z_off:=0 cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:='' target_hook:='hook1'">
     <xacro:property name="prefix" value="ugv${id}_" />
-
-    <xacro:ugv_component 
-    prefix="${prefix}"
-    x="0" 
-    y="0" 
-    z="0"
-    />
 
     <link name="${prefix}cable_root_link">
         <inertial>
@@ -39,52 +32,44 @@
         cable_yaw="${cable_yaw}"
         radius="0.005" mass="0.01" />
 
-       <link name="${prefix}virtual_cable_to_ugv_joint">
+   <link name="${prefix}virtual_extreme_link">
         <inertial>
-            <mass value="0.0001"/> 
-            <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+            <mass value="0.01"/> 
+            <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
         </inertial>
+        <visual>
+            <geometry>
+                <sphere radius="0.02"/>
+            </geometry>
+            <material name="Red">
+                <color rgba="1.0 0.0 0.0 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <sphere radius="0.02"/>
+            </geometry>
+        </collision>
     </link>
 
-
-    <link name="${prefix}cable_attach_link">
-    <inertial>
-        <mass value="0.0001"/>
-        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-    </inertial>
-    </link>
-
-    <!-- Fix the attachment link to the ugv's base_link -->
-    <joint name="${prefix}cable_attach_fixed" type="fixed">
-    <parent link="${prefix}cable_attach_link"/>   
-    <child link="${prefix}base_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <joint name="${prefix}extreme_motor_joint" type="fixed">
+        <parent link="${prefix}link_${segments}"/>   
+        <child link="${prefix}virtual_extreme_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
-    <!-- joint_x: last cable segment to virtual -->
-    <joint name="${prefix}joint_x_cable_to_ugv_joint" type="revolute">
-    <parent link="${prefix}link_${segments}"/>
-    <child link="${prefix}virtual_cable_to_ugv_joint"/>
-    <axis xyz="1 0 0"/>
-    <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
-    <dynamics damping="0.05" friction="0.01"/>
-    </joint>
-
-    <!-- joint_y: virtual to cable_attach_link  -->
-    <joint name="${prefix}joint_y_cable_to_ugv_joint" type="revolute">
-    <parent link="${prefix}virtual_cable_to_ugv_joint"/>
-    <child link="${prefix}cable_attach_link"/> 
-    <axis xyz="0 1 0"/>
-    <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
-    <dynamics damping="0.05" friction="0.01"/>
-    </joint>
-
-    <gazebo reference="${prefix}base_link">
+    <gazebo reference="${prefix}extreme_motor_joint">
         <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
-    <gazebo reference="${prefix}cable_attach_link">
-        <preserveFixedJoint>true</preserveFixedJoint>
-    </gazebo>
+
+    <!-- <gazebo>
+        <plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
+            <publish_link_pose>true</publish_link_pose>
+            <publish_nested_model_pose>true</publish_nested_model_pose>
+            <use_pose_vector_msg>true</use_pose_vector_msg>
+            <update_rate>50</update_rate>
+        </plugin>
+    </gazebo> -->
 
   </xacro:macro> 
 </robot>
