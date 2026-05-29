@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
-  <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
+  <xacro:include filename="crazy2fly.urdf.xacro" />
+  <xacro:include filename="components/cable_component.xacro" />
 
 <xacro:macro name="add_drone" params="id segments length x_off:=0 y_off:=0 z_off:=0 cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:=''">
     <xacro:property name="prefix" value="drone${id}_" />

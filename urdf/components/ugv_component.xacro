@@ -10,8 +10,11 @@
       </inertial>
       <visual>
         <geometry>
-        <box size="0.2 0.2 0.1"/>
+            <sphere radius="0.02"/>
         </geometry>
+        <material name="Red">
+            <color rgba="1.0 0.0 0.0 1.0"/>
+        </material>
       </visual>
 		<!-- <collision name="${prefix}base_collision">
 			<geometry>

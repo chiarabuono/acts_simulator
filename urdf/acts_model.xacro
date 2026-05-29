@@ -4,7 +4,8 @@
   <xacro:include filename="components/panel.xacro" />
   <xacro:include filename="uav_cable_assembly.urdf.xacro" /> 
   <xacro:include filename="ugv_cable_assembly.urdf.xacro" />
-  
+
+  <xacro:arg name="controller_config" default=""/>  
 
   <xacro:property name="sqrt3" value="${3**0.5}"/>
   <xacro:property name="cable_segments" value="5"/>
@@ -28,7 +29,26 @@
 
   <xacro:property name="target1_x" value="-1.2"/>
   <xacro:property name="target1_y" value="0.0"/>
-  <xacro:property name="target1_z" value="0.0"/>  
+  <xacro:property name="target1_z" value="0.0"/>
+
+  <xacro:macro name="ros2_control_ugv_joint" params="prefix">
+    <joint name="${prefix}joint_x_cable_to_ugv">
+      <command_interface name="position">
+        <param name="min">-1.5708</param>
+        <param name="max"> 1.5708</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="${prefix}joint_y_cable_to_ugv">
+      <command_interface name="position">
+        <param name="min">-1.5708</param>
+        <param name="max"> 1.5708</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro> 
   
   <link name="base_link"/>
 
@@ -56,8 +76,7 @@
     x_off="${ground_anchor_x}" 
     y_off="${ground_anchor_y}" 
     z_off="${ground_anchor_z+system_heigth}"
-    cable_roll="0.0" cable_pitch="0" cable_yaw="0"
-    target_hook="hook1" />
+    cable_roll="0.0" cable_pitch="0" cable_yaw="0"/>
 
     <xacro:add_ugv
     id="2" 
@@ -67,8 +86,7 @@
     x_off="${ground_anchor_x+0.5}" 
     y_off="${ground_anchor_y+0.5}" 
     z_off="${ground_anchor_z+system_heigth}"
-    cable_roll="0.0" cable_pitch="0" cable_yaw="0"
-    target_hook="hook2" />
+    cable_roll="0.0" cable_pitch="0" cable_yaw="0"/>
 
   <xacro:add_drone 
     id="1" 
@@ -100,14 +118,26 @@
     z_off="${hook3_z+system_heigth}"
     cable_roll="0" cable_pitch="0" cable_yaw="0" />
 
-    <!-- <gazebo>
-    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
-      <parameters>$(find acts_simulator)/config/cable_controller.yaml</parameters>
+
+    <ros2_control name="CableSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <xacro:ros2_control_ugv_joint prefix="ugv1_" />
+    <xacro:ros2_control_ugv_joint prefix="ugv2_" />
+
+    <!-- add ugv3...ugv6 tip joints here, same pattern -->
+
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system"
+            name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(arg controller_config)</parameters>
     </plugin>
-  </gazebo> -->
-<!-- 
-    <gazebo>
-    <plugin filename="gz-sim-apply-link-wrench-system" name="gz::sim::systems::ApplyLinkWrench"/>
-  </gazebo> -->
+  </gazebo>
 
 </robot>

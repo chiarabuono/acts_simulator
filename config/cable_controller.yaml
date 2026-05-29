@@ -1,17 +1,34 @@
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Hz
+    update_rate: 100
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-    forward_position_controller:
-      type: position_controllers/JointGroupPositionController
+    ugv_tip_position_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
 
-forward_position_controller:
+ugv_tip_position_controller:
   ros__parameters:
     joints:
-      - joint_pulley_x
-      - joint_pulley_y
-      - joint_pulley_z
-    interface_name: position
+      - ugv1_joint_x_cable_to_ugv
+      - ugv1_joint_y_cable_to_ugv
+      - ugv2_joint_x_cable_to_ugv
+      - ugv2_joint_y_cable_to_ugv
+
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+    state_publish_rate: 50.0
+    action_monitors_period: 0.1
+    allow_partial_joints_goal: true
+
+    # ADD THIS BLOCK TO OVERRIDE THE DEFAULT 0.1 GAIN
+    gains:
+      ugv1_joint_x_cable_to_ugv: {p: 150.0, i: 1.0, d: 5.0}
+      ugv1_joint_y_cable_to_ugv: {p: 150.0, i: 1.0, d: 5.0}
+      ugv2_joint_x_cable_to_ugv: {p: 150.0, i: 1.0, d: 5.0}
+      ugv2_joint_y_cable_to_ugv: {p: 150.0, i: 1.0, d: 5.0}

@@ -1,75 +1,73 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
-  <xacro:include filename="$(find acts_simulator)/urdf/components/ugv_component.xacro" />
+  <xacro:include filename="components/cable_component.xacro" />
+  <xacro:include filename="components/ugv_component.xacro" />
 
-  <xacro:macro name="add_ugv" params="id segments length x_off:=0 y_off:=0 z_off:=0 cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:='' target_hook:='hook1'">
+  <xacro:macro name="add_ugv" params="id segments length x_off:=0 y_off:=0 z_off:=0 
+                                       cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:=''">
     <xacro:property name="prefix" value="ugv${id}_" />
 
+    <!-- UGV body -->
+    <xacro:ugv_component prefix="${prefix}" x="0" y="0" z="0" />
+
+    <!-- Cable attachment point at the top (fixed to panel) -->
     <link name="${prefix}cable_root_link">
-        <inertial>
-            <mass value="0.0001"/>
-            <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
-        </inertial>
+      <inertial>
+        <mass value="0.0001"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      </inertial>
     </link>
 
     <xacro:unless value="${panel_link == ''}">
-        <joint name="${prefix}panel_to_cable_joint" type="fixed">
-            <parent link="${panel_link}"/>
-            <child link="${prefix}cable_root_link"/>
-            <origin xyz="${x_off} ${y_off} ${z_off}" rpy="0 0 0"/>
-        </joint>
+      <joint name="${prefix}panel_to_cable_joint" type="fixed">
+        <parent link="${panel_link}"/>
+        <child link="${prefix}cable_root_link"/>
+        <origin xyz="${x_off} ${y_off} ${z_off}" rpy="0 0 0"/>
+      </joint>
     </xacro:unless>
 
+    <!-- Cable chain: cable_root_link → link_1 → ... → link_N -->
     <xacro:ugv_cable 
-        prefix="${prefix}"
-        parent_link="${prefix}cable_root_link"
-        is_flexible="true"
-        segments="${segments}" 
-        length="${length}"
-        cable_roll="${cable_roll}" 
-        cable_pitch="${cable_pitch}"
-        cable_yaw="${cable_yaw}"
-        radius="0.005" mass="0.01" />
+      prefix="${prefix}"
+      parent_link="${prefix}cable_root_link"
+      is_flexible="true"
+      segments="${segments}" 
+      length="${length}"
+      cable_roll="${cable_roll}" 
+      cable_pitch="${cable_pitch}"
+      cable_yaw="${cable_yaw}"
+      radius="0.005" mass="0.01" />
 
-   <link name="${prefix}virtual_extreme_link">
-        <inertial>
-            <mass value="0.01"/> 
-            <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
-        </inertial>
-        <visual>
-            <geometry>
-                <sphere radius="0.02"/>
-            </geometry>
-            <material name="Red">
-                <color rgba="1.0 0.0 0.0 1.0"/>
-            </material>
-        </visual>
-        <collision>
-            <geometry>
-                <sphere radius="0.02"/>
-            </geometry>
-        </collision>
+    <!-- Virtual intermediate link for the 2-axis joint at the tip -->
+    <link name="${prefix}virtual_tip_link">
+      <inertial>
+        <mass value="0.0001"/> 
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      </inertial>
     </link>
 
-    <joint name="${prefix}extreme_motor_joint" type="fixed">
-        <parent link="${prefix}link_${segments}"/>   
-        <child link="${prefix}virtual_extreme_link"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+    <!-- joint_x: last cable segment → virtual tip (rotation around X) -->
+    <joint name="${prefix}joint_x_cable_to_ugv" type="revolute">
+      <parent link="${prefix}link_${segments}"/>
+      <child link="${prefix}virtual_tip_link"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
+      <dynamics damping="0.05" friction="0.01"/>
     </joint>
 
-    <gazebo reference="${prefix}extreme_motor_joint">
-        <preserveFixedJoint>true</preserveFixedJoint>
-    </gazebo>
+    <!-- joint_y: virtual tip → base_link (rotation around Y) -->
+    <joint name="${prefix}joint_y_cable_to_ugv" type="revolute">
+      <parent link="${prefix}virtual_tip_link"/>
+      <child link="${prefix}base_link"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
+      <dynamics damping="0.05" friction="0.01"/>
+    </joint>
 
-    <!-- <gazebo>
-        <plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
-            <publish_link_pose>true</publish_link_pose>
-            <publish_nested_model_pose>true</publish_nested_model_pose>
-            <use_pose_vector_msg>true</use_pose_vector_msg>
-            <update_rate>50</update_rate>
-        </plugin>
-    </gazebo> -->
+    <!-- Keep fixed joints from being welded by Gazebo -->
+    <gazebo reference="${prefix}panel_to_cable_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
 
   </xacro:macro> 
 </robot>

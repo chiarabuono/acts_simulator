@@ -31,7 +31,7 @@ setup(
 
     (os.path.join('share', package_name, 'worlds'), glob('worlds/*')),
     
-    (os.path.join('share', package_name, 'config'), glob('config/*.json')),
+    (os.path.join('share', package_name, 'config'), glob('config/*.json') + glob('config/*.yaml')),
 
     (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
     ],
@@ -51,6 +51,7 @@ setup(
             'controller_node = acts_simulator.controller_node:main',
             'drone_start = acts_simulator.drone_start:main', 
             'gz_pose_to_odom = acts_simulator.gz_pose_to_odom:main',
+            'ugv_tip_controller = acts_simulator.ugv_tip_controller:main',
         ],
     },
 )
