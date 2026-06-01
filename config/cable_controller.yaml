@@ -17,7 +17,7 @@ ugv_tip_position_controller:
       - ugv2_joint_y_cable_to_ugv
 
     command_interfaces:
-      - position
+      - effort  # <--- Change this from position to effort
     state_interfaces:
       - position
       - velocity
@@ -26,9 +26,8 @@ ugv_tip_position_controller:
     action_monitors_period: 0.1
     allow_partial_joints_goal: true
 
-    # ADD THIS BLOCK TO OVERRIDE THE DEFAULT 0.1 GAIN
     gains:
-      ugv1_joint_x_cable_to_ugv: {p: 150.0, i: 1.0, d: 5.0}
-      ugv1_joint_y_cable_to_ugv: {p: 150.0, i: 1.0, d: 5.0}
-      ugv2_joint_x_cable_to_ugv: {p: 150.0, i: 1.0, d: 5.0}
-      ugv2_joint_y_cable_to_ugv: {p: 150.0, i: 1.0, d: 5.0}
+      ugv1_joint_x_cable_to_ugv: {p: 10.0, i: 0.0, d: 2.0}
+      ugv1_joint_y_cable_to_ugv: {p: 10.0, i: 0.0, d: 2.0}
+      ugv2_joint_x_cable_to_ugv: {p: 10.0, i: 0.0, d: 2.0}
+      ugv2_joint_y_cable_to_ugv: {p: 10.0, i: 0.0, d: 2.0}

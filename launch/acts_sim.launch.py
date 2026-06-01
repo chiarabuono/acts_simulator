@@ -58,6 +58,21 @@ def generate_launch_description():
         output='screen'
     )
 
+    xacro_file2 = os.path.join(pkg_share, 'urdf', 'ground_hooks.xacro')
+    robot_description_config2 = xacro.process_file(xacro_file2)
+    robot_desc2 = robot_description_config2.toxml()
+
+    spawn_system2 = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=[
+            '-name', 'ground',
+            '-string', robot_desc2,
+            '-z', '0.0' 
+        ],
+        output='screen'
+    )
+
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -106,6 +121,7 @@ def generate_launch_description():
         set_gz_resource_path,
         gazebo,
         spawn_system,
+        spawn_system2,
         robot_state_publisher,
         clock_bridge,
         delayed_controllers,

@@ -51,8 +51,8 @@ def generate_launch_description():
             'ugv2_panel_x':  0.5,
             'ugv2_panel_y':  0.5,
             'ugv2_panel_z':  1.5,
-            'ugv2_target_x': -0.5,
-            'ugv2_target_y': -0.5,
+            'ugv2_target_x': -1.0,
+            'ugv2_target_y': -1.0,
         }]
     )
 
