@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts">
+
+  <xacro:include filename="components/panel.xacro" />
+  <xacro:include filename="uav_cable_assembly.urdf.xacro" /> 
+  <xacro:include filename="ugv_cable_assembly.urdf.xacro" />
+
+  <xacro:arg name="controller_config" default=""/>  
+
+  <xacro:property name="sqrt3" value="${3**0.5}"/>
+  <xacro:property name="cable_segments" value="5"/>
+  <xacro:property name="system_heigth" value="1.0"/>
+
+  <xacro:property name="hook1_x" value="0.0"/>   
+  <xacro:property name="hook1_y" value="${sqrt3 / 3}"/>  
+  <xacro:property name="hook1_z" value="0.10"/>
+
+  <xacro:property name="hook2_x" value="-0.5"/>   
+  <xacro:property name="hook2_y" value="${-sqrt3 / 6}"/>  
+  <xacro:property name="hook2_z" value="0.10"/>     
+
+  <xacro:property name="hook3_x" value="0.5"/>   
+  <xacro:property name="hook3_y" value="${-sqrt3 / 6}"/>  
+  <xacro:property name="hook3_z" value="0.10"/>
+
+  <xacro:property name="ground_anchor_x" value="0.0"/>   
+  <xacro:property name="ground_anchor_y" value="0.0"/>  
+  <xacro:property name="ground_anchor_z" value="0.1"/>
+
+  <xacro:property name="target1_x" value="-1.2"/>
+  <xacro:property name="target1_y" value="0.0"/>
+  <xacro:property name="target1_z" value="0.0"/>
+
+  
+  <link name="base_link"/>
+
+  <xacro:panel
+    link_name="chassis_link" 
+    mass="1.0" 
+    width="2"
+    length="2" 
+    heigth="0.2"
+    x="0" y="0" z="${system_heigth}" 
+    material_name="Blue" 
+    material_color="0.0 0.0 0.8 0.0" />
+
+  <joint name="base_to_chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis_link"/>
+    <origin xyz="0 0 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <xacro:add_ugv
+    id="1" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${ground_anchor_x}" 
+    y_off="${ground_anchor_y}" 
+    z_off="${ground_anchor_z+system_heigth}"
+    cable_roll="0.0" cable_pitch="0" cable_yaw="0"/>
+
+    <xacro:add_ugv
+    id="2" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${ground_anchor_x+0.5}" 
+    y_off="${ground_anchor_y+0.5}" 
+    z_off="${ground_anchor_z+system_heigth}"
+    cable_roll="0.0" cable_pitch="0" cable_yaw="0"/>
+
+
+
+  <xacro:add_drone 
+    id="1" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${hook1_x}" 
+    y_off="${hook1_y}" 
+    z_off="${hook1_z+system_heigth}"
+    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+  <xacro:add_drone 
+    id="2" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${hook2_x}" 
+    y_off="${hook2_y}" 
+    z_off="${hook2_z+system_heigth}"
+    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+  <xacro:add_drone 
+    id="3" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${hook3_x}" 
+    y_off="${hook3_y}" 
+    z_off="${hook3_z+system_heigth}"
+    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+    <gazebo>
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
+      <parameters>$(find acts_simulator)/config/acts_controller.yaml</parameters>
+      <position_proportional_gain>20.0</position_proportional_gain>
+    </plugin>
+  </gazebo>
+
+
+</robot>

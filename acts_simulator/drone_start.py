@@ -5,33 +5,35 @@ from actuator_msgs.msg import Actuators
 class DroneJumpstart(Node):
     def __init__(self):
         super().__init__('drone_jumpstart')
-        # Use the topic that you confirmed works manually
-        self.publisher_ = self.create_publisher(
-            Actuators, 
-            '/drone1_/command/motor_speed', 
-            10)
+        self.publisher_ = self.create_publisher(Actuators, "command/motor_speed", 10)
+        self.declare_parameter("action_time", 0.0)
         
         self.timer = self.create_timer(0.1, self.takeoff_kick)
         self.start_time = self.get_clock().now()
+        self.time = self.get_parameter("action_time").value * 1e9
+        self.velocity = 2000.0
 
     def takeoff_kick(self):
         now = self.get_clock().now()
         elapsed = now - self.start_time
         
-        # Apply full thrust for 3 seconds to clear the platform
-        if elapsed.nanoseconds < 8e9:  
+        if elapsed.nanoseconds < self.time:  
             msg = Actuators()
-            # Sending 3000.0 to all 4 motors (adjust if 3000 isn't enough to lift)
-            msg.velocity = [3500.0, 3500.0, 3500.0, 3500.0]
+            msg.velocity = [self.velocity, self.velocity, self.velocity, self.velocity]
             self.publisher_.publish(msg)
-            self.get_logger().info('Applying RAW MOTOR thrust for takeoff...')
+            self.get_logger().info('Applying RAW MOTOR thrust for takeoff...', once=True)
         else:
-            # Stop the kick
             self.get_logger().info('Takeoff kick finished.')
             self.timer.cancel()
+            raise SystemExit 
 
 def main():
     rclpy.init()
     node = DroneJumpstart()
-    rclpy.spin(node)
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, SystemExit):
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()

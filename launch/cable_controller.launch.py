@@ -113,16 +113,15 @@ def launch_setup(
     )
 
     bridge = Node(
-    package='ros_gz_bridge',
-    executable='parameter_bridge',
-    arguments=[
-        '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-        '/model/cable/joint/joint_pulley/0/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double'
-    ],
-    output='screen'
-)
-
-
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+            # Remap the illegal numeric token to 'joint_0' on the ROS 2 side
+            '/model/cable/joint/joint_pulley/joint_0/cmd_pos@std_msgs/msg/Float64]gz.msgs.Double@/model/cable/joint/joint_pulley/0/cmd_pos'
+        ],
+        output='screen'
+    )
 
     delayed_controller = RegisterEventHandler(
         event_handler=OnProcessStart(

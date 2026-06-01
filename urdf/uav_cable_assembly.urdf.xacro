@@ -1,36 +1,88 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:include filename="$(find acts_simulator)/urdf/crazy2fly.urdf.xacro" />
-  <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
+  <xacro:include filename="crazy2fly.urdf.xacro" />
+  <xacro:include filename="components/cable_component.xacro" />
 
-  <xacro:macro name="add_drone" params="id segments length panel_link x_off y_off z_off">
+<xacro:macro name="add_drone" params="id segments length x_off:=0 y_off:=0 z_off:=0 cable_roll:=0 cable_pitch:=0 cable_yaw:=0 panel_link:=''">
     <xacro:property name="prefix" value="drone${id}_" />
-    
     <xacro:crazy2fly prefix="${prefix}" />
 
-    <xacro:uav_cable 
-      prefix="${prefix}" 
-      parent_link="${panel_link}" 
-      is_flexible="true" 
-      segments="${segments}" 
-      length="${length}" 
-      radius="0.005" mass="0.01" />
+        <link name="${prefix}cable_root_link">
+            <inertial>
+                <mass value="0.0001"/>
+                <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+            </inertial>
+        </link>
 
-    <joint name="${prefix}cable_to_drone_joint" type="fixed">
-      <parent link="${prefix}link_${segments}"/> 
-      <child link="${prefix}base_link"/>
-      <origin xyz="${x_off} ${y_off} ${float(z_off)}" rpy="0 0 0"/>
+        <!-- If panel provided, attach panel to cable root -->
+    <xacro:unless value="${panel_link == ''}">
+        <joint name="${prefix}panel_to_cable_joint" type="fixed">
+            <parent link="${panel_link}"/>
+            <child link="${prefix}cable_root_link"/>
+            <origin xyz="${x_off} ${y_off} ${z_off}" rpy="0 0 0"/>
+        </joint>
+    </xacro:unless>
+
+    <!-- Cable hangs from cable_root_link -->
+    <xacro:uav_cable 
+        prefix="${prefix}" 
+        parent_link="${prefix}cable_root_link"
+        is_flexible="true"
+        segments="${segments}" 
+        length="${length}"
+        cable_roll="${cable_roll}" 
+        cable_pitch="${cable_pitch}"
+        cable_yaw="${cable_yaw}"
+        radius="0.005" mass="0.01" />
+
+    <!-- virtual -->
+    <!-- Link between joint_x and joint_y -->
+    <link name="${prefix}virtual_cable_to_drone_joint">
+        <inertial>
+            <mass value="0.0001"/> 
+            <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+        </inertial>
+    </link>
+
+
+    <link name="${prefix}cable_attach_link">
+    <inertial>
+        <mass value="0.0001"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+    </link>
+
+    <!-- Fix the attachment link to the drone's base_link -->
+    <joint name="${prefix}cable_attach_fixed" type="fixed">
+    <parent link="${prefix}cable_attach_link"/>   
+    <child link="${prefix}base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
-    <gazebo reference="${prefix}cable_to_drone_joint">
-      <preserveFixedJoint>true</preserveFixedJoint>
-      <disableFixedJointLumping>true</disableFixedJointLumping>
-    </gazebo>
+    <!-- joint_x: last cable segment to virtual -->
+    <joint name="${prefix}joint_x_cable_to_drone_joint" type="revolute">
+    <parent link="${prefix}link_${segments}"/>
+    <child link="${prefix}virtual_cable_to_drone_joint"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
+    <dynamics damping="0.05" friction="0.01"/>
+    </joint>
+
+    <!-- joint_y: virtual to cable_attach_link  -->
+    <joint name="${prefix}joint_y_cable_to_drone_joint" type="revolute">
+    <parent link="${prefix}virtual_cable_to_drone_joint"/>
+    <child link="${prefix}cable_attach_link"/> 
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
+    <dynamics damping="0.05" friction="0.01"/>
+    </joint>
 
     <gazebo reference="${prefix}base_link">
-      <self_collide>true</self_collide>
+        <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <gazebo reference="${prefix}cable_attach_link">
+        <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
 
-    
-  </xacro:macro>
+    </xacro:macro>
 </robot>

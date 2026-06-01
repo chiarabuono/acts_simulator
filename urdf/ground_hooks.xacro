@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ground_hooks">
+
+  <xacro:macro name="hook" params="prefix x y z">
+    <link name="${prefix}">
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <sphere radius="0.03"/>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="base_link_to_${prefix}" type="fixed">
+      <parent link="world"/>   <!-- was: world -->
+      <child link="${prefix}"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+    </joint>
+
+
+  </xacro:macro>
+
+  <link name="world"/> 
+
+  <xacro:hook prefix="hook1" x="1.0" y="1.0" z="0.0"/>
+  <xacro:hook prefix="hook2" x="-1.0" y="-1.0" z="0.0"/>
+
+</robot>

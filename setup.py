@@ -51,6 +51,7 @@ setup(
             'controller_node = acts_simulator.controller_node:main',
             'drone_start = acts_simulator.drone_start:main', 
             'cable_controller = acts_simulator.cable_controller:main',
+            'ugv_controller = acts_simulator.ugv_controller:main',
         ],
     },
 )

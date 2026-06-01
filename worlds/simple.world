@@ -98,8 +98,7 @@ Copyright ©2025 nknab
 			<link name="fixed_support_link">
 				<inertial>
 					<mass>0.00001</mass>
-				</inertial>
-				<inertia>
+					<inertia>
 					<ixx>0.000000001</ixx>
 					<ixy>0</ixy>
 					<ixz>0</ixz>
@@ -107,6 +106,7 @@ Copyright ©2025 nknab
 					<iyz>0</iyz>
 					<izz>0.000000001</izz>
 				</inertia>
+				</inertial>
 			</link>
 			<joint name="work_harder" type="ball">
 				<parent>world</parent>
