@@ -34,6 +34,8 @@ setup(
 
     (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
     (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
+        
+    (os.path.join('share', package_name, 'mujoco'), glob('mujoco/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -52,6 +54,7 @@ setup(
             'drone_start = acts_simulator.drone_start:main', 
             'cable_controller = acts_simulator.cable_controller:main',
             'ugv_controller = acts_simulator.ugv_controller:main',
+            'mujoco_311_simulation = acts_simulator.mujoco_311_simulation:main'
         ],
     },
 )

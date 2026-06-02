@@ -1,0 +1,44 @@
+<mujoco model="crazy2fly">
+  <compiler angle="radian" meshdir="../meshes/"/>
+
+  <asset>
+    <mesh name="core_mesh" file="core/core.obj"/>
+    <mesh name="prop_cw" file="propellers/cw/cw.stl"/>
+    <mesh name="prop_ccw" file="propellers/ccw/ccw.stl"/>
+  </asset>
+
+  <worldbody>
+    <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 5" dir="0 0 -1"/>
+    
+    <body name="base_link" pos="0 0 0.5">
+      <freejoint name="drone_floating_base"/> 
+
+      <geom type="box" size="0.1 0.1 0.05" rgba="0.3 0.3 0.3 1"/>
+      <geom type="mesh" mesh="core_mesh" rgba="0.15 0.15 0.15 1"/>
+
+      <body name="front_prop" pos="0.17 0 0.017">
+        <geom type="mesh" mesh="prop_cw" rgba="1 0 0 1"/> </body>
+
+      <body name="back_prop" pos="-0.17 0 0.017">
+        <geom type="mesh" mesh="prop_cw" rgba="0.2 0.2 0.2 1"/>
+      </body>
+
+      <body name="right_prop" pos="0 -0.17 0.017" quat="0.7071 0 0 0.7071">
+        <geom type="mesh" mesh="prop_ccw" rgba="0.2 0.2 0.2 1"/>
+      </body>
+
+      <body name="left_prop" pos="0 0.17 0.017" quat="0.7071 0 0 0.7071">
+        <geom type="mesh" mesh="prop_ccw" rgba="0.2 0.2 0.2 1"/>
+      </body>
+
+    </body>
+  </worldbody>
+
+  <actuator>
+    <motor name="motor_0_right" joint="drone_floating_base" gear="0 0 1 0 0 0" ctrlrange="0 30"/>
+    <motor name="motor_1_left"  joint="drone_floating_base" gear="0 0 1 0 0 0" ctrlrange="0 30"/>
+    <motor name="motor_2_front" joint="drone_floating_base" gear="0 0 1 0 0 0" ctrlrange="0 30"/>
+    <motor name="motor_3_back"  joint="drone_floating_base" gear="0 0 1 0 0 0" ctrlrange="0 30"/>
+  </actuator>
+
+</mujoco>
