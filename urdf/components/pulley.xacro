@@ -5,6 +5,15 @@
 
 <link name="${prefix}base_x_link"><inertial><mass value="0.01"/>
     <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/> </inertial>
+    <visual>
+        <geometry>
+            <sphere radius="0.1"/>
+        </geometry>
+        <material name="blue">
+            <color rgba="1.0 0.0 0.0 1.0"/>
+        </material>
+      </visual>
+ 
   </link>
   
   <joint name="${prefix}joint_pulley_x" type="prismatic">
@@ -42,16 +51,36 @@
     <child link="${prefix}base_z_link"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit effort="1000.0" lower="-1.2" upper="10.0" velocity="2.0"/>
+    <limit effort="1000.0" lower="-20" upper="20.0" velocity="2.0"/>
     <dynamics damping="10.0" friction="0.5"/>
   </joint>
 
     <ros2_control name="${prefix}GazeboSimSystem" type="system">
-        <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
-        <joint name="${prefix}joint_pulley_x"><command_interface name="position"/><state_interface name="position"/></joint>
-        <joint name="${prefix}joint_pulley_y"><command_interface name="position"/><state_interface name="position"/></joint>
-        <joint name="${prefix}joint_pulley_z"><command_interface name="position"/><state_interface name="position"/></joint>
-    </ros2_control>
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    
+    <joint name="${prefix}joint_pulley_x">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="${prefix}joint_pulley_y">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="${prefix}joint_pulley_z">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      </plugin>
+  </gazebo>
 
 
 </xacro:macro>

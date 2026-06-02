@@ -2,15 +2,21 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts_system">
 
   <xacro:include filename="$(find acts_simulator)/urdf/components/cable_component.xacro" />
+  <xacro:include filename="components/pulley.xacro" />
+
 
   <link name="world"/>
+
+  <xacro:pulley
+    prefix="cable1_"
+    parent_link="world" />
 
   <link name="base_x_link"><inertial><mass value="0.01"/>
     <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/> </inertial>
   </link>
   
   <joint name="joint_pulley_x" type="prismatic">
-    <parent link="world"/>
+    <parent link="cable1_base_z_link"/>
     <child link="base_x_link"/>
     <origin xyz="0 0 0.0" rpy="0 0 0"/><axis xyz="1 0 0"/>
     <limit effort="1000.0" lower="-10.0" upper="10.0" velocity="2.0"/>
@@ -45,7 +51,9 @@
     <limit effort="1000.0" lower="-1.2" upper="10.0" velocity="2.0"/>
   </joint>
 
-  <xacro:uav_cable prefix="" parent_link="base_z_link" is_flexible="true" segments="20" length="10" radius="0.01" mass="0.1" orientation="0" />
+  <xacro:uav_cable prefix="" parent_link="base_z_link" is_flexible="true" segments="20" length="10" radius="0.01" mass="0.1" />
+
+
 
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>

@@ -17,7 +17,7 @@ class PulleyTester(Node):
         
         # Prepare the message
         self.msg = Float64MultiArray()
-        self.msg.data = [1.0, 1.0, 0.0] # [X, Y, Z]
+        self.msg.data = [0.0, 0.0, 0.0] # [X, Y, Z]
         
         # Create a ROS 2 timer instead of using time.sleep()
         # This timer natively respects Gazebo's simulation clock
@@ -25,10 +25,10 @@ class PulleyTester(Node):
         self.timer = self.create_timer(self.timer_period, self.timer_callback)
         
         self.get_logger().info('Pulley tester node started with sim_time=True.')
+        self.get_logger().info(f"Publishing target XYZ: {self.msg.data}")
 
     def timer_callback(self):
         self.pub.publish(self.msg)
-        self.get_logger().info(f"Publishing target XYZ: {self.msg.data}")
 
 def main(args=None):
     rclpy.init(args=args)

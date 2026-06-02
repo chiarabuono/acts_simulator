@@ -8,8 +8,8 @@
   <xacro:arg name="controller_config" default=""/>  
 
   <xacro:property name="sqrt3" value="${3**0.5}"/>
-  <xacro:property name="cable_segments" value="5"/>
-  <xacro:property name="system_heigth" value="1.0"/>
+  <xacro:property name="cable_segments" value="10"/>
+  <xacro:property name="system_heigth" value="2.0"/>
 
   <xacro:property name="hook1_x" value="0.0"/>   
   <xacro:property name="hook1_y" value="${sqrt3 / 3}"/>  
@@ -36,7 +36,7 @@
 
   <xacro:panel
     link_name="chassis_link" 
-    mass="1.0" 
+    mass="0.001" 
     width="2"
     length="2" 
     heigth="0.2"
@@ -72,7 +72,7 @@
 
 
 
-  <xacro:add_drone 
+  <!-- <xacro:add_drone 
     id="1" 
     segments="${cable_segments}" 
     length="1.5" 
@@ -100,7 +100,7 @@
     x_off="${hook3_x}" 
     y_off="${hook3_y}" 
     z_off="${hook3_z+system_heigth}"
-    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+    cable_roll="0" cable_pitch="0" cable_yaw="0" /> -->
 
     <gazebo>
     <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">

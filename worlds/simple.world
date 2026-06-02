@@ -17,14 +17,22 @@ Copyright ©2025 nknab
 <sdf version="1.6">
 	<world name="simple_world">
 		<physics name="1ms" type="ignored">
-			<max_step_size>0.001</max_step_size>
-			<real_time_factor>1.0</real_time_factor>
-			<real_time_update_rate>1000</real_time_update_rate>
-		</physics>
+        <max_step_size>0.001</max_step_size>
+        <real_time_factor>1.0</real_time_factor>
+        <real_time_update_rate>1000</real_time_update_rate>
+        <dart>
+            <collision_detector>bullet</collision_detector>
+            <solver>
+                <solver_type>pgs</solver_type>
+            </solver>
+        </dart>
+    </physics>
 
-		<plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact" />
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact">
+        <allow_ghosts>false</allow_ghosts>
+    </plugin>
 
-		<plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
 
 		<plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
 

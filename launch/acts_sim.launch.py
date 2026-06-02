@@ -18,7 +18,7 @@ from os import popen
 
 PACKAGE_NAME = "acts_simulator"
 WORLD = "simple"
-WAIT_TIME = 10.0
+WAIT_TIME = 5.0 
 
 def clean_function(_: LaunchContext) -> None:
     popen("pkill -x gz")
@@ -43,13 +43,13 @@ def generate_launch_description():
         launch_arguments={'gz_args': f'-r {world_file}'}.items(),
     )
 
-    # ── Resolve yaml path and pass it into xacro ──────────────────────
     controller_config = os.path.join(pkg_share, 'config', 'acts_controller.yaml')
-
     xacro_file = os.path.join(pkg_share, 'urdf', 'acts_model.xacro')
+    
+    # Process Xacro normally without namespace forcing
     robot_desc = xacro.process_file(
         xacro_file,
-        mappings={'controller_config': controller_config}  # ← passed to xacro:arg
+        mappings={'controller_config': controller_config}
     ).toxml()
 
     spawn_system = Node(
@@ -59,38 +59,30 @@ def generate_launch_description():
         output='screen'
     )
 
-    clock_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
-        output='screen'
-    )
-
+    # 1. Global Robot State Publisher (No namespace sandbox)
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
         parameters=[{
-            'robot_description': xacro.process_file(xacro_file).toxml(),
+            'robot_description': robot_desc,
             'use_sim_time': True,
         }]
     )
     
+    # 2. Global Spawners targeting the root controller manager
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
+        output='screen'
     )
 
     position_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["forward_position_controller", "--controller-manager", "/controller_manager"],
-    )
-
-    delayed_rsp = TimerAction(
-        period=2.0,
-        actions=[node_robot_state_publisher]
+        output='screen'
     )
 
     delayed_controllers = TimerAction(
@@ -101,18 +93,14 @@ def generate_launch_description():
         ]
     )
 
-
-    xacro_file2 = os.path.join(pkg_share, 'urdf', 'ground_hooks.xacro')
-    robot_description_config2 = xacro.process_file(xacro_file2)
-    robot_desc2 = robot_description_config2.toxml()
-
-    spawn_system2 = Node(
-        package='ros_gz_sim',
-        executable='create',
+    # 3. Clean global bridge mapping
+    clock_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
         arguments=[
-            '-name', 'ground',
-            '-string', robot_desc2,
-            '-z', '0.0' 
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+            # Fixed right-bracket token parsing error
+            '/robot_description@std_msgs/msg/String[gz.msgs.String@/robot_description'
         ],
         output='screen'
     )
@@ -127,10 +115,9 @@ def generate_launch_description():
     return LaunchDescription([
         set_gz_resource_path,
         gazebo,
-        delayed_rsp,
-        delayed_controllers,
-        spawn_system,
-        # spawn_system2,
         clock_bridge,
+        spawn_system,
+        node_robot_state_publisher, 
+        delayed_controllers, 
         shutdown_handler,
     ])

@@ -96,7 +96,6 @@ def launch_setup(
         executable='parameter_bridge',
         arguments=[
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-            '/model/cable/joint/joint_pulley/joint_0/cmd_pos@std_msgs/msg/Float64[gz.msgs.Double'
         ],
         output='screen'
     )

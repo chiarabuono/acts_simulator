@@ -56,7 +56,7 @@ def generate_launch_description():
         arguments=[
             '-name', 'cable',
             '-string', robot_desc,
-            '-z', '0.0'
+            '-z', '10.0'
         ],
         output='screen'
     )
