@@ -11,11 +11,14 @@
         <geometry>
           <sphere radius="0.03"/>
         </geometry>
+        <material name="Red">
+            <color rgba="1.0 0.0 0.0 1.0"/>
+        </material>
       </visual>
     </link>
 
     <joint name="base_link_to_${prefix}" type="fixed">
-      <parent link="base_link"/>   <!-- was: world -->
+      <parent link="world"/>   <!-- was: world -->
       <child link="${prefix}"/>
       <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
     </joint>

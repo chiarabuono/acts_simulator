@@ -15,24 +15,37 @@ Copyright ©2025 nknab
 -->
 
 <sdf version="1.6">
-	<world name="simple_world">
-		<physics name="1ms" type="ignored">
-			<max_step_size>0.001</max_step_size>
-			<real_time_factor>1.0</real_time_factor>
-			<real_time_update_rate>1000</real_time_update_rate>
-		</physics>
+    <world name="simple_world">
+        <physics name="4ms_optimized" type="ignored">
+            <max_step_size>0.004</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+            <real_time_update_rate>250</real_time_update_rate>
 
-		<plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact" />
+			<dart>
+				<solver>
+					<type>lcp</type>
+				</solver>
+				<collision_detector>bullet</collision_detector>
+			</dart>
+        </physics>
 
-		<plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
-
-		<plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
-
-		<plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
-
-		<plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
-			<render_engine>ogre2</render_engine>
+        <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact" />
+        <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics">
+			<engine>
+				<filename>gz-physics-dartsim-plugin</filename>
+			</engine>
+			<dart>
+				<solver>
+					<type>lcp</type> 
+				</solver>
+			</dart>
 		</plugin>
+        <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+        <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+        
+        <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+            <render_engine>ogre2</render_engine>
+        </plugin>
 
 		<plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu" />
 
@@ -43,83 +56,79 @@ Copyright ©2025 nknab
 			<publish_sensor_poses>false</publish_sensor_poses>
 		</plugin> -->
 
-		<gravity>0 0 -9.81</gravity>
+        <gravity>0 0 -9.81</gravity>
+        <magnetic_field>5.5645e-06 2.28758e-05 -4.23884e-05</magnetic_field>
 
-		<magnetic_field>5.5645e-06 2.28758e-05 -4.23884e-05</magnetic_field>
+        <light type="directional" name="sun">
+            <cast_shadows>true</cast_shadows>
+            <pose>0 0 10 0 0 0</pose>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+            <attenuation>
+                <range>1000</range>
+                <constant>0.9</constant>
+                <linear>0.01</linear>
+                <quadratic>0.001</quadratic>
+            </attenuation>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
 
-		<!-- Light Source -->
-		<light type="directional" name="sun">
-			<cast_shadows>true</cast_shadows>
-			<pose>0 0 10 0 0 0</pose>
-			<diffuse>0.8 0.8 0.8 1</diffuse>
-			<specular>0.2 0.2 0.2 1</specular>
-			<attenuation>
-				<range>1000</range>
-				<constant>0.9</constant>
-				<linear>0.01</linear>
-				<quadratic>0.001</quadratic>
-			</attenuation>
-			<direction>-0.5 0.1 -0.9</direction>
-		</light>
+        <model name="ground_plane">
+            <static>true</static>
+            <link name="ground_plane_link">
+                <collision name="ground_plane_collision">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <surface>
+                        <friction>
+                            <ode>
+                                <mu>100</mu>
+                                <mu2>50</mu2>
+                            </ode>
+                        </friction>
+                    </surface>
+                </collision>
+                <visual name="ground_plane_visual">
+                    <cast_shadows>false</cast_shadows>
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <material>
+                        <ambient>0.3 0.3 0.3 1.0</ambient>
+                        <diffuse>0.7 0.7 0.7 1.0</diffuse>
+                        <specular>0.01 0.01 0.01 1.0</specular>
+                    </material>
+                </visual>
+            </link>
+        </model>
 
-		<!-- Ground Plane -->
-		<model name="ground_plane">
-			<static>true</static>
-			<link name="ground_plane_link">
-				<collision name="ground_plane_collision">
-					<geometry>
-						<plane>
-							<normal>0 0 1</normal>
-							<size>100 100</size>
-						</plane>
-					</geometry>
-					<surface>
-						<friction>
-							<ode>
-								<mu>100</mu>
-								<mu2>50</mu2>
-							</ode>
-						</friction>
-					</surface>
-				</collision>
-				<visual name="ground_plane_visual">
-					<cast_shadows>false</cast_shadows>
-					<geometry>
-						<plane>
-							<normal>0 0 1</normal>
-							<size>100 100</size>
-						</plane>
-					</geometry>
-					<material>
-						<ambient>0.3 0.3 0.3 1.0</ambient>
-						<diffuse>0.7 0.7 0.7 1.0</diffuse>
-						<specular>0.01 0.01 0.01 1.0</specular>
-					</material>
-				</visual>
-			</link>
-		</model>
+        <!-- <model name="fixed_support">
+            <pose>0 0 1.0 0 0 0</pose>
+            <link name="fixed_support_link">
+                <inertial>
+                    <mass>0.001</mass> 
+                    <inertia>
+                        <ixx>0.00001</ixx>
+                        <ixy>0</ixy>
+                        <ixz>0</ixz>
+                        <iyy>0.00001</iyy>
+                        <iyz>0</iyz>
+                        <izz>0.00001</izz>
+                    </inertia>
+                </inertial>
+            </link>
+            <joint name="work_harder" type="ball">
+                <parent>world</parent>
+                <child>fixed_support_link</child>
+            </joint>
+        </model> -->
 
-		<!-- Fixed Support Model for Detachable Joint -->
-		<model name="fixed_support">
-			<pose>0 0 1.0 0 0 0</pose>
-			<link name="fixed_support_link">
-				<inertial>
-					<mass>0.00001</mass>
-					<!-- <inertia>
-						<ixx>0.000000001</ixx>
-						<ixy>0</ixy>
-						<ixz>0</ixz>
-						<iyy>0.000000001</iyy>
-						<iyz>0</iyz>
-						<izz>0.000000001</izz>
-					</inertia> -->
-				</inertial>
-			</link>
-			<joint name="work_harder" type="ball">
-				<parent>world</parent>
-				<child>fixed_support_link</child>
-			</joint>
-		</model>
-
-	</world>
+    </world>
 </sdf>

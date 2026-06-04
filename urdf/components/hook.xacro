@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:macro name="ground_hook" params= "prefix anchorX anchorY anchorZ">
+
+    <link name="${prefix}ground_hook">
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      </inertial>
+      <visual>
+        <geometry><sphere radius="0.03"/></geometry>
+      </visual>
+    </link>
+
+    <joint name="base_to_${prefix}hook" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}ground_hook"/>
+      <origin xyz="${anchorX} ${anchorY} ${anchorZ}" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="base_to_${prefix}hook">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+
+      <gazebo>
+      <plugin filename="libgz-sim-detachable-joint-system.so" name="gz::sim::systems::DetachableJoint">
+        <parent_link>${prefix}ground_hook</parent_link>
+        <child_model>acts</child_model> 
+        <child_link>${prefix}base_link</child_link>
+      </plugin>
+    </gazebo>
+
+  </xacro:macro>
+</robot>

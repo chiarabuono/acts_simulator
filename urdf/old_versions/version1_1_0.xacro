@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts">
+
+  <xacro:include filename="components/panel.xacro" />
+  <xacro:include filename="uav_cable_assembly.urdf.xacro" /> 
+  <xacro:include filename="ugv_cable_assembly.urdf.xacro" />
+
+  <xacro:arg name="controller_config" default=""/>  
+
+  <xacro:property name="sqrt3" value="${3**0.5}"/>
+  <xacro:property name="cable_segments" value="10"/>
+  <xacro:property name="system_heigth" value="1.0"/>
+  <xacro:property name="uav_cable_len" value="1.0"/>
+
+  <!-- In the payload reference frame -->
+  <xacro:property name="hook1_x" value="0.0"/>   
+  <xacro:property name="hook1_y" value="${sqrt3 / 3}"/>  
+  <xacro:property name="hook1_z" value="0.10"/>
+
+  <xacro:property name="hook2_x" value="-0.5"/>   
+  <xacro:property name="hook2_y" value="${-sqrt3 / 6}"/>  
+  <xacro:property name="hook2_z" value="0.10"/>     
+
+  <xacro:property name="hook3_x" value="0.5"/>   
+  <xacro:property name="hook3_y" value="${-sqrt3 / 6}"/>  
+  <xacro:property name="hook3_z" value="0.10"/>
+
+  <xacro:property name="hookA_x" value="0.0"/>   
+  <xacro:property name="hookA_y" value="0.0"/>  
+  <xacro:property name="hookA_z" value="-0.10"/>
+
+  <xacro:property name="hookB_x" value="0.0"/>   
+  <xacro:property name="hookB_y" value="0.0"/>  
+  <xacro:property name="hookB_z" value="-0.10"/>
+
+  <xacro:property name="hookC_x" value="0.0"/>   
+  <xacro:property name="hookC_y" value="0.0"/>  
+  <xacro:property name="hookC_z" value="-0.10"/>
+
+  <xacro:property name="hookD_x" value="0.0"/>   
+  <xacro:property name="hookD_y" value="0.0"/>  
+  <xacro:property name="hookD_z" value="-0.10"/>
+
+  <xacro:property name="hookE_x" value="0.0"/>   
+  <xacro:property name="hookE_y" value="0.0"/>  
+  <xacro:property name="hookE_z" value="-0.10"/>
+
+  <xacro:property name="hookF_x" value="0.0"/>   
+  <xacro:property name="hookF_y" value="0.0"/>  
+  <xacro:property name="hookF_z" value="-0.10"/>
+
+  <!-- In the inertial reference frame -->
+  <xacro:property name="anchorA_x" value="-0.5"/>   
+  <xacro:property name="anchorA_y" value="0.0"/>  
+  <xacro:property name="anchorA_z" value="0.0"/>
+
+  <xacro:property name="anchorB_x" value="0.5"/>   
+  <xacro:property name="anchorB_y" value="0.5"/>  
+  <xacro:property name="anchorB_z" value="0.0"/>
+
+  <xacro:macro name="ground_hook" params= "prefix anchorX anchorY anchorZ">
+
+    <link name="${prefix}ground_hook">
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      </inertial>
+      <visual>
+        <geometry><sphere radius="0.03"/></geometry>
+      </visual>
+    </link>
+
+    <joint name="base_to_${prefix}hook" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}ground_hook"/>
+      <origin xyz="${anchorX} ${anchorY} ${anchorZ}" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="base_to_${prefix}hook">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+
+      <gazebo>
+      <plugin filename="libgz-sim-detachable-joint-system.so" name="gz::sim::systems::DetachableJoint">
+        <parent_link>${prefix}ground_hook</parent_link>
+        <child_model>acts</child_model> 
+        <child_link>${prefix}base_link</child_link>
+      </plugin>
+    </gazebo>
+
+  </xacro:macro>
+
+  <link name="base_link"/>
+
+  <xacro:ground_hook 
+  prefix="ugv1_" 
+  anchorX="${anchorA_x}"
+  anchorY="${anchorA_y}"
+  anchorZ="${anchorA_z}"
+  />
+
+  <xacro:ground_hook prefix="ugv2_" 
+  anchorX="${anchorB_x}"
+  anchorY="${anchorB_y}"
+  anchorZ="${anchorB_z}"
+  />
+
+  <xacro:panel
+    link_name="chassis_link" 
+    mass="0.001" 
+    width="2"
+    length="2" 
+    heigth="0.2"
+    x="0" y="0" z="${system_heigth}" 
+    material_name="Blue" 
+    material_color="0.0 0.0 0.8 0.0" />
+
+  <joint name="base_to_chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis_link"/>
+    <origin xyz="0 0 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- x_off, y_off, z_off in the payload reference frame -->
+  <xacro:add_ugv
+    id="1" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="${hookA_x}" 
+    y_off="${hookA_y}" 
+    z_off="${- hookA_z + system_heigth}"
+    cable_roll="0.0" cable_pitch="0" cable_yaw="0.0"/>
+
+  <xacro:add_ugv
+    id="2" 
+    segments="${cable_segments}" 
+    length="1.5" 
+    panel_link="chassis_link"
+    x_off="0.5" 
+    y_off="0.5" 
+    z_off="${system_heigth}"
+    cable_roll="0.0" cable_pitch="0" cable_yaw="0"/>
+
+  <xacro:add_drone 
+    id="1" 
+    segments="${cable_segments}" 
+    length="${uav_cable_len}" 
+    panel_link="chassis_link"
+    x_off="${hook1_x}" 
+    y_off="${hook1_y}" 
+    z_off="${hook1_z+system_heigth}"
+    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+  <xacro:add_drone 
+    id="2" 
+    segments="${cable_segments}" 
+    length="${uav_cable_len}" 
+    panel_link="chassis_link"
+    x_off="${hook2_x}" 
+    y_off="${hook2_y}" 
+    z_off="${hook2_z+system_heigth}"
+    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+  <xacro:add_drone 
+    id="3" 
+    segments="${cable_segments}" 
+    length="${uav_cable_len}" 
+    panel_link="chassis_link"
+    x_off="${hook3_x}" 
+    y_off="${hook3_y}" 
+    z_off="${hook3_z+system_heigth}"
+    cable_roll="0" cable_pitch="0" cable_yaw="0" />
+
+  <!-- <gazebo>
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
+      <parameters>$(find acts_simulator)/config/acts_controller.yaml</parameters>
+    </plugin>
+  </gazebo> -->
+
+  </robot>

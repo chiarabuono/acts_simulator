@@ -32,7 +32,13 @@
             <collision name="${resolved_prefix}_link_collision">
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
-                    <mesh filename="${mesh_path}/${file}.stl" />
+                    <!-- <mesh filename="${mesh_path}/${file}.stl" /> -->
+                    <xacro:if value="${shape == 'hollow'}">
+                        <cylinder radius="${outer_radius}" length="${height}"/>
+                    </xacro:if>
+                    <xacro:if value="${shape == 'box'}">
+                        <box size="${width} ${length} ${height}"/>
+                    </xacro:if>
                 </geometry>
             </collision>
 

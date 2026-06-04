@@ -78,7 +78,7 @@
     </joint>
 
     <gazebo reference="${prefix}base_link">
-        <preserveFixedJoint>true</preserveFixedJoint>
+        <preserveFixedJoint>false</preserveFixedJoint>
     </gazebo>
     <gazebo reference="${prefix}cable_attach_link">
         <preserveFixedJoint>true</preserveFixedJoint>

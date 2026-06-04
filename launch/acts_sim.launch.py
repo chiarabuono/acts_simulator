@@ -1,4 +1,5 @@
 import os
+import tempfile
 import xacro
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription, LaunchContext
@@ -42,28 +43,44 @@ def generate_launch_description():
         launch_arguments={'gz_args': f'-r {world_file}'}.items(),
     )
 
-    # ── Resolve yaml path and pass it into xacro ──────────────────────
-    controller_config = os.path.join(pkg_share, 'config', 'cable_controller.yaml')
-
-    xacro_file = os.path.join(pkg_share, 'urdf', 'acts_model.xacro')
-    robot_desc = xacro.process_file(
-        xacro_file,
-        mappings={'controller_config': controller_config}  # ← passed to xacro:arg
-    ).toxml()
-
-    spawn_system = Node(
+    xacro_hooks = os.path.join(pkg_share, 'urdf', 'ground_hooks.xacro')
+    robot_hooks_config = xacro.process_file(xacro_hooks)
+    robot_desc_hooks = robot_hooks_config.toxml()
+    spawn_system_hooks = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-name', 'acts', '-string', robot_desc, '-z', '0.0'],
+        arguments=[
+            '-name', 'hooks',
+            '-string', robot_desc_hooks,
+            '-z', '0.0' 
+        ],
         output='screen'
     )
 
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        output='screen',
-        parameters=[{'robot_description': robot_desc, 'use_sim_time': True}]
+    # ── Resolve yaml path and pass it into xacro ──────────────────────
+    # controller_config = os.path.join(pkg_share, 'config', 'cable_controller.yaml')
+
+    xacro_file = os.path.join(pkg_share, 'urdf', 'acts_model.xacro')
+    robot_desc = xacro.process_file(xacro_file).toxml()
+
+    # 1. Create a temporary file and write the xacro/urdf string to it
+    with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.urdf') as tmp_file:
+        tmp_file.write(robot_desc)
+        tmp_file_path = tmp_file.name
+
+    # 2. Pass the file path instead of the giant string
+    spawn_system = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-file', tmp_file_path, '-name', 'acts']
     )
+
+    # robot_state_publisher = Node(
+    #     package='robot_state_publisher',
+    #     executable='robot_state_publisher',
+    #     output='screen',
+    #     parameters=[{'robot_description': robot_desc, 'use_sim_time': True}]
+    # )
 
     clock_bridge = Node(
         package='ros_gz_bridge',
@@ -72,28 +89,15 @@ def generate_launch_description():
         output='screen'
     )
 
-    joint_state_broadcaster_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=[
-            'joint_state_broadcaster',
-            '--controller-manager', '/controller_manager',
-        ],
-    )
+    # joint_state_broadcaster_spawner = Node(
+    #     package='controller_manager',
+    #     executable='spawner',
+    #     arguments=[
+    #         'joint_state_broadcaster',
+    #         '--controller-manager', '/controller_manager',
+    #     ],
+    # )
 
-    ugv_tip_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=[
-            'ugv_tip_position_controller',
-            '--controller-manager', '/controller_manager',
-        ],
-    )
-
-    delayed_controllers = TimerAction(
-        period=8.0,
-        actions=[joint_state_broadcaster_spawner, ugv_tip_controller_spawner]
-    )
 
     shutdown_handler = RegisterEventHandler(
         OnShutdown(on_shutdown=[
@@ -106,8 +110,9 @@ def generate_launch_description():
         set_gz_resource_path,
         gazebo,
         spawn_system,
-        robot_state_publisher,
+        # spawn_system_hooks,
+        # robot_state_publisher,
         clock_bridge,
-        delayed_controllers,
+        # joint_state_broadcaster_spawner,
         shutdown_handler,
     ])
