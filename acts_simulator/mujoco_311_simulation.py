@@ -11,36 +11,33 @@ model = mujoco.MjModel.from_xml_string(xml_model)
 data = mujoco.MjData(model)
 
 
-CABLE_LENGTH_L = model.tendon_range[0][1] # Evaluates to 5.0 meters
-m_i = model.body("drone").mass[0] # Drone mass (mi)
-g = 9.81            # Gravity acceleration
-K_p = 25.0          # Controller Proportional Gain (Kp)
-K_d = 6.0           # Controller Derivative Gain (Kd)
+CABLE_LENGTH_L = model.tendon_range[0][1] 
+m_i = model.body("drone").mass[0] 
+g = 9.81            
+K_p = 6.0          
+K_d = 2.0           
 
-b = np.array([0.0, 0.0, 0.0])  # Anchor coordinates (b)
-
-# Input: Target Ground Force vector f* requested by the operator
+b = np.array([0.0, 0.0, 0.0])
 f_star = np.array([4.0, 2.0, 8.0])
 
 print("Launching Section 3.1.1 MuJoCo Controller...")
 
 with mujoco.viewer.launch_passive(model, data) as viewer:
     
-    # Pre-calculate reference vector constants once (Equations 3.10 to 3.12)
     f_star_norm = np.linalg.norm(f_star)
     tau_star = f_star_norm                               # Eq 3.10
     u_star = f_star / f_star_norm                        # Eq 3.11
     a_star = b + CABLE_LENGTH_L * u_star                 # Eq 3.12
-    a_star_dot = np.array([0.0, 0.0, 0.0])               # Static tracking target (\dot{a}* = 0)
+    a_star_dot = np.array([0.0, 0.0, 0.0])            
     
     max_tension_observed = 0.0
 
     while viewer.is_running():
         step_start = time.time()
 
-        # A. Read Current State from the physics environment
-        a = data.xpos[1]      # Spatial Position of the drone (a)
-        a_dot = data.qvel[0:3] # Spatial Linear Velocity of the drone (\dot{a})
+        # Current State from the physics environment
+        a = data.xpos[1]      
+        a_dot = data.qvel[0:3]
         
         dist_cable = np.linalg.norm(a - b)
         u = (a - b) / dist_cable if dist_cable > 0.001 else np.array([0.0, 0.0, 1.0]) # Eq 3.9
@@ -53,20 +50,16 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
 
         data.qfrc_applied[0:3] = F_prop
 
-        # D. Advance Physics Step
         mujoco.mj_step(model, data)
         
-        # E. Read internal constraint forces to see the true cable tension (including the snap)
-        # MuJoCo maps contact/constraint forces into the 'efc_force' array
+        # cable tension (including the snap)
         if data.efc_force.size > 0:
-            cable_tension = -data.efc_force[0] # Constraint force acts negatively to pull back
+            cable_tension = -data.efc_force[0]
             if cable_tension > max_tension_observed:
                 max_tension_observed = cable_tension
 
-        # F. Synchronize 3D UI display
         viewer.sync()
 
-        # G. Pacing loop to stay close to real-time execution speeds
         time_until_next_step = model.opt.timestep - (time.time() - step_start)
         if time_until_next_step > 0:
             time.sleep(time_until_next_step)

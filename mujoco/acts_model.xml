@@ -1,0 +1,143 @@
+<mujoco model="multi_drone_payload">
+  <compiler angle="radian" autolimits="true"/>
+
+  <option gravity="0 0 -9.81" timestep="0.002"/>
+
+  <visual>
+    <headlight ambient="0.4 0.4 0.4" diffuse="0.8 0.8 0.8"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient"
+             rgb1="0.4 0.6 0.8" rgb2="0.0 0.0 0.0" width="512" height="512"/>
+    <texture name="grid" type="2d" builtin="checker"
+             rgb1="0.3 0.3 0.3" rgb2="0.4 0.4 0.4" width="512" height="512"/>
+    <material name="grid_mat" texture="grid" texrepeat="4 4" reflectance="0.1"/>
+    <material name="payload_mat" rgba="0.6 0.4 0.2 1"/>
+    <material name="drone_mat"   rgba="0.2 0.2 0.8 1"/>
+    <material name="anchor_mat"  rgba="0.8 0.1 0.1 1"/>
+    <material name="hook_mat"    rgba="1.0 0.8 0.0 1"/>
+    <material name="target_mat"  rgba="0.0 0.9 0.0 0.3"/>
+  </asset>
+
+  <worldbody>
+
+    <geom name="ground" type="plane" size="10 10 0.1"
+          material="grid_mat" condim="3" friction="1 0.005 0.0001"/>
+
+    <body name="target_marker" mocap="true" pos="0 0 1.0">
+      <geom type="sphere" size="0.08" material="target_mat" contype="0" conaffinity="0"/>
+    </body>
+
+
+    <body name="payload" pos="0 0 0.1">
+      <freejoint name="payload_joint"/>
+      <inertial pos="0 0 0" mass="1.0"
+                diaginertia="0.3467 0.3467 0.6667"/>
+                <!-- diaginertia for uniform box m=1, 2x2x0.2:
+                     Ixx = m/12*(ly²+lz²) = 1/12*(4+0.04) = 0.3367  (approx 0.3467 with rounding)
+                     Izz = m/12*(lx²+ly²) = 1/12*(4+4)    = 0.6667  -->
+      <geom name="payload_geom" type="box" size="1.0 1.0 0.1"
+            material="payload_mat" condim="3" friction="1 0.005 0.0001"/>
+
+      <!-- UAV hook sites (top face, z=+0.10 from COM) -->
+      <site name="hook_1" pos=" 0.0000  0.5774  0.10" size="0.04" rgba="1 0.8 0 1"/>
+      <site name="hook_2" pos="-0.5000 -0.2887  0.10" size="0.04" rgba="1 0.8 0 1"/>
+      <site name="hook_3" pos=" 0.5000 -0.2887  0.10" size="0.04" rgba="1 0.8 0 1"/>
+
+      <!-- Ground cable hook sites (bottom face, z=-0.10 from COM) -->
+      <site name="hook_4" pos="-0.9  0.9 -0.10" size="0.04" rgba="1 0.4 0 1"/>
+      <site name="hook_5" pos=" 0.0  0.9 -0.10" size="0.04" rgba="1 0.4 0 1"/>
+      <site name="hook_6" pos=" 0.9  0.9 -0.10" size="0.04" rgba="1 0.4 0 1"/>
+      <site name="hook_7" pos="-0.9 -0.9 -0.10" size="0.04" rgba="1 0.4 0 1"/>
+      <site name="hook_8" pos=" 0.0 -0.9 -0.10" size="0.04" rgba="1 0.4 0 1"/>
+      <site name="hook_9" pos=" 0.9 -0.9 -0.10" size="0.04" rgba="1 0.4 0 1"/>
+    </body>
+
+
+    <body name="drone_1" pos="0.0000 0.5774 0.25">
+      <freejoint name="drone_1_joint"/>
+      <inertial pos="0 0 0" mass="2.0" diaginertia="0.015 0.015 0.0225"/>
+      <geom name="drone_1_geom" type="cylinder" size="0.15 0.05"
+            material="drone_mat" condim="3" friction="1 0.005 0.0001"/>
+      <site name="drone_1_com" pos="0 0 0" size="0.03" rgba="0 1 1 1"/>
+    </body>
+
+    <body name="drone_2" pos="-0.5000 -0.2887 0.25">
+      <freejoint name="drone_2_joint"/>
+      <inertial pos="0 0 0" mass="2.0" diaginertia="0.015 0.015 0.0225"/>
+      <geom name="drone_2_geom" type="cylinder" size="0.15 0.05"
+            material="drone_mat" condim="3" friction="1 0.005 0.0001"/>
+      <site name="drone_2_com" pos="0 0 0" size="0.03" rgba="0 1 1 1"/>
+    </body>
+
+    <body name="drone_3" pos="0.5000 -0.2887 0.25">
+      <freejoint name="drone_3_joint"/>
+      <inertial pos="0 0 0" mass="2.0" diaginertia="0.015 0.015 0.0225"/>
+      <geom name="drone_3_geom" type="cylinder" size="0.15 0.05"
+            material="drone_mat" condim="3" friction="1 0.005 0.0001"/>
+      <site name="drone_3_com" pos="0 0 0" size="0.03" rgba="0 1 1 1"/>
+    </body>
+
+    <site name="ground_anchor_4" pos="-1.4  1.4 0" size="0.06" rgba="0.8 0.1 0.1 1"/>
+    <site name="ground_anchor_5" pos=" 0.0  1.4 0" size="0.06" rgba="0.8 0.1 0.1 1"/>
+    <site name="ground_anchor_6" pos=" 1.4  1.4 0" size="0.06" rgba="0.8 0.1 0.1 1"/>
+    <site name="ground_anchor_7" pos="-1.4 -1.4 0" size="0.06" rgba="0.8 0.1 0.1 1"/>
+    <site name="ground_anchor_8" pos=" 0.0 -1.4 0" size="0.06" rgba="0.8 0.1 0.1 1"/>
+    <site name="ground_anchor_9" pos=" 1.4 -1.4 0" size="0.06" rgba="0.8 0.1 0.1 1"/>
+
+  </worldbody>
+
+  <tendon>
+
+    <!-- Drone cables -->
+    <spatial name="cable_1" width="0.008" rgba="0.2 0.8 0.2 1" limited="true" range="0 1.0">
+      <site site="drone_1_com"/>
+      <site site="hook_1"/>
+    </spatial>
+
+    <spatial name="cable_2" width="0.008" rgba="0.2 0.8 0.2 1" limited="true" range="0 1.0">
+      <site site="drone_2_com"/>
+      <site site="hook_2"/>
+    </spatial>
+
+    <spatial name="cable_3" width="0.008" rgba="0.2 0.8 0.2 1" limited="true" range="0 1.0">
+      <site site="drone_3_com"/>
+      <site site="hook_3"/>
+    </spatial>
+
+    <!-- Ground cables -->
+    <spatial name="cable_4" width="0.008" rgba="0.9 0.4 0.1 1" limited="true" range="0 1.1446">
+      <site site="ground_anchor_4"/>
+      <site site="hook_4"/>
+    </spatial>
+
+    <spatial name="cable_5" width="0.008" rgba="0.9 0.4 0.1 1" limited="true" range="0 1.0296">
+      <site site="ground_anchor_5"/>
+      <site site="hook_5"/>
+    </spatial>
+
+    <spatial name="cable_6" width="0.008" rgba="0.9 0.4 0.1 1" limited="true" range="0 1.1446">
+      <site site="ground_anchor_6"/>
+      <site site="hook_6"/>
+    </spatial>
+
+    <spatial name="cable_7" width="0.008" rgba="0.9 0.4 0.1 1" limited="true" range="0 1.1446">
+      <site site="ground_anchor_7"/>
+      <site site="hook_7"/>
+    </spatial>
+
+    <spatial name="cable_8" width="0.008" rgba="0.9 0.4 0.1 1" limited="true" range="0 1.0296">
+      <site site="ground_anchor_8"/>
+      <site site="hook_8"/>
+    </spatial>
+
+    <spatial name="cable_9" width="0.008" rgba="0.9 0.4 0.1 1" limited="true" range="0 1.1446">
+      <site site="ground_anchor_9"/>
+      <site site="hook_9"/>
+    </spatial>
+
+  </tendon>
+
+</mujoco>

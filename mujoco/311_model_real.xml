@@ -1,0 +1,33 @@
+<mujoco model="section_3_1_1_cable_system">
+
+  <option gravity="0 0 -9.81" timestep="0.002"/>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker"
+             rgb1=".1 .2 .3" rgb2=".2 .3 .4" width="300" height="300"/>
+    <material name="grid_mat" texture="grid" texrepeat="10 10"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 10" dir="0 0 -1"/>
+    <geom type="plane" size="10 10 0.1" material="grid_mat"/>
+    <site name="anchor_b" pos="0 0 0" size="0.05" rgba="1 0 0 1"/>
+
+    <body name="drone" pos="0 0 0.05">
+      <freejoint name="drone_joint"/>
+      <inertial pos="0 0 0" mass="1.5" diaginertia="0.01 0.01 0.015"/>
+      <geom name="drone_geom" type="cylinder" size="0.15 0.05"
+            rgba="0 0.7 0.9 1" mass="1.5"/>
+      <site name="attachment_a" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
+    </body>
+  </worldbody>
+
+  <tendon>
+    <spatial name="cable_tether" limited="true" range="0 5.0"
+             width="0.02" rgba="0 0.8 0 1">
+      <site site="anchor_b"/>
+      <site site="attachment_a"/>
+    </spatial>
+  </tendon>
+
+</mujoco>

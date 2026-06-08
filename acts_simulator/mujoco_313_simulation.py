@@ -14,8 +14,8 @@ data = mujoco.MjData(model)
 
 # Tendon limit constraints
 CABLE_1_MAX_L = model.tendon_range[2][1]
-CABLE_2_MAX_L = model.tendon_range[0][1]  # Maximum length of ground cable 2
-CABLE_3_MAX_L = model.tendon_range[1][1]  # Maximum length of ground cable 3
+CABLE_2_MAX_L = model.tendon_range[0][1]
+CABLE_3_MAX_L = model.tendon_range[1][1]
 
 # Masses
 m_payload = model.body("payload").mass[0]
@@ -115,10 +115,9 @@ def get_cable_tensions(model, data):
     tendon_idx_cable3 = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, "cable_3")
 
     for i in range(data.nefc):
-        # efc_type == 3  →  mujoco.mjtConstraint.mjCNSTR_LIMIT_TENDON
         if data.efc_type[i] == mujoco.mjtConstraint.mjCNSTR_LIMIT_TENDON:
-            tidx = data.efc_id[i]          # which tendon triggered this row
-            force = -data.efc_force[i]     # sign convention: positive = tension
+            tidx = data.efc_id[i]          
+            force = -data.efc_force[i]    
             if tidx == tendon_idx_cable2:
                 tau2 = max(0.0, force)
             elif tidx == tendon_idx_cable3:
@@ -157,19 +156,19 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
 
         # Desired target pose
         p_star = np.array([ctrl_params['px'], ctrl_params['py'], ctrl_params['pz']])
-        data.mocap_pos[0] = p_star   # Synchronize translucent visualizer sphere
+        data.mocap_pos[0] = p_star
 
         p_star_dot   = np.zeros(3)
         p_star_ddot  = np.zeros(3)
 
-        # Actual system state  
-        p     = data.xpos[payload_id].copy() # Payload body global coordinate
+        # Actual system state (global coordinate)
+        p     = data.xpos[payload_id].copy() # Payload
         p_dot = data.qvel[0:3].copy()
 
-        a1    = data.xpos[drone_id].copy()     # Drone body global coordinate
+        a1    = data.xpos[drone_id].copy()     # Drone
         a1_dot = data.qvel[6:9].copy()
 
-        # Compute cable forces
+        # Cable forces
         vec_c2  = p - a2
         dist_c2 = np.linalg.norm(vec_c2)
         u2 = vec_c2 / dist_c2 if dist_c2 > 0.001 else e3
@@ -188,7 +187,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
                     + ctrl_params['Kp_p'] * (p_star - p)
                     + ctrl_params['Kd_p'] * (p_star_dot - p_dot))
         
-        # E. MULTI-CASE GEOMETRIC SELECTION LAYER
+        # MULTI-CASE GEOMETRIC SELECTION LAYER
         target_dist_c2 = np.linalg.norm(p_star - a2)
         target_dist_c3 = np.linalg.norm(p_star - a3)
         eps = 0.05   # Tolerance for boundary contact
@@ -199,36 +198,25 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         on_boundary_c2 = abs(target_dist_c2 - CABLE_2_MAX_L) <= eps
         on_boundary_c3 = abs(target_dist_c3 - CABLE_3_MAX_L) <= eps
 
-
+        # CASE 3: p* is inside the workspace triangle — cables are slack.
         if inside_c2 or inside_c3:
-            switch_case(3)
-            # ----------------------------------------------------------------
-            # CASE 3: p* is inside the workspace triangle — cables are slack.
-            # ----------------------------------------------------------------
-            
+            switch_case(3)            
             F_a1_star = F_p_star
 
+        # CASE 1: p* lies on (or very close to) the intersecting boundary
         elif on_boundary_c2 or on_boundary_c3:
             switch_case(1)
-            # ----------------------------------------------------------------
-            # CASE 1: p* lies on (or very close to) the intersecting boundary
-            # arcs.  F*_{a,1} = F*_p − Σ F_{a,i}
-            # ----------------------------------------------------------------
-            F_a1_star = F_p_star - (Fa_2 + Fa_3)
-            
+            F_a1_star = F_p_star - (Fa_2 + Fa_3)       
 
+        # CASE 2: p* is out of reach — ground cables block the payload.
         else:
             switch_case(2)
-            # ----------------------------------------------------------------
-            # CASE 2: p* is out of reach — ground cables block the payload.
-            # ----------------------------------------------------------------
             u2_target = (p_star - a2) / target_dist_c2 if target_dist_c2 > 0.001 else e3
             u3_target = (p_star - a3) / target_dist_c3 if target_dist_c3 > 0.001 else e3
 
             p_geom_c2 = a2 + CABLE_2_MAX_L * u2_target
             p_geom_c3 = a3 + CABLE_3_MAX_L * u3_target
 
-            # Select the binding cable (the one most over its limit)
             excess_c2 = target_dist_c2 - CABLE_2_MAX_L
             excess_c3 = target_dist_c3 - CABLE_3_MAX_L
 
@@ -240,7 +228,6 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             F_virtual = ctrl_params['K_virtual'] * (p_star - p_geom)
             F_a1_star = F_p_star - (Fa_2 + Fa_3) + F_virtual
 
-        # Decompose F*_{a,1} into scalar tension and unit direction
         F_a1_star_norm = np.linalg.norm(F_a1_star)
         tau1_star = F_a1_star_norm
         u1_star   = F_a1_star / F_a1_star_norm if F_a1_star_norm > 0.001 else e3
@@ -259,7 +246,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         prev_a1_star   = a1_star.copy()
         prev_step_time = now
 
-        # Apply drone propulsion force (Eq. 3.13)
+        # Eq. 3.13
         vec_cable1  = a1 - p
         dist_cable1 = np.linalg.norm(vec_cable1)
         u1 = vec_cable1 / dist_cable1 if dist_cable1 > 0.001 else e3

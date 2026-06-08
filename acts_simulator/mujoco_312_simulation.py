@@ -62,7 +62,6 @@ def run_tuning_gui():
 
     root.mainloop()
 
-# Spin up the slider window in the background
 gui_thread = threading.Thread(target=run_tuning_gui, daemon=True)
 gui_thread.start()
 
@@ -99,7 +98,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         a1 = data.xpos[3]        # Index 3 = drone body
         a1_dot = data.qvel[6:9]  
 
-        # B. Get current Ground Cable 2 unit vector and force (Fa,2)
+        # (Fa,2)
         vec_cable2 = p - a2
         dist_cable2 = np.linalg.norm(vec_cable2)
         u2 = vec_cable2 / dist_cable2 if dist_cable2 > 0.001 else e3
@@ -108,14 +107,12 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         tau2 = max(0.0, tau2)    
         Fa_2 = tau2 * u2
 
-        # C. Apply Eq. 3.19 using live thread-safe dictionary updates
         F_p_star = m_payload * (p_star_ddot + g * e3) + \
-                   gains['Kp_p'] * (p_star - p) + gains['Kd_p'] * (p_star_dot - p_dot)
+                   gains['Kp_p'] * (p_star - p) + gains['Kd_p'] * (p_star_dot - p_dot) # Eq. 3.19
 
-        # D. Apply Eq. 3.20: Remaining force allocation
-        F_a1_star = F_p_star - Fa_2
+        F_a1_star = F_p_star - Fa_2 # Eq. 3.20
         
-        # E. Map target force vector to geometric position for drone (Eq. 3.12)
+        # Eq. 3.12
         F_a1_star_norm = np.linalg.norm(F_a1_star)
         tau1_star = F_a1_star_norm
         u1_star = F_a1_star / F_a1_star_norm if F_a1_star_norm > 0.001 else e3
@@ -123,7 +120,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         a1_star = p + CABLE_1_MAX_L * u1_star
         a1_star_dot = np.array([0.0, 0.0, 0.0]) 
 
-        # F. Apply Eq. 3.13 with real-time slider outputs
+        # Eq. 3.13
         vec_cable1 = a1 - p
         dist_cable1 = np.linalg.norm(vec_cable1)
         u1 = vec_cable1 / dist_cable1 if dist_cable1 > 0.001 else e3
@@ -132,13 +129,10 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
                  gains['Kp_d'] * (a1_star - a1) + gains['Kd_d'] * (a1_star_dot - a1_dot) + \
                  tau1_star * u1
 
-        # G. Inject calculated control force into drone Degrees of Freedom
         data.qfrc_applied[6:9] = F_prop
 
-        # H. Step forward physics
         mujoco.mj_step(model, data)
 
-        # I. Frame pacing
         time_until_next_step = model.opt.timestep - (time.time() - step_start)
         if time_until_next_step > 0:
             time.sleep(time_until_next_step)
