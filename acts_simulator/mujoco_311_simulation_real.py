@@ -4,6 +4,7 @@ import numpy as np
 import time
 import threading
 import tkinter as tk
+from scipy.spatial.transform import Rotation as R
 
 with open("mujoco/311_model_real.xml", "r") as f:
     xml_model = f.read()
@@ -74,13 +75,7 @@ def run_tuning_gui():
 
 threading.Thread(target=run_tuning_gui, daemon=True).start()
 
-b      = np.array([0.0, 0.0, 0.0])     # cable anchor
-f_star = np.array([4.0, 2.0, 8.0])     # desired cable force vector
 
-f_norm   = np.linalg.norm(f_star)
-u_star   = f_star / f_norm              # Eq 3.11
-a_star   = b + CABLE_LENGTH_L * u_star  # Eq 3.12
-a_star_dot = np.zeros(3)
 
 def rot_to_euler_zyx(R):
     """ZYX Euler angles (roll φ, pitch θ, yaw ψ) from 3x3 rotation matrix."""
@@ -89,12 +84,7 @@ def rot_to_euler_zyx(R):
     yaw   = np.arctan2(R[1, 0], R[0, 0])
     return np.array([roll, pitch, yaw])
 
-def desired_euler_from_force(F_des, yaw_des=0.0):
-    """
-    Geometric inverse: given a desired world-frame force,
-    return the roll & pitch needed to align body-z with it.
-    This is the standard quadrotor flatness inversion (Lee et al. 2010).
-    """
+def desired_R_from_force(F_des, yaw_des=0.0):
     F_norm = np.linalg.norm(F_des)
     if F_norm < 1e-6:
         return np.array([0.0, 0.0, yaw_des])
@@ -102,16 +92,56 @@ def desired_euler_from_force(F_des, yaw_des=0.0):
     x_c   = np.array([np.cos(yaw_des), np.sin(yaw_des), 0.0])
     y_des = np.cross(z_des, x_c)
     norm_y = np.linalg.norm(y_des)
+
     if norm_y < 1e-6:          # degenerate: z_des ≈ x_c, use fallback
         x_c = np.array([0.0, 1.0, 0.0])
         y_des = np.cross(z_des, x_c)
         norm_y = np.linalg.norm(y_des)
     y_des /= norm_y
     x_des  = np.cross(y_des, z_des)
-    R_des  = np.column_stack([x_des, y_des, z_des])
+
+    return np.column_stack([x_des, y_des, z_des])
+
+def desired_euler_from_force(F_des, yaw_des=0.0):
+    R_des = desired_R_from_force(F_des, yaw_des=0.0)
     return rot_to_euler_zyx(R_des)
 
+def desired_quat_from_force(F_des, yaw_des=0.0):
+    R_des = desired_R_from_force(F_des, yaw_des=0.0)
+    return R.from_matrix(R_des).as_quat()
+
+
+def position_controller(a, a_dot, a_star, a_star_dot, body_z):
+    f = (gains['Kp_pos'] * (a_star - a) + gains['Kd_pos'] * (a_star_dot - a_dot)) + m_i * np.array([0.0, 0.0, g])
+    F_total = max(0.0, np.dot(f, body_z))
+    quat_des = desired_quat_from_force(f, yaw_des=0.0)
+
+    return F_total, quat_des
+
+def attitude_controller(desired_quat, current_quat, R_current):
+    angular_vel = R_current.T @ data.qvel[3:6]
+
+    current_q = R.from_quat(current_quat)
+    des_q = R.from_quat(desired_quat)
+
+    error_q_obj = current_q.inv() * des_q
+    error_q = error_q_obj.as_quat() # Vector structure: [x, y, z, w]
+
+    sign = 1.0 if error_q[3] >= 0 else -1.0
+
+    I_vec   = np.array([I_xx, I_yy, I_zz])
+    tau_des = -gains['Kd_att'] * angular_vel + gains['Kp_att'] * (sign * error_q[:3])
+    return tau_des * I_vec
+    
+
 print("Launching simulation…")
+b      = np.array([0.0, 0.0, 0.0])     # cable anchor
+f_star = np.array([4.0, 2.0, 8.0])     # desired cable force vector
+
+f_norm   = np.linalg.norm(f_star)
+u_star   = f_star / f_norm              # Eq 3.11
+a_star   = b + CABLE_LENGTH_L * u_star  # Eq 3.12
+a_star_dot = np.zeros(3)
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while viewer.is_running():
         step_start = time.time()
@@ -119,29 +149,14 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         # Current state
         a     = data.xpos[drone_id].copy()
         a_dot = data.qvel[0:3].copy()
-        R     = data.xmat[drone_id].reshape(3, 3)
-        euler = rot_to_euler_zyx(R)
+        
+        R_curr_mat = data.xmat[drone_id].reshape(3, 3)
+        body_z  = R_curr_mat[:, 2]
+        current_quat = R.from_matrix(R_curr_mat).as_quat()
 
-        omega = R.T @ data.qvel[3:6]
 
-        # ── Outer loop: position → desired world force ────────────────────
-        acc_des     = (gains['Kp_pos'] * (a_star    - a) +
-                       gains['Kd_pos'] * (a_star_dot - a_dot))
-        F_des_world = m_i * (acc_des + np.array([0.0, 0.0, g]))
-
-        # Total thrust = projection onto current body-z (must be ≥ 0)
-        body_z  = R[:, 2]
-        F_total = max(0.0, np.dot(F_des_world, body_z))
-
-        # ── Inner loop: attitude → torques ───────────────────────────────
-        euler_des    = desired_euler_from_force(F_des_world, yaw_des=0.0)
-        euler_error  = euler_des - euler
-        euler_error[2] = (euler_error[2] + np.pi) % (2 * np.pi) - np.pi  # wrap yaw
-
-        # PD on Euler error, scaled by inertia so gains are dimensionless
-        I_vec   = np.array([I_xx, I_yy, I_zz])
-        tau_des = (gains['Kp_att'] * euler_error * I_vec +
-                   gains['Kd_att'] * (-omega)    * I_vec)
+        F_total, quat_des = position_controller(a, a_dot, a_star, a_star_dot, body_z)
+        tau_des = attitude_controller(quat_des, current_quat, R_curr_mat)
 
         # ── Motor mixing & saturation ────────────────────────────────────
         wrench   = np.array([F_total, tau_des[0], tau_des[1], tau_des[2]])
@@ -153,7 +168,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         tau_act = w_act[1:4]
 
         data.xfrc_applied[drone_id, 0:3] = F_act * body_z
-        data.xfrc_applied[drone_id, 3:6] = R @ tau_act
+        data.xfrc_applied[drone_id, 3:6] = R_curr_mat @ tau_act
 
         mujoco.mj_step(model, data)
         viewer.sync()
