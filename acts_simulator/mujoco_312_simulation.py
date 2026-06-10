@@ -15,6 +15,9 @@ data = mujoco.MjData(model)
 CABLE_1_MAX_L = model.tendon_range[1][1]
 CABLE_2_MAX_L = model.tendon_range[0][1]
 
+payload_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "payload")
+drone_id   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "drone")
+
 m_payload = model.body("payload").mass[0]
 m_drone = model.body("drone").mass[0]  
 g = 9.81            
@@ -92,10 +95,10 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         p_star_ddot = np.array([0.0, 0.0, 0.0])
 
         # A. Read current states
-        p = data.xpos[2]         # Index 2 = payload body
+        p  = data.xpos[payload_id]
         p_dot = data.qvel[0:3]   
         
-        a1 = data.xpos[3]        # Index 3 = drone body
+        a1 = data.xpos[drone_id]
         a1_dot = data.qvel[6:9]  
 
         # (Fa,2)
