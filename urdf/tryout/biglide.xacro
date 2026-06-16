@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="biglide">
+
+  <xacro:property name="mass" value="1.0" />
+  
+  <xacro:macro name="standard_inertia">
+    <inertial>
+      <mass value="${mass}" />
+      <inertia ixx="1e-5" ixy="0.0" ixz="0.0" iyy="1e-5" iyz="0.0" izz="1e-5" />
+    </inertial>
+  </xacro:macro>
+
+  <link name="world"/>
+
+  <link name="base">
+    <xacro:standard_inertia />
+  </link>
+
+  <joint name="jointBase" type="fixed">
+    <parent link="world" />
+    <child link="base" />
+    <origin xyz="0.2 0 0" rpy="0 0 0" />
+  </joint>
+
+  <link name="leftRail">
+    <xacro:standard_inertia />
+    <visual>
+      <geometry><box size="0.01 5.0 0.01" /></geometry>
+    </visual>
+  </link>
+
+  <joint name="jointLeftRail" type="fixed">
+    <parent link="world" />
+    <child link="leftRail" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <link name="rightRail">
+    <xacro:standard_inertia />
+    <visual>
+      <geometry><box size="0.01 5.0 0.01" /></geometry>
+    </visual>
+  </link>
+
+  <joint name="jointRightRail" type="fixed">
+    <parent link="world" />
+    <child link="rightRail" />
+    <origin xyz="0.4 0 0" rpy="0 0 0" />
+  </joint>
+
+  <link name="leftFoot">
+    <xacro:standard_inertia />
+    <visual>
+      <geometry><box size="0.05 0.15 0.05" /></geometry>
+    </visual>
+  </link>
+
+  <joint name="A11" type="prismatic">
+    <parent link="world" />
+    <child link="leftFoot" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.5" upper="2.5" effort="1000" velocity="10" />
+  </joint>
+
+  <link name="rightFoot">
+    <xacro:standard_inertia />
+    <visual>
+      <geometry><box size="0.05 0.15 0.05" /></geometry>
+    </visual>
+  </link>
+
+  <joint name="A21" type="prismatic">
+    <parent link="world" />
+    <child link="rightFoot" />
+    <origin xyz="0.4 0 0" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.5" upper="2.5" effort="1000" velocity="10" />
+  </joint>
+
+  <link name="leftArm">
+    <inertial>
+      <origin xyz="0.2828427 0.0 0" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia ixx="1e-5" ixy="0.0" ixz="0.0" iyy="1e-5" iyz="0.0" izz="1e-5"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.14142135623 0.0 0" rpy="0 0 0" />
+      <geometry><box size="0.2828427 0.05 0.05" /></geometry>
+    </visual>
+  </link>
+
+  <joint name="A12" type="revolute">
+    <parent link="leftFoot" />
+    <child link="leftArm" />
+    <origin xyz="0 0 0" rpy="0 0 0.7853981" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14" upper="3.14" effort="1000" velocity="10"/>
+  </joint>
+
+  <link name="rightArm">
+    <inertial>
+      <origin xyz="0.2828427 0.0 0" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia ixx="1e-5" ixy="0.0" ixz="0.0" iyy="1e-5" iyz="0.0" izz="1e-5"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.14142135623 0.0 0" rpy="0 0 0" />
+      <geometry><box size="0.2828427 0.05 0.05" /></geometry>
+    </visual>
+  </link>
+
+  <joint name="A22" type="revolute">
+    <parent link="rightFoot" />
+    <child link="rightArm" />
+    <origin xyz="0 0 0" rpy="0 0 2.3561949" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.14" upper="3.14" effort="1000" velocity="10"/>
+  </joint>
+
+  <link name="endEffector">
+    <xacro:standard_inertia />
+    <visual>
+      <geometry><cylinder radius="0.05" length="0.05" /></geometry>
+    </visual>
+  </link>
+
+  <joint name="jointEndEffector" type="fixed">
+    <parent link="leftArm" />
+    <child link="endEffector" />
+    <origin xyz="0.2828427 0 0" rpy="0 0 0" />
+  </joint>
+
+  </robot>

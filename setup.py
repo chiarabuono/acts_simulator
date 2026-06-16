@@ -14,7 +14,7 @@ setup(
     (os.path.join('share', package_name, 'config/gz_bridge'), glob('config/gz_bridge/*.yaml')),
     (os.path.join('share', package_name, 'config/sensors'), glob('config/sensors/*.yaml')),
 
-    (os.path.join('share', package_name, 'urdf'), glob('urdf/*.xacro')),
+    (os.path.join('share', package_name, 'urdf'), glob('urdf/*.xacro') + glob('urdf/*.sdf')),
     (os.path.join('share', package_name, 'urdf/components'), glob('urdf/components/*.xacro')),
     (os.path.join('share', package_name, 'urdf/sensors'), glob('urdf/sensors/*.xacro')),
     (os.path.join('share', package_name, 'urdf/macros'), glob('urdf/macros/*.xacro')),

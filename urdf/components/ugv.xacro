@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename='rail.xacro' /> 
+
+<xacro:property name="mass_cable" value="0.01" />
+
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${(m/12) * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+               iyy="${(m/12) * (3*r*r + h*h)}" iyz="0.0"
+               izz="${(m/2) * (r*r)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="add_ugv" params="id length x y z cable_len roll:=0 pitch:=0 yaw:=0">
+    
+    <xacro:add_rail 
+    id="${id}"
+    length="5.0"
+    x="${x}" y="${y}" z="${z}"
+    />
+
+    <link name="ugv${id}">
+        <xacro:standard_inertia />
+        <visual>
+        <geometry><box size="0.05 0.15 0.05" /></geometry>
+        </visual>
+    </link>
+
+    <joint name="ugv${id}_hook_joint" type="prismatic">
+        <parent link="world" />
+        <child link="ugv${id}" />
+        <origin xyz="${x} ${y} ${z}" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="-2.5" upper="2.5" effort="1000" velocity="10" />
+    </joint>
+
+    <link name="ugv${id}_cable">
+        <xacro:cylinder_inertia m="${mass_cable}" r="0.01" h="${cable_len}" />
+        <visual>
+        <origin xyz="0.0 0.0 ${cable_len/2}" rpy="0.0 0.0 0" />
+        <geometry><cylinder radius="0.01" length="${cable_len}"/></geometry>
+        </visual>
+    </link>
+
+
+    <joint name="ugv${id}_cablehook_joint" type="revolute">
+        <parent link="ugv${id}" />
+        <child link="ugv${id}_cable" />
+        <origin xyz="0 0 0" rpy="0 0 0.0" />
+        <axis xyz="0 0 1" />
+        <limit lower="-3.14" upper="3.14" effort="1000" velocity="10"/>
+    </joint>
+
+
+  </xacro:macro>
+
+</robot>

@@ -1,193 +1,34 @@
-<?xml version='1.0'?> 
-<robot xmlns:xacro='http://www.ros.org/wiki/xacro' name='acts'> 
-<xacro:include filename='components/panel.xacro' /> 
-<xacro:include filename='uav_cable_assembly.urdf.xacro' /> 
-<xacro:include filename='ugv_cable_assembly.urdf.xacro' /> 
-<xacro:include filename='components/hook.xacro' /> 
- 
-<xacro:property name='sqrt3' value='${3**0.5}'/> 
-<xacro:property name='cable_segments' value='5'/>
-<xacro:property name='system_heigth' value='1.0'/>
-<xacro:property name='uav_cable_len' value='1.0'/>
- 
-<link name='base_link'/>
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="acts_model">
 
-<xacro:panel 
-link_name='chassis_link' 
-mass='0.001' 
-width='2' 
-length='2'
-heigth='0.2' 
-x='0' y='0' z='${system_heigth}' 
-material_name='Blue' 
-material_color='0.0 0.0 0.8 0.0' />
+<xacro:include filename='components/ugv.xacro' /> 
+<xacro:include filename='components/payload.xacro' /> 
 
-<joint name='base_to_chassis_joint' type='fixed'> 
-<parent link='base_link'/> 
-<child link='chassis_link'/> 
-<origin xyz='0 0 0.0' rpy='0 0 0'/> 
-</joint> 
+<link name='world'/>
+<xacro:add_ugv
+    id="1"
+    length="5.0"
+    x="0" y="0" z="0"
+    cable_len="2.0"
+    />
 
-<xacro:property name='hookA_x' value='-0.9'/> 
-<xacro:property name='hookA_y' value='0.9'/> 
-<xacro:property name='hookA_z' value='-0.10'/> 
- 
-<xacro:property name='anchorA_x' value='-1.4'/> 
-<xacro:property name='anchorA_y' value='1.4'/> 
-<xacro:property name='anchorA_z' value='0.0'/> 
- 
-<xacro:ground_hook prefix='ugv1_' anchorX='${anchorA_x}' anchorY='${anchorA_y}' anchorZ='${anchorA_z}' /> 
- 
-<xacro:add_ugv 
-id='1'
-segments='${cable_segments}' 
-length='1.1446' 
-panel_link='chassis_link' 
-x_off='-0.9' 
-y_off='0.9' 
-z_off='0.9' 
-cable_roll='0.0' cable_pitch='-0.6659' cable_yaw='2.3562'/> 
- 
-<xacro:property name='hookB_x' value='0'/> 
-<xacro:property name='hookB_y' value='0.9'/> 
-<xacro:property name='hookB_z' value='-0.10'/> 
- 
-<xacro:property name='anchorB_x' value='0'/> 
-<xacro:property name='anchorB_y' value='1.4'/> 
-<xacro:property name='anchorB_z' value='0.0'/> 
- 
-<xacro:ground_hook prefix='ugv2_' anchorX='${anchorB_x}' anchorY='${anchorB_y}' anchorZ='${anchorB_z}' /> 
- 
-<xacro:add_ugv 
-id='2'
-segments='${cable_segments}' 
-length='1.0296' 
-panel_link='chassis_link' 
-x_off='0' 
-y_off='0.9' 
-z_off='0.9' 
-cable_roll='0.0' cable_pitch='-0.5071' cable_yaw='1.5708'/> 
- 
-<xacro:property name='hookC_x' value='0.9'/> 
-<xacro:property name='hookC_y' value='0.9'/> 
-<xacro:property name='hookC_z' value='-0.10'/> 
- 
-<xacro:property name='anchorC_x' value='1.4'/> 
-<xacro:property name='anchorC_y' value='1.4'/> 
-<xacro:property name='anchorC_z' value='0.0'/> 
- 
-<xacro:ground_hook prefix='ugv3_' anchorX='${anchorC_x}' anchorY='${anchorC_y}' anchorZ='${anchorC_z}' /> 
- 
-<xacro:add_ugv 
-id='3'
-segments='${cable_segments}' 
-length='1.1446' 
-panel_link='chassis_link' 
-x_off='0.9' 
-y_off='0.9' 
-z_off='0.9' 
-cable_roll='0.0' cable_pitch='-0.6659' cable_yaw='0.7854'/> 
- 
-<xacro:property name='hookD_x' value='-0.9'/> 
-<xacro:property name='hookD_y' value='-0.9'/> 
-<xacro:property name='hookD_z' value='-0.10'/> 
- 
-<xacro:property name='anchorD_x' value='-1.4'/> 
-<xacro:property name='anchorD_y' value='-1.4'/> 
-<xacro:property name='anchorD_z' value='0.0'/> 
- 
-<xacro:ground_hook prefix='ugv4_' anchorX='${anchorD_x}' anchorY='${anchorD_y}' anchorZ='${anchorD_z}' /> 
- 
-<xacro:add_ugv 
-id='4'
-segments='${cable_segments}' 
-length='1.1446' 
-panel_link='chassis_link' 
-x_off='-0.9' 
-y_off='-0.9' 
-z_off='0.9' 
-cable_roll='0.0' cable_pitch='-0.6659' cable_yaw='-2.3562'/> 
- 
-<xacro:property name='hookE_x' value='0'/> 
-<xacro:property name='hookE_y' value='-0.9'/> 
-<xacro:property name='hookE_z' value='-0.10'/> 
- 
-<xacro:property name='anchorE_x' value='0'/> 
-<xacro:property name='anchorE_y' value='-1.4'/> 
-<xacro:property name='anchorE_z' value='0.0'/> 
- 
-<xacro:ground_hook prefix='ugv5_' anchorX='${anchorE_x}' anchorY='${anchorE_y}' anchorZ='${anchorE_z}' /> 
- 
-<xacro:add_ugv 
-id='5'
-segments='${cable_segments}' 
-length='1.0296' 
-panel_link='chassis_link' 
-x_off='0' 
-y_off='-0.9' 
-z_off='0.9' 
-cable_roll='0.0' cable_pitch='-0.5071' cable_yaw='-1.5708'/> 
- 
-<xacro:property name='hookF_x' value='0.9'/> 
-<xacro:property name='hookF_y' value='-0.9'/> 
-<xacro:property name='hookF_z' value='-0.10'/> 
- 
-<xacro:property name='anchorF_x' value='1.4'/> 
-<xacro:property name='anchorF_y' value='-1.4'/> 
-<xacro:property name='anchorF_z' value='0.0'/> 
- 
-<xacro:ground_hook prefix='ugv6_' anchorX='${anchorF_x}' anchorY='${anchorF_y}' anchorZ='${anchorF_z}' /> 
- 
-<xacro:add_ugv 
-id='6'
-segments='${cable_segments}' 
-length='1.1446' 
-panel_link='chassis_link' 
-x_off='0.9' 
-y_off='-0.9' 
-z_off='0.9' 
-cable_roll='0.0' cable_pitch='-0.6659' cable_yaw='-0.7854'/> 
- 
-<xacro:property name='hook1_x' value='0.0'/>
-<xacro:property name='hook1_y' value='${sqrt3/3}'/>
-<xacro:property name='hook1_z' value='0.1'/>
- 
-<xacro:add_drone 
-id='1' 
-segments='${cable_segments}' 
-length='${uav_cable_len}' 
-panel_link='chassis_link'
-x_off='${hook1_x}' 
-y_off='${hook1_y}' 
-z_off='${hook1_z+system_heigth}' 
- cable_roll='0' cable_pitch='0' cable_yaw='0' /> 
- 
-<xacro:property name='hook2_x' value='-0.5'/>
-<xacro:property name='hook2_y' value='${-sqrt3 / 6}'/>
-<xacro:property name='hook2_z' value='0.1'/>
- 
-<xacro:add_drone 
-id='2' 
-segments='${cable_segments}' 
-length='${uav_cable_len}' 
-panel_link='chassis_link'
-x_off='${hook2_x}' 
-y_off='${hook2_y}' 
-z_off='${hook2_z+system_heigth}' 
- cable_roll='0' cable_pitch='0' cable_yaw='0' /> 
- 
-<xacro:property name='hook3_x' value='0.5'/>
-<xacro:property name='hook3_y' value='${-sqrt3 / 6}'/>
-<xacro:property name='hook3_z' value='0.1'/>
- 
-<xacro:add_drone 
-id='3' 
-segments='${cable_segments}' 
-length='${uav_cable_len}' 
-panel_link='chassis_link'
-x_off='${hook3_x}' 
-y_off='${hook3_y}' 
-z_off='${hook3_z+system_heigth}' 
- cable_roll='0' cable_pitch='0' cable_yaw='0' /> 
- 
+<xacro:payload
+    x="2.0" y="1.0" z="2.0"
+    />
+  
+
+<xacro:add_ugv
+  id="2"
+  length="5.0"
+  x="2" y="2" z="0"
+  cable_len="2.0"
+  />
+
+  <xacro:add_ugv
+  id="3"
+  length="5.0"
+  x="-1" y="1" z="0"
+  cable_len="2.0"
+  />
+
 </robot>

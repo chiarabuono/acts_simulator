@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="cable_rail_track" params="prefix parent_link x y z">
+
+    <link name="${prefix}rail_pitch_dummy">
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}anchor_pitch" type="revolute">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}rail_pitch_dummy"/>
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="1000" lower="-1.57" upper="1.57" velocity="10"/>
+    </joint>
+
+    <link name="${prefix}rail">
+      <visual>
+        <origin xyz="0 0 2.5" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.03" length="5.0"/> 
+        </geometry>
+        <material name="grey">
+          <color rgba="0.5 0.5 0.5 1.0"/>
+        </material>
+      </visual>
+      <inertial>
+        <mass value="1.0"/>
+        <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.01"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}anchor_yaw" type="revolute">
+      <parent link="${prefix}rail_pitch_dummy"/>
+      <child link="${prefix}rail"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="1000" lower="-3.14" upper="3.14" velocity="10"/>
+    </joint>
+
+  </xacro:macro>
+
+</robot>

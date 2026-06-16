@@ -1,0 +1,16 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100 # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    ugv_position_controller:
+      type: position_controllers/JointGroupPositionController
+
+ugv_position_controller:
+  ros__parameters:
+    joints:
+      - ugv1_rail_to_base
+      - ugv2_rail_to_base
+      - ugv3_rail_to_base

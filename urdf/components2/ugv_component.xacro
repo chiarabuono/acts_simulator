@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="ugv_component" params="prefix x y z">
+
+    <link name="${prefix}base_link">
+      <inertial>
+        <mass value="10.0" />
+        <origin xyz="${x} ${y} ${z}" rpy="0 0 0" />
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.02" />
+      </inertial>
+      <visual>
+        <geometry>
+          <sphere radius="0.02"/>
+        </geometry>
+        <material name="Red">
+          <color rgba="1.0 0.0 0.0 1.0"/>
+        </material>
+      </visual>
+      <collision name="${prefix}base_collision">
+        <geometry>
+          <sphere radius="0.02"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <gazebo reference="${prefix}base_link">
+      <visual>
+        <material>
+          <ambient>1.0 0.0 0.0 1.0</ambient>
+          <diffuse>1.0 0.0 0.0 1.0</diffuse>
+        </material>
+      </visual>
+    </gazebo>
+
+  </xacro:macro>
+</robot>

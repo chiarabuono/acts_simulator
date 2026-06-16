@@ -23,7 +23,7 @@ Copyright ©2025 nknab
 
 			<dart>
 				<solver>
-					<type>lcp</type>
+					<!-- <type>lcp</type> -->
 				</solver>
 				<collision_detector>bullet</collision_detector>
 			</dart>
@@ -36,7 +36,7 @@ Copyright ©2025 nknab
 			</engine>
 			<dart>
 				<solver>
-					<type>lcp</type> 
+					<!-- <type>lcp</type>  -->
 				</solver>
 			</dart>
 		</plugin>
