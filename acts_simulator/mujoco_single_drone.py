@@ -5,14 +5,14 @@ import time
 import threading
 import tkinter as tk
 from scipy.spatial.transform import Rotation as R
-from utils_control import DroneSimple
+from utils_control import FreeFlightDrone
 
 with open("mujoco/single_drone.xml", "r") as f:
     xml_model = f.read()
 
 model = mujoco.MjModel.from_xml_string(xml_model)
 data = mujoco.MjData(model)
-drone = DroneSimple(model)
+drone = FreeFlightDrone(model, drone_name="drone")
 
 drone_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "drone")
 
