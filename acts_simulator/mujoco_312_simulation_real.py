@@ -1,9 +1,11 @@
-from utils_control import Drone
 import mujoco
 import numpy as np
 import tkinter as tk
 import threading
 import mujoco.viewer
+import time
+from scipy.spatial.transform import Rotation as R
+from utils_control import PayloadControlDrone
 
 with open("mujoco/312_model_real.xml", "r") as f:
     xml_model = f.read()
@@ -15,50 +17,50 @@ payload_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "payload")
 drone_id   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "drone")
 
 payload_dof_offset = model.body_dofadr[payload_id]
-drone_dof_offset   = model.body_dofadr[drone_id]   
+drone_dof_offset   = model.body_dofadr[drone_id] 
 
-CABLE_1_MAX_L = model.tendon_range[1][1]        # payload to drone
-CABLE_2_MAX_L = model.tendon_range[0][1]        # payload to ground
+cable_1_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, "cable_1")
+cable_2_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, "cable_2")
+
+CABLE_1_MAX_L = model.tendon_range[cable_1_id][1]       # payload to drone
+CABLE_2_MAX_L = model.tendon_range[cable_2_id][1]       # payload to ground
 
 m_payload = model.body("payload").mass[0]
-m_drone = model.body("drone").mass[0]  
-g = 9.81            
+m_drone = model.body("drone").mass[0] 
 e3 = np.array([0.0, 0.0, 1.0])
 a2 = np.array([0.0, 0.0, 0.0])                  # anchor point
 
 gains_platform = {
-    'Kp_pl': 0.2,
-    'Kd_pl': 0.1,
-
+    'Kp_pl': 15.0, 
+    'Kd_pl': 6.0
 }
+
+drone = PayloadControlDrone(
+    model, 
+    drone_name="drone", 
+    qvel_offset=drone_dof_offset, 
+    payload_mass=m_payload, 
+    gains_platform=gains_platform
+)
+
+# Set high-performance tuning tracking properties
+# drone.gains.update({
+#     'Kp_pos': np.diag([25.0, 25.0, 25.0]),
+#     'Kd_pos': np.diag([8.2, 8.2, 9.0]),
+#     'Kp_att': np.diag([12.0, 12.0, 12.0]),
+#     'Kd_att': np.diag([3.5, 3.5, 3.5])
+# })
 
 MODE = "force_control"
 
-drone = Drone(model, data, "drone", qvel_offset=drone_dof_offset)
-drone.set_desired(np.array([0, 0, 1]), data.xpos[payload_id], CABLE_1_MAX_L)
-
 def run_tuning_gui():
-    
     root = tk.Tk()
-    root.title("Quadrotor Gain Tuner")
+    root.title("Gain Tuner")
     root.geometry("340x380")
-    drone_sliders = [
-        ("Position Kp",  'Kp_pos', 0, 30),      #0.1
-        ("Position Kd",  'Kd_pos', 0, 10),      #0.1
-        ("Attitude Kp",  'Kp_att', 0, 30),      #0.1
-        ("Attitude Kd",  'Kd_att', 0, 10),      #0.1
-    ]
     payload_sliders = [        
         ("Platform Kp",  'Kp_pl',  0, 30),      #0.2
-        ("Platform Kd",  'Kp_pl',  0, 10)       #0.8
+        ("Platform Kd",  'Kd_pl',  0, 10)       #0.8
     ]
-    
-    for label, key, lo, hi in drone_sliders:
-        tk.Label(root, text=label).pack()
-        s = tk.Scale(root, from_=lo, to=hi, resolution=0.1, orient='horizontal',
-                     command=lambda v, k=key: drone.gains.update({k: float(v)}))
-        s.set(drone.gains[key])
-        s.pack(fill='x', padx=10)
 
     for label, key, lo, hi in payload_sliders:
         tk.Label(root, text=label).pack()
@@ -77,50 +79,54 @@ if MODE == "payload_position_control":
 elif MODE == "force_control":
     f_star = np.array([1.0, 2.0, 10.0])
     f_star_norm = np.linalg.norm(f_star)
-    tau_star = f_star_norm                               # Eq 3.10
     u2_star = f_star / f_star_norm                       # Eq 3.11            
     p_star = a2 + CABLE_2_MAX_L * u2_star                # Eq 3.21
 
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while viewer.is_running():
-        dist_from_anchor = np.linalg.norm(p_star)
+        step_start = time.time()
         data.mocap_pos[0] = p_star
             
         p_star_dot = np.array([0.0, 0.0, 0.0])
         p_star_ddot = np.array([0.0, 0.0, 0.0])
 
-        p  = data.xpos[payload_id]
-        p_dot = data.qvel[0:3]   
+        p = data.xpos[payload_id].copy()
+        p_dot = data.qvel[payload_dof_offset : payload_dof_offset+3].copy()   
+        drone.update_payload_pose(p, p_dot)
         
-        a1 = data.xpos[drone_id]
-        a1_dot = data.qvel[6:9]  
-
-        prev_p_dot = data.qvel[0:3].copy()
+        R_mat = data.xmat[drone_id].reshape(3, 3)
+        current_quat = R.from_matrix(R_mat).as_quat()
+        
+        # Local body angular velocities extracted from exact drone Dof addresses (Indices 9, 10, 11)
+        angular_vel = R_mat.T @ data.qvel[drone_dof_offset+3 : drone_dof_offset+6]  
 
         # (Fa,2)
         vec_cable2 = p - a2
         dist_cable2 = np.linalg.norm(vec_cable2)
-        u2 = vec_cable2 / dist_cable2 if dist_cable2 > 0.001 else e3
+        u2 = vec_cable2 / dist_cable2 if dist_cable2 > 0.001 else -e3
 
         tau2 = -data.efc_force[0] if data.efc_force.size > 0 else 0.0
         tau2 = max(0.0, tau2)    
         Fa_2 = tau2 * u2
 
-        F_p_star = m_payload * (p_star_ddot + g * e3) + \
-                    gains_platform['Kp_pl'] * (p_star - p) + gains_platform['Kd_pl'] * (p_star_dot - p_dot) # Eq. 3.19
+        # Update controller inner states
+        drone.set_payload_states(p_star_ddot, Fa_2, p_star, p_star_dot)
 
-        F_a1_star = F_p_star - Fa_2 # Eq. 3.20
+        a = data.xpos[drone_id].copy()
+        a_star = p_star + np.array([0.0, 0.0, CABLE_1_MAX_L])
+        a_star_dot = np.array([0.0, 0.0, 0.0])
+        a_dot = data.qvel[drone_dof_offset : drone_dof_offset+3].copy()   
 
-        drone.set_desired(F_a1_star, p, CABLE_1_MAX_L)
-        drone.step(data, drone.a_star, drone.a_star_dot)
+        wrench, R_des = drone.compute_motor_wrenches(a_star, a, a_star_dot, a_dot, current_quat, angular_vel)
 
-        prev_p_dot = data.qvel[0:3].copy()
+        # Map computed wrench allocations directly to drone center of mass
+        data.xfrc_applied[drone_id, 0:3] = wrench[0] * R_mat[:, 2] 
+        data.xfrc_applied[drone_id, 3:6] = R_mat @ wrench[1:4]     
+
+        # Step simulation physics
         mujoco.mj_step(model, data)
-
-        # Monitoring only (after mj_step)
-        p_ddot       = (data.qvel[0:3] - prev_p_dot) / model.opt.timestep
-        Fp_act       = m_payload * (p_ddot + g * e3)
-        Fa_2_monitor = Fp_act - F_a1_star
-        tau2_monitor = np.linalg.norm(Fa_2_monitor)
-        print(f"tau2 control: {tau2:.3f} | tau2 monitor: {tau2_monitor:.3f}")
         viewer.sync()
+
+        time_until_next_step = model.opt.timestep - (time.time() - step_start)
+        if time_until_next_step > 0:
+            time.sleep(time_until_next_step)
