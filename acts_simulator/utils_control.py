@@ -24,9 +24,10 @@ class Drone:
         self.kd = 0.016 * self.kt
         self.omega_max_sq = (2.0 * omega_hover) ** 2
         self._build_mixer()
-        
-        self.gains = {'Kp_pos': 0.4, 'Kd_pos': 1.2,
-                      'Kp_att': 6.5, 'Kd_att': 5.0}
+
+    def set_gains(self, Kp_pos, Kd_pos, Kp_att, Kd_att):    
+        self.gains = {'Kp_pos': Kp_pos, 'Kd_pos': Kd_pos,
+                      'Kp_att': Kp_att, 'Kd_att': Kd_att}
 
     def _build_mixer(self):
         kt, kd, L = self.kt, self.kd, self.L_arm
@@ -121,3 +122,101 @@ class Drone:
         F_total, quat_des = self.position_controller(a_star, a_star_dot)
         tau_des           = self.attitude_controller(quat_des)
         self.apply_control(data, F_total, tau_des)
+
+
+class DroneSimple:
+    def __init__(self, model, drone_name="drone"):
+        self.GRAVITY = 9.81
+        self.MAX_ROTOR_VELOCITY = 2000.0
+        
+        # Pull geometric parameters from parameters or model configurations
+        self.arm_length = 0.17
+        self.kt = 5.5e-6
+        self.kd = 3.299e-7
+        self.drone_mass = 1.0
+
+
+        self.gains = {'Kp_pos': np.diag([5.0, 5.0, 10.0]), 
+                      'Kd_pos': np.diag([4.2, 4.2, 5.0]),
+                      'Kp_att': np.diag([5.6, 5.6, 5.6]), 
+                      'Kd_att': np.diag([1.0, 1.0, 1.0])} 
+
+        self.inv_mixer = self.build_inverse_mixer_matrix(self.arm_length, self.kt, self.kd)
+
+    def build_inverse_mixer_matrix(self, l, kt, kd):
+        mixer = np.array([
+            [  kt,       kt,       kt,       kt     ],
+            [ -kt * l,   kt * l,   kt * l,  -kt * l ],
+            [ -kt * l,  -kt * l,   kt * l,   kt * l ],
+            [ -kd,       kd,      -kd,       kd     ]
+        ])
+        return np.linalg.inv(mixer)
+
+    def position_controller(self, pd, p, vd, v):
+        g = np.array([0, 0, self.GRAVITY])
+        
+        # PD Law + Anti-gravity feedforward
+        f = self.gains["Kd_pos"] @ (vd - v) + self.gains["Kp_pos"] @ (pd - p) + (self.drone_mass * g)
+        scalar_force = np.linalg.norm(f)
+
+        # Safety Cap Thrust
+        max_thrust = 20.0
+        scalar_force = min(scalar_force, max_thrust)
+
+        # Orientation Matrix construction
+        norm_f = np.linalg.norm(f)
+        if norm_f < 1e-6:
+            z_b = np.array([0.0, 0.0, 1.0])
+        else:
+            z_b = f / norm_f
+
+        y_w = np.array([0.0, 1.0, 0.0])
+        x_b = np.cross(y_w, z_b)
+        if np.linalg.norm(x_b) < 1e-6:
+            x_b = np.array([1.0, 0.0, 0.0])
+        else:
+            x_b /= np.linalg.norm(x_b)
+            
+        y_b = np.cross(z_b, x_b)
+
+        R_mat = np.column_stack((x_b, y_b, z_b))
+        desired_quat = R.from_matrix(R_mat).as_quat()
+
+        return desired_quat, scalar_force, R_mat
+
+    def attitude_controller(self, desired_orientation_quat, current_quat, angular_vel):
+        current_q = R.from_quat(current_quat)
+        des_q = R.from_quat(desired_orientation_quat)
+
+        error_q_obj = current_q.inv() * des_q
+        error_q = error_q_obj.as_quat() 
+
+        sign = 1.0 if error_q[3] >= 0 else -1.0
+        tau = -self.gains["Kd_att"] @ angular_vel + self.gains["Kp_att"] @ (sign * error_q[:3])
+        return tau
+
+    def compute_motor_wrenches(self, pd, p, vd, v, current_quat, angular_vel):
+        # 1. Position tracking
+        att_desired, thrust, R_des = self.position_controller(pd, p, vd, v)
+        
+        # 2. Attitude tracking
+        torques = self.attitude_controller(att_desired, current_quat, angular_vel)
+
+        # 3. Mix outputs to get individual motor allocations
+        w_vec = np.array([thrust, torques[0], torques[1], torques[2]])
+        w_squared = self.inv_mixer @ w_vec
+
+        speeds = np.sqrt(np.maximum(w_squared, 0.0))
+        speeds = np.minimum(speeds, self.MAX_ROTOR_VELOCITY)
+        
+        # Convert rotational motor speeds back into spatial body forces for MuJoCo's xfrc_applied vector
+        actual_wrench = self.build_forward_mixer(self.arm_length, self.kt, self.kd) @ (speeds**2)
+        return actual_wrench, R_des
+
+    def build_forward_mixer(self, l, kt, kd):
+        return np.array([
+            [  kt,       kt,       kt,       kt     ],
+            [ -kt * l,   kt * l,   kt * l,  -kt * l ],
+            [ -kt * l,  -kt * l,   kt * l,   kt * l ],
+            [ -kd,       kd,      -kd,       kd     ]
+        ])

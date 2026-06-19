@@ -17,6 +17,7 @@ f_star = np.array([4.0, 2.0, 8.0])     # desired cable force vector
 
 
 drone = Drone(model, data, "drone")
+drone.set_gains(0.4, 1.2, 6.5, 5.0)
 drone.set_desired(f_star, b, CABLE_LENGTH_L)
 
 def run_tuning_gui():

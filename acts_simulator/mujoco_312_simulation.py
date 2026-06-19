@@ -28,7 +28,7 @@ gains = {
     'Kp_p': 1.0,
     'Kd_p': 1.0,
     'Kp_d': 6.0,
-    'Kd_d': 2.0
+    'Kd_d': 3.0
 }
 
 def run_tuning_gui():
