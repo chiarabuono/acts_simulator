@@ -43,8 +43,6 @@ drone = PayloadControlDrone(
     gains_platform=gains_platform
 )
 
-MODE = "force_control"
-
 def run_tuning_gui():
     root = tk.Tk()
     root.title("Gain Tuner")
@@ -66,13 +64,9 @@ def run_tuning_gui():
 
 threading.Thread(target=run_tuning_gui, daemon=True).start()
 
-if MODE == "payload_position_control":
-    p_star = np.copy(data.mocap_pos[0])
-elif MODE == "force_control":
-    f_star = np.array([1.0, 2.0, 10.0])
-    f_star_norm = np.linalg.norm(f_star)
-    u2_star = f_star / f_star_norm                       # Eq 3.11            
-    p_star = a2 + CABLE_2_MAX_L * u2_star                # Eq 3.21
+
+p_star = np.array([2.0, 1.0, 1.5])
+CABLE_FILTER_ALPHA = 0.05 
 
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while viewer.is_running():
@@ -82,13 +76,18 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         p_star_dot = np.array([0.0, 0.0, 0.0])
         p_star_ddot = np.array([0.0, 0.0, 0.0])
 
+        target_l2 = np.linalg.norm(p_star - a2)
+        current_max_l2 = model.tendon_range[cable_2_id][1]
+        smooth_l2 = current_max_l2 + CABLE_FILTER_ALPHA * (target_l2 - current_max_l2)
+        
+        model.tendon_range[cable_2_id][1] = smooth_l2
+
         p = data.xpos[payload_id].copy()
         p_dot = data.qvel[payload_dof_offset : payload_dof_offset+3].copy()   
         drone.update_payload_pose(p, p_dot)
         
         R_mat = data.xmat[drone_id].reshape(3, 3)
         current_quat = R.from_matrix(R_mat).as_quat()
-        
         angular_vel = R_mat.T @ data.qvel[drone_dof_offset+3 : drone_dof_offset+6]  
 
         # (Fa,2)
@@ -109,11 +108,9 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
 
         wrench, R_des = drone.compute_motor_wrenches(a_star, a, a_star_dot, a_dot, current_quat, angular_vel)
 
-        # Map computed wrench allocations directly to drone center of mass
-        data.xfrc_applied[drone_id, 0:3] = wrench[0] * R_des[:, 2] 
-        data.xfrc_applied[drone_id, 3:6] = R_des @ wrench[1:4]     
+        data.xfrc_applied[drone_id, 0:3] = wrench[0] * R_mat[:, 2] 
+        data.xfrc_applied[drone_id, 3:6] = R_mat @ wrench[1:4]     
 
-        # Step simulation physics
         mujoco.mj_step(model, data)
         viewer.sync()
 
