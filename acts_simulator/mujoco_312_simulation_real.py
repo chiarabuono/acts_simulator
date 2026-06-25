@@ -38,7 +38,6 @@ gains_platform = {
 drone = PayloadControlDrone(
     model, 
     drone_name="drone", 
-    qvel_offset=drone_dof_offset, 
     payload_mass=m_payload, 
     gains_platform=gains_platform
 )

@@ -7,14 +7,15 @@ kt = 5.5e-6
 kd = 3.299e-7
 
 class BaseDrone:
-    def __init__(self, model, drone_name="drone", qvel_offset=0):
+    def __init__(self, model, drone_name="drone", payload_mass=0.0):
         self.GRAVITY = 9.81
         self.MAX_ROTOR_VELOCITY = MAX_ROTOR_VELOCITY
         self.arm_length = 0.17
         self.kt = kt
         self.kd = kd
         self.drone_mass = model.body(drone_name).mass[0]
-        self.qvel_offset = qvel_offset
+        self.drone_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, drone_name)
+        self.qvel_offset = model.body(self.drone_id).dofadr[0]
 
         self.gains = {
             'Kp_pos': np.diag([5.0, 5.0, 10.0]), 
@@ -106,8 +107,8 @@ class CableTetheredDrone(BaseDrone):
         return self.calculate_orientation_frame(f_total)
 
 class PayloadControlDrone(BaseDrone):
-    def __init__(self, model, drone_name="drone", qvel_offset=0, payload_mass=1.0, gains_platform=None):
-        super().__init__(model, drone_name, qvel_offset)
+    def __init__(self, model, drone_name="drone", payload_mass=1.0, gains_platform=None):
+        super().__init__(model, drone_name)
         self.m_payload = payload_mass
         self.gains_platform = gains_platform if gains_platform is not None else {'Kp_pl': 0.2, 'Kd_pl': 0.1}
         self.e3 = np.array([0.0, 0.0, 1.0])
@@ -148,8 +149,8 @@ class PayloadControlDrone(BaseDrone):
         return self.calculate_orientation_frame(f_total)
     
 class ACTScontrolDrone(BaseDrone):
-    def __init__(self, model, drone_name="drone", qvel_offset=0, payload_mass=1.0):
-        super().__init__(model, drone_name, qvel_offset)
+    def __init__(self, model, drone_name="drone", payload_mass=1.0):
+        super().__init__(model, drone_name)
         self.m_payload = payload_mass
         self.data  = mujoco.MjData(model)
         
@@ -164,7 +165,10 @@ class ACTScontrolDrone(BaseDrone):
         self.tau_star = tau_star
         self.p_hook = p_hook
 
-    def apply_wrench(self, drone_id, drone_dof_offset, a_star):
+    def apply_wrench(self, a_star):
+        drone_id = self.drone_id
+        drone_dof_offset = self.qvel_offset
+
         R_mat = self.data.xmat[drone_id].reshape(3, 3)
 
         a = self.data.xpos[drone_id].copy()

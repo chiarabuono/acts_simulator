@@ -2,76 +2,23 @@ import mujoco
 import mujoco.viewer
 import numpy as np
 import time
-from utils_control import ACTScontrolDrone
-from scipy.spatial.transform import Rotation as R
 from utils_optimization import *
 from params_acts import *
-import tkinter as tk
 import threading
 from time import strftime, localtime
 
+def set_cable_length(tendon_idx, max_len):
+    if max_len < 0: 
+        print(f"Error: Negative length {max_len}")
+        return
+        
+    cable_idx = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, f"cable_{tendon_idx}")
+    model.tendon_range[cable_idx, 1] = max_len
 
-drone1 = ACTScontrolDrone(
-    model, 
-    drone_name="drone_1", 
-    qvel_offset=drone_1_dof, 
-    payload_mass=m_payload
-)
+def get_cable_length(tendon_idx):
+    cable_idx = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, f"cable_{tendon_idx}")
+    return model.tendon_range[cable_idx, 1]
 
-drone2 = ACTScontrolDrone(
-    model, 
-    drone_name="drone_2", 
-    qvel_offset=drone_2_dof, 
-    payload_mass=m_payload 
-)
-
-drone3 = ACTScontrolDrone(
-    model, 
-    drone_name="drone_3", 
-    qvel_offset=drone_3_dof, 
-    payload_mass=m_payload
-)
-
-G_ACCEL = np.linalg.norm(model.opt.gravity) 
-W_MIN = 5.0                                  
-D_SAFE = 0.4
-
-PAYLOAD_MASS = model.body("payload").mass[0]
-DRONE_MASSES = [
-    model.body("drone_1").mass[0],
-    model.body("drone_2").mass[0],
-    model.body("drone_3").mass[0] ]
-
-L_CABLES_DRONES = [
-    model.tendon_range[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, "cable_1")][1],
-    model.tendon_range[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, "cable_2")][1],
-    model.tendon_range[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, "cable_3")][1] ]
-
-HOOK_OFFSETS_DRONE = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"hook_{i}")] for i in range(1, 4) ]
-HOOK_OFFSETS_GROUND = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"hook_{i}")] for i in range(4, 10) ]
-P_GROUND_ANCHORS = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground_anchor_{i}")] for i in range(4, 10)]
-
-GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground_anchor_{i}") for i in range(4, 10)]
-
-CABLE_FILTER_ALPHA = 0.005
-step_counter = 0
-
-p_drone_targets = np.array([
-    data.body("drone_1").xpos.copy(),
-    data.body("drone_2").xpos.copy(),
-    data.body("drone_3").xpos.copy(),
-])
-optimal_tensions = np.array([15.0, 15.0, 15.0])
-OPTIMIZATION_FREQUENCY = 1000
-
-kp = 20.0
-ctrl_params = {
-    'px': 0.0,
-    'py': 0.0,
-    'pz': 5.0,
-    'Kp_pos' : kp,
-    'Kd_pos' : 2*(kp)**0.5
-}
 
 def run_tuning_gui():
     root = tk.Tk()
@@ -136,7 +83,6 @@ def compute_Wp_star(p_payload, p_star):
     w_payload = data.cvel[payload_id][0:3].copy() 
     F_p_star = PAYLOAD_MASS * (np.array([0.0, 0.0, G_ACCEL])) + Kp_pos * (p_star - p_payload) + Kd_pos * (v_star - v_payload)
     
-    # Payload torque control loop 
     Kr, Kw = 15.0, 5.0
 
     q = data.body("payload").xquat
@@ -154,10 +100,10 @@ def compute_Wp_star(p_payload, p_star):
 
     return W_p_star
 
+step_counter = 0
 iteration = 1
+
 p_star = np.array([ctrl_params['px'], ctrl_params['py'], ctrl_params['pz']])
-R_star = np.eye(3)
-# R_star = R.from_quat([q_star[1], q_star[2], q_star[3], q_star[0]]).as_matrix()
 data.mocap_pos[0] = p_star
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while viewer.is_running():
@@ -183,8 +129,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         step_counter += 1
 
         a1_star, a2_star, a3_star = p_drone_targets[0], p_drone_targets[1], p_drone_targets[2]
-        
-        # 4. Winch Actuator Lengths Dynamic Update Loop
+
         for k in range(6):
             anchor_id = GROUND_ANCHOR_IDS[k]
             p_anchor_global = data.site_xpos[anchor_id] 
@@ -195,10 +140,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             current_len = get_cable_length(k + 4) 
             new_len = current_len + CABLE_FILTER_ALPHA * (rho_star - current_len)
             set_cable_length(k + 4, new_len)
-            
 
-
-        # 5. Distribute Reference Positions and Track Vectors via Drone Control Loop
         p_hook1 = p_star + R_mat_payload @ HOOK_OFFSETS_DRONE[0]
         p_hook2 = p_star + R_mat_payload @ HOOK_OFFSETS_DRONE[1]
         p_hook3 = p_star + R_mat_payload @ HOOK_OFFSETS_DRONE[2]
@@ -207,9 +149,9 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         drone2.set_cable_target(optimal_tensions[1], p_hook2)
         drone3.set_cable_target(optimal_tensions[2], p_hook3)
 
-        drone1.apply_wrench(drone_1_id, drone_1_dof, a1_star)
-        drone2.apply_wrench(drone_2_id, drone_2_dof, a2_star)
-        drone3.apply_wrench(drone_3_id, drone_3_dof, a3_star) 
+        drone1.apply_wrench(a1_star)
+        drone2.apply_wrench(a2_star)
+        drone3.apply_wrench(a3_star) 
 
         mujoco.mj_step(model, data)
         drone1.update_data(data)
