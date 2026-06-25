@@ -2,13 +2,17 @@ import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
+MAX_ROTOR_VELOCITY = 1666.0
+kt = 5.5e-6
+kd = 3.299e-7
+
 class BaseDrone:
     def __init__(self, model, drone_name="drone", qvel_offset=0):
         self.GRAVITY = 9.81
-        self.MAX_ROTOR_VELOCITY = 2000.0
+        self.MAX_ROTOR_VELOCITY = MAX_ROTOR_VELOCITY
         self.arm_length = 0.17
-        self.kt = 5.5e-6
-        self.kd = 3.299e-7
+        self.kt = kt
+        self.kd = kd
         self.drone_mass = model.body(drone_name).mass[0]
         self.qvel_offset = qvel_offset
 
@@ -141,4 +145,47 @@ class PayloadControlDrone(BaseDrone):
 
         f_total = f_base + (tau_star * u)                      # Eq 3.5
 
+        return self.calculate_orientation_frame(f_total)
+    
+class ACTScontrolDrone(BaseDrone):
+    def __init__(self, model, drone_name="drone", qvel_offset=0, payload_mass=1.0):
+        super().__init__(model, drone_name, qvel_offset)
+        self.m_payload = payload_mass
+        self.data  = mujoco.MjData(model)
+        
+        self.tau_star = 0.0
+        self.p_hook = np.zeros(3)
+    
+    def update_data(self, data):
+        self.data = data
+        
+    def set_cable_target(self, tau_star, p_hook):
+        """Updates the current payload hook position and desired tension for this drone."""
+        self.tau_star = tau_star
+        self.p_hook = p_hook
+
+    def apply_wrench(self, drone_id, drone_dof_offset, a_star):
+        R_mat = self.data.xmat[drone_id].reshape(3, 3)
+
+        a = self.data.xpos[drone_id].copy()
+        a_star_dot = np.array([0.0, 0.0, 0.0])
+        a_dot = self.data.qvel[drone_dof_offset : drone_dof_offset+3].copy()
+        current_quat = R.from_matrix(R_mat).as_quat()
+        angular_vel =  R_mat.T @ self.data.qvel[drone_dof_offset+3 : drone_dof_offset+6]
+
+        wrench, R_des = self.compute_motor_wrenches(a_star, a, a_star_dot, a_dot, current_quat, angular_vel)
+
+        self.data.xfrc_applied[drone_id, 0:3] = wrench[0] * R_des[:, 2] 
+        self.data.xfrc_applied[drone_id, 3:6] = R_des @ wrench[1:4]  
+    
+    def position_controller(self, pd, p, vd, v):
+        g_vec = np.array([0, 0, self.GRAVITY])
+        
+        f_base = self.gains["Kd_pos"] @ (vd - v) + self.gains["Kp_pos"] @ (pd - p) + (self.drone_mass * g_vec) # Eq 3.5 partial
+        
+        dist_cable = np.linalg.norm(p - self.p_hook)
+        u = (p - self.p_hook) / dist_cable if dist_cable > 0.001 else np.array([0.0, 0.0, 1.0]) 
+        
+        f_total = f_base + (self.tau_star * u)                
+        
         return self.calculate_orientation_frame(f_total)

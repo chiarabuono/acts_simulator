@@ -1,0 +1,142 @@
+<mujoco model="section_3_1_2_interactive_system">
+    <compiler angle="radian" autolimits="true"/>
+    <option gravity="0 0 -9.81" timestep="0.002"/>
+
+    <visual>
+        <headlight ambient="0.4 0.4 0.4" diffuse="0.8 0.8 0.8"/>
+        <rgba haze="0.15 0.25 0.35 1"/>
+    </visual>
+
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1="0.4 0.6 0.8" rgb2="0.0 0.0 0.0" width="512" height="512"/>
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" rgb2=".2 .3 .4" width="300" height="300"/>
+        <material name="grid_mat" texture="grid" texrepeat="10 10"/>
+        <material name="payload_mat" rgba="0.6 0.4 0.2 1"/>
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 10" dir="0 0 -1"/>
+        <geom name="ground" type="plane" size="10 10 0.1" material="grid_mat" condim="3" friction="1 0.005 0.0001"/>
+
+        <body name="target_marker" mocap="true" pos="0.0 0 1.0">
+            <geom type="sphere" size="0.06" rgba="1 0.5 0 0.4" contype="0" conaffinity="0"/>
+        </body>
+
+        <body name="payload" pos="0 0 0.1">
+            <freejoint name="payload_joint"/>
+            <inertial pos="0 0 0" mass="1.0" diaginertia="0.3467 0.3467 0.6667"/>
+            <geom name="payload_geom" type="box" size="1.0 1.0 0.1" 
+                material="payload_mat" condim="3" friction="1 0.005 0.0001"
+                rgba="0.6 0.4 0.2 0.35" />
+            <site name="payload_com" pos="0 0 0" size="0.06" rgba="1 0 0 1" type="sphere"/>
+
+            <!-- Top hooks for drones: 60°-rotated triangle vs ground anchors, radius 0.55 m -->
+            <site name="hook_1" pos=" 0.4763  0.2750  0.10" size="0.04" rgba="1 1 0 1"/>
+            <site name="hook_2" pos="-0.4763  0.2750  0.10" size="0.04" rgba="1 1 0 1"/>
+            <site name="hook_3" pos=" 0.0000 -0.5500  0.10" size="0.04" rgba="1 1 0 1"/>
+
+            <!--
+                Stewart bottom hooks: 3 paired points, each shared by 2 cables.
+                hook_4 = hook_6 = hook_9 position  (anchor A shares with these)
+                Naming kept as hook_4..9 to match Python range(4,10) lookup,
+                but physically only 3 unique positions:
+                  hook_4 & hook_9 → PA ( 0.0000,  0.5500, -0.10)  shared by cable_4 and cable_9
+                  hook_5 & hook_6 → PB (-0.4763, -0.2750, -0.10)  shared by cable_5 and cable_6
+                  hook_7 & hook_8 → PC ( 0.4763, -0.2750, -0.10)  shared by cable_7 and cable_8
+            -->
+            <site name="hook_4" pos=" 0.0000  0.5500 -0.10" size="0.06" rgba="1 0.2 0.2 1"/>
+            <site name="hook_5" pos="-0.4763 -0.2750 -0.10" size="0.06" rgba="0.2 1 0.2 1"/>
+            <site name="hook_6" pos="-0.4763 -0.2750 -0.10" size="0.06" rgba="0.2 1 0.2 1"/>
+            <site name="hook_7" pos=" 0.4763 -0.2750 -0.10" size="0.06" rgba="0.2 0.2 1 1"/>
+            <site name="hook_8" pos=" 0.4763 -0.2750 -0.10" size="0.06" rgba="0.2 0.2 1 1"/>
+            <site name="hook_9" pos=" 0.0000  0.5500 -0.10" size="0.06" rgba="1 0.2 0.2 1"/>
+        </body>
+
+        <!-- Drones: 60°-rotated triangle vs ground anchors, radius 1.1 m -->
+        <body name="drone_1" pos=" 0.4763  0.2750  0.25">
+            <freejoint name="drone_1_joint"/>
+            <inertial pos="0 0 0" mass="2.0" diaginertia="0.01 0.01 0.015"/>
+            <geom name="drone_1_geom" type="cylinder" size="0.15 0.05" rgba="0 0.7 0.9 1" mass="2.0" condim="3" friction="1 0.005 0.0001"/>
+            <site name="drone_1_com" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
+        </body>
+
+        <body name="drone_2" pos="-0.4763  0.2750  0.25">
+            <freejoint name="drone_2_joint"/>
+            <inertial pos="0 0 0" mass="2.0" diaginertia="0.01 0.01 0.015"/>
+            <geom name="drone_2_geom" type="cylinder" size="0.15 0.05" rgba="0 0.7 0.9 1" mass="2.0" condim="3" friction="1 0.005 0.0001"/>
+            <site name="drone_2_com" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
+        </body>
+
+        <body name="drone_3" pos=" 0.0000 -0.5500  0.25">
+            <freejoint name="drone_3_joint"/>
+            <inertial pos="0 0 0" mass="2.0" diaginertia="0.01 0.01 0.015"/>
+            <geom name="drone_3_geom" type="cylinder" size="0.15 0.05" rgba="0 0.7 0.9 1" mass="2.0" condim="3" friction="1 0.005 0.0001"/>
+            <site name="drone_3_com" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
+        </body>
+
+        <!--
+            Ground anchors: 3 paired points, each shared by 2 cables.
+            Named ground_anchor_4..9 to match Python range(4,10) lookup.
+              ground_anchor_4 & ground_anchor_5 → GA ( 0.0000,  1.1000, 0)
+              ground_anchor_6 & ground_anchor_7 → GB (-0.9526, -0.5500, 0)
+              ground_anchor_8 & ground_anchor_9 → GC ( 0.9526, -0.5500, 0)
+        -->
+        <site name="ground_anchor_4" pos=" 0.0000  1.1000  0" size="0.07" rgba="1 0.2 0.2 1"/>
+        <site name="ground_anchor_5" pos=" 0.0000  1.1000  0" size="0.07" rgba="1 0.2 0.2 1"/>
+        <site name="ground_anchor_6" pos="-0.9526 -0.5500  0" size="0.07" rgba="0.2 1 0.2 1"/>
+        <site name="ground_anchor_7" pos="-0.9526 -0.5500  0" size="0.07" rgba="0.2 1 0.2 1"/>
+        <site name="ground_anchor_8" pos=" 0.9526 -0.5500  0" size="0.07" rgba="0.2 0.2 1 1"/>
+        <site name="ground_anchor_9" pos=" 0.9526 -0.5500  0" size="0.07" rgba="0.2 0.2 1 1"/>
+
+    </worldbody>
+
+    <tendon>
+        <!-- Drone lift cables -->
+        <spatial name="cable_1" limited="true" range="0 1.5" width="0.015" rgba="0 0.8 0 1">
+            <site site="drone_1_com"/>
+            <site site="hook_1"/>
+        </spatial>
+        <spatial name="cable_2" limited="true" range="0 1.5" width="0.015" rgba="0 0.8 0 1">
+            <site site="drone_2_com"/>
+            <site site="hook_2"/>
+        </spatial>
+        <spatial name="cable_3" limited="true" range="0 1.5" width="0.015" rgba="0 0.8 0 1">
+            <site site="drone_3_com"/>
+            <site site="hook_3"/>
+        </spatial>
+
+        <!--
+            Gough-Stewart ground cables, pairing pattern:
+              cable_4: GA → PA  (anchor_4 → hook_4)
+              cable_5: GA → PB  (anchor_5 → hook_5)
+              cable_6: GB → PB  (anchor_6 → hook_6)
+              cable_7: GB → PC  (anchor_7 → hook_7)
+              cable_8: GC → PC  (anchor_8 → hook_8)
+              cable_9: GC → PA  (anchor_9 → hook_9)
+        -->
+        <spatial name="cable_4" limited="true" range="0 5.0" width="0.015" rgba="1 0.3 0.3 1">
+            <site site="ground_anchor_4"/>
+            <site site="hook_4"/>
+        </spatial>
+        <spatial name="cable_5" limited="true" range="0 5.0" width="0.015" rgba="1 0.6 0.3 1">
+            <site site="ground_anchor_5"/>
+            <site site="hook_5"/>
+        </spatial>
+        <spatial name="cable_6" limited="true" range="0 5.0" width="0.015" rgba="0.3 1 0.3 1">
+            <site site="ground_anchor_6"/>
+            <site site="hook_6"/>
+        </spatial>
+        <spatial name="cable_7" limited="true" range="0 5.0" width="0.015" rgba="0.3 1 0.6 1">
+            <site site="ground_anchor_7"/>
+            <site site="hook_7"/>
+        </spatial>
+        <spatial name="cable_8" limited="true" range="0 5.0" width="0.015" rgba="0.3 0.3 1 1">
+            <site site="ground_anchor_8"/>
+            <site site="hook_8"/>
+        </spatial>
+        <spatial name="cable_9" limited="true" range="0 5.0" width="0.015" rgba="0.7 0.3 1 1">
+            <site site="ground_anchor_9"/>
+            <site site="hook_9"/>
+        </spatial>
+    </tendon>
+</mujoco>
