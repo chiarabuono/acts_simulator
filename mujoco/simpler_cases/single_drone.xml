@@ -1,0 +1,28 @@
+<mujoco model="quadrotor_system">
+  <option gravity="0 0 -9.81" timestep="0.002"/>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" rgb2=".2 .3 .4" width="300" height="300"/>
+    <material name="grid_mat" texture="grid" texrepeat="10 10"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 10" dir="0 0 -1"/>
+    <geom type="plane" size="10 10 0.1" material="grid_mat"/>
+
+    <body name="drone" pos="0 0 0.5">
+      <freejoint name="drone_joint"/>
+      <inertial pos="0 0 0" mass="1.0" diaginertia="0.005 0.005 0.01"/>
+      <geom name="drone_geom" type="cylinder" size="0.17 0.05" rgba="0 0.7 0.9 1" mass="1.0"/>
+      <site name="forward_marker" type="box" pos="0.17 0 0" size="0.04 0.01 0.01" rgba="1 0 0 1"/>
+      <site name="left_marker" type="box" pos="0 0.17 0" size="0.01 0.04 0.01" rgba="0 1 0 1"/>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <motor name="motor_1" joint="drone_joint" gear="1 0 0 0 0 0"/>
+    <motor name="motor_2" joint="drone_joint" gear="0 1 0 0 0 0"/>
+    <motor name="motor_3" joint="drone_joint" gear="0 0 1 0 0 0"/>
+    <motor name="motor_4" joint="drone_joint" gear="0 0 0 1 0 0"/>
+  </actuator>
+</mujoco>

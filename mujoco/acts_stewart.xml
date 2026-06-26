@@ -53,21 +53,21 @@
         </body>
 
         <!-- Drones: 60°-rotated triangle vs ground anchors, radius 1.1 m -->
-        <body name="drone_1" pos=" 0.4763  0.2750  0.25">
+        <body name="drone_1" pos=" 0.9526  0.5500  0.25">
             <freejoint name="drone_1_joint"/>
             <inertial pos="0 0 0" mass="2.0" diaginertia="0.01 0.01 0.015"/>
             <geom name="drone_1_geom" type="cylinder" size="0.15 0.05" rgba="0 0.7 0.9 1" mass="2.0" condim="3" friction="1 0.005 0.0001"/>
             <site name="drone_1_com" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
         </body>
 
-        <body name="drone_2" pos="-0.4763  0.2750  0.25">
+        <body name="drone_2" pos="-0.9526  0.5500  0.25">
             <freejoint name="drone_2_joint"/>
             <inertial pos="0 0 0" mass="2.0" diaginertia="0.01 0.01 0.015"/>
             <geom name="drone_2_geom" type="cylinder" size="0.15 0.05" rgba="0 0.7 0.9 1" mass="2.0" condim="3" friction="1 0.005 0.0001"/>
             <site name="drone_2_com" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
         </body>
 
-        <body name="drone_3" pos=" 0.0000 -0.5500  0.25">
+        <body name="drone_3" pos=" 0.0000 -1.1000  0.25">
             <freejoint name="drone_3_joint"/>
             <inertial pos="0 0 0" mass="2.0" diaginertia="0.01 0.01 0.015"/>
             <geom name="drone_3_geom" type="cylinder" size="0.15 0.05" rgba="0 0.7 0.9 1" mass="2.0" condim="3" friction="1 0.005 0.0001"/>
@@ -114,27 +114,27 @@
               cable_8: GC → PC  (anchor_8 → hook_8)
               cable_9: GC → PA  (anchor_9 → hook_9)
         -->
-        <spatial name="cable_4" limited="true" range="0 5.0" width="0.015" rgba="1 0.3 0.3 1">
+        <spatial name="cable_4" limited="true" range="0 1.5" width="0.015" rgba="1 0.3 0.3 1">
             <site site="ground_anchor_4"/>
             <site site="hook_4"/>
         </spatial>
-        <spatial name="cable_5" limited="true" range="0 5.0" width="0.015" rgba="1 0.6 0.3 1">
+        <spatial name="cable_5" limited="true" range="0 1.5" width="0.015" rgba="1 0.6 0.3 1">
             <site site="ground_anchor_5"/>
             <site site="hook_5"/>
         </spatial>
-        <spatial name="cable_6" limited="true" range="0 5.0" width="0.015" rgba="0.3 1 0.3 1">
+        <spatial name="cable_6" limited="true" range="0 1.5" width="0.015" rgba="0.3 1 0.3 1">
             <site site="ground_anchor_6"/>
             <site site="hook_6"/>
         </spatial>
-        <spatial name="cable_7" limited="true" range="0 5.0" width="0.015" rgba="0.3 1 0.6 1">
+        <spatial name="cable_7" limited="true" range="0 1.5" width="0.015" rgba="0.3 1 0.6 1">
             <site site="ground_anchor_7"/>
             <site site="hook_7"/>
         </spatial>
-        <spatial name="cable_8" limited="true" range="0 5.0" width="0.015" rgba="0.3 0.3 1 1">
+        <spatial name="cable_8" limited="true" range="0 1.5" width="0.015" rgba="0.3 0.3 1 1">
             <site site="ground_anchor_8"/>
             <site site="hook_8"/>
         </spatial>
-        <spatial name="cable_9" limited="true" range="0 5.0" width="0.015" rgba="0.7 0.3 1 1">
+        <spatial name="cable_9" limited="true" range="0 1.5" width="0.015" rgba="0.7 0.3 1 1">
             <site site="ground_anchor_9"/>
             <site site="hook_9"/>
         </spatial>
