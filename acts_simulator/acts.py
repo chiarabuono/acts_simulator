@@ -49,13 +49,13 @@ def run_tuning_gui():
     s_pz.pack(fill='x', padx=10)
 
     tk.Label(root, text="Kp Payload").pack()
-    s_kp = tk.Scale(root, from_=0.5, to=20.0, resolution=0.05, orient='horizontal',
+    s_kp = tk.Scale(root, from_=0.5, to=40.0, resolution=0.05, orient='horizontal',
                     command=lambda v: update_val('kp', v))
     s_kp.set(ctrl_params['Kp_pos'])
     s_kp.pack(fill='x', padx=10)
 
     tk.Label(root, text="Kd payload").pack()
-    s_kd = tk.Scale(root, from_=0.5, to=20.0, resolution=0.05, orient='horizontal',
+    s_kd = tk.Scale(root, from_=0.5, to=40.0, resolution=0.05, orient='horizontal',
                     command=lambda v: update_val('kd', v))
     s_kd.set(ctrl_params['Kd_pos'])
     s_kd.pack(fill='x', padx=10)

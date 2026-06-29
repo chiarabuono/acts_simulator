@@ -42,11 +42,11 @@ GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground
 CABLE_FILTER_ALPHA = 0.005
 OPTIMIZATION_FREQUENCY = 1000
 
-kp = 20.0
+kp = 21.0
 ctrl_params = {
-    'px': 0.0,
+    'px': 0.5,
     'py': 0.0,
-    'pz': 5.0,
+    'pz': 2.0,
     'Kp_pos' : kp,
     'Kd_pos' : 2*(kp)**0.5
 }
