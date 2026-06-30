@@ -20,7 +20,7 @@ def compute_payload_jacobian(p_payload, R_mat_payload, p_anchors, hook_offsets):
 
 def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors, 
                              drone_masses, l_cables_drone, hook_offsets_drone, 
-                             hook_offsets_ground, W_p_star, tau_min=5.0, w_min=5.0, d_safe=0.5, g=9.81):
+                             hook_offsets_ground, W_p_star, tau_min=5.5, w_min=5.0, d_safe=0.5, g=9.81):
     """
     Optimizes drone positions p_a to minimize propulsion force squaring based on the 
     simplified strategy where every cable tension is fixed at the minimum admissible value tau_min.

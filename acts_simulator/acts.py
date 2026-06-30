@@ -6,6 +6,7 @@ from utils_optimization import *
 from params_acts import *
 from utils_visual import * 
 from time import strftime, localtime
+from utils_performance_indices import compute_rig_performance_indices
 
 def set_cable_length(tendon_idx, max_len):
     if max_len < 0: 
@@ -18,6 +19,24 @@ def set_cable_length(tendon_idx, max_len):
 def get_cable_length(tendon_idx):
     cable_idx = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, f"cable_{tendon_idx}")
     return model.tendon_range[cable_idx, 1]
+
+def get_cable_tension(model, data, tendon_name):
+    """
+    Returns the actual constraint force (tension) MuJoCo is applying on a
+    passive, limited spatial tendon (your cable_1..cable_9). These tendons
+    have no stiffness/damping/actuator, so the only force present is the
+    unilateral limit constraint force enforced when the cable is taut.
+
+    Returns 0.0 if the cable is slack (not at its length limit this step).
+    """
+    tendon_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, tendon_name)
+
+    for i in range(data.nefc):
+        if (data.efc_type[i] == mujoco.mjtConstraint.mjCNSTR_LIMIT_TENDON
+                and data.efc_id[i] == tendon_id):
+            return -data.efc_force[i]  # sign: limit constraint force opposes extension -> tension is positive when pulling
+
+    return 0.0
 
 def quaternon_multiply(q1, q2):
     w1, x1, y1, z1 = q1
@@ -76,10 +95,22 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             W_p_star = compute_Wp_star(p_payload, p_star, q_star)
 
             p_drone_targets, optimal_tensions = optimize_drone_positions(
-                p_star, R_star, P_GROUND_ANCHORS, DRONE_MASSES, 
-                L_CABLES_DRONES, HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND, 
+                p_star, R_star, P_GROUND_ANCHORS, DRONE_MASSES,
+                L_CABLES_DRONES, HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
                 W_p_star, w_min=W_MIN, d_safe=D_SAFE, g=G_ACCEL
             )
+
+            tau_drone_actual = np.array([get_cable_tension(model, data, f"cable_{i}") for i in (1, 2, 3)])
+            tau_ground_actual = np.array([get_cable_tension(model, data, f"cable_{i}") for i in (4, 5, 6, 7, 8, 9)])
+
+            indices = compute_rig_performance_indices(
+                p_payload, R_mat_payload,
+                p_drone_targets, P_GROUND_ANCHORS,
+                HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
+                tau_drone_actual, tau_ground_actual,
+                W_p_star, PAYLOAD_MASS,
+            )
+            plot.update(data.time, indices)
             iteration += 1
         step_counter += 1
 

@@ -1,6 +1,9 @@
 import tkinter as tk
 import threading
 from params_acts import ctrl_params
+import matplotlib.pyplot as plt
+from collections import deque
+import numpy as np
 
 def run_tuning_gui():
     root = tk.Tk()
@@ -83,3 +86,63 @@ def run_tuning_gui():
 
 gui_thread = threading.Thread(target=run_tuning_gui, daemon=True)
 gui_thread.start()
+
+ 
+class LiveIndexPlot:
+ 
+    GROUPS = {
+        "indeces": ["conditioning_index", "worst_case_capacity_margin"],        #TODO: give best name
+        "wrench_margin": ["capacity_margin", "radius_available_wrench"],
+        "manipulability": ["manipulability"],
+        "composite_score" : ["composite_score"]
+    }
+ 
+    def __init__(self, max_points: int = 500):
+        plt.ion()
+        self.fig, axes = plt.subplots(4, 1, sharex=True, figsize=(7, 8))
+        self.axes = {
+            "indeces": axes[0],
+            "wrench_margin": axes[1],
+            "manipulability": axes[2],
+            "composite_score" : axes[3]
+        }
+ 
+        self.t = deque(maxlen=max_points)
+        self.series = {}
+        self.lines = {}
+ 
+        for group_name, keys in self.GROUPS.items():
+            ax = self.axes[group_name]
+            for k in keys:
+                self.series[k] = deque(maxlen=max_points)
+                self.lines[k] = ax.plot([], [], label=k)[0]
+            ax.legend(loc="upper right", fontsize=8)
+ 
+        self.axes["wrench_margin"].axhline(0, color="gray", linestyle="--", linewidth=0.8)
+        # self.axes["normalized"].set_ylabel("index, choose a better name")
+        # self.axes["wrench_margin"].set_ylabel("wrench margin")
+        # self.axes["manipulability"].set_ylabel("manipulability")
+        self.axes["composite_score"].set_xlabel("time [s]")
+ 
+        self.fig.tight_layout()
+ 
+    def update(self, t: float, indices: dict):
+        self.t.append(t)
+ 
+        for k, line in self.lines.items():
+            value = indices.get(k, np.nan)
+            self.series[k].append(value)
+            line.set_data(self.t, self.series[k])
+ 
+        for ax in self.axes.values():
+            ax.relim()
+            ax.autoscale_view()
+ 
+        self.fig.canvas.draw_idle()
+        self.fig.canvas.flush_events()
+ 
+    def close(self):
+        plt.close(self.fig)
+
+
+plot = LiveIndexPlot()

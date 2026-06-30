@@ -42,20 +42,21 @@ P_GROUND_ANCHORS = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_
 GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground_anchor_{i}") for i in range(4, 10)]
 
 # ------ Optimization parameters  ------------------------------------------------------------
-CABLE_FILTER_ALPHA = 0.005
+CABLE_FILTER_ALPHA = 0.001
 OPTIMIZATION_FREQUENCY = 1000
 
 kp = 21.0
+kr = 50.0
 ctrl_params = {
     'px': 0.5,
     'py': 0.0,
     'pz': 2.0,
     'Kp_pos' : kp,
     'Kd_pos' : 2*(kp)**0.5,
-    'Kr' : 15.0,
-    'Kw' : 5.0,
+    'Kr' : kr,
+    'Kw' : 2*(kr)**0.5,
     'quat_w' : 1.0,
-    'quat_x' : 0.50,
+    'quat_x' : 0.0,
     'quat_y' : 0.0,
     'quat_z' : 0.0
 }
