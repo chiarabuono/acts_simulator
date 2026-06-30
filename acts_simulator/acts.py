@@ -4,7 +4,7 @@ import numpy as np
 import time
 from utils_optimization import *
 from params_acts import *
-import threading
+from utils_visual import * 
 from time import strftime, localtime
 
 def set_cable_length(tendon_idx, max_len):
@@ -19,52 +19,6 @@ def get_cable_length(tendon_idx):
     cable_idx = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, f"cable_{tendon_idx}")
     return model.tendon_range[cable_idx, 1]
 
-
-def run_tuning_gui():
-    root = tk.Tk()
-    root.title("Section 3.1.3 Position Target Mixer")
-    root.geometry("360x700")
-
-    def update_val(key, val):
-        ctrl_params[key] = float(val)
-
-    tk.Label(root, text="Desired Payload Coordinates (p*)", font=('Helvetica', 10, 'bold')).pack(pady=5)
-
-    tk.Label(root, text="Target X Position").pack()
-    s_px = tk.Scale(root, from_=-3.0, to=3.0, resolution=0.05, orient='horizontal',
-                    command=lambda v: update_val('px', v))
-    s_px.set(ctrl_params['px'])
-    s_px.pack(fill='x', padx=10)
-
-    tk.Label(root, text="Target Y Position").pack()
-    s_py = tk.Scale(root, from_=-2.0, to=2.0, resolution=0.05, orient='horizontal',
-                    command=lambda v: update_val('py', v))
-    s_py.set(ctrl_params['py'])
-    s_py.pack(fill='x', padx=10)
-
-    tk.Label(root, text="Target Z Position (Height)").pack()
-    s_pz = tk.Scale(root, from_=0.5, to=5.0, resolution=0.05, orient='horizontal',
-                    command=lambda v: update_val('pz', v))
-    s_pz.set(ctrl_params['pz'])
-    s_pz.pack(fill='x', padx=10)
-
-    tk.Label(root, text="Kp Payload").pack()
-    s_kp = tk.Scale(root, from_=0.5, to=40.0, resolution=0.05, orient='horizontal',
-                    command=lambda v: update_val('kp', v))
-    s_kp.set(ctrl_params['Kp_pos'])
-    s_kp.pack(fill='x', padx=10)
-
-    tk.Label(root, text="Kd payload").pack()
-    s_kd = tk.Scale(root, from_=0.5, to=40.0, resolution=0.05, orient='horizontal',
-                    command=lambda v: update_val('kd', v))
-    s_kd.set(ctrl_params['Kd_pos'])
-    s_kd.pack(fill='x', padx=10)
-
-    root.mainloop()
-
-gui_thread = threading.Thread(target=run_tuning_gui, daemon=True)
-gui_thread.start()
-
 def quaternon_multiply(q1, q2):
     w1, x1, y1, z1 = q1
     w2, x2, y2, z2 = q2
@@ -76,17 +30,16 @@ def quaternon_multiply(q1, q2):
         w1*z2 + x1*y2 - y1*x2 + z1*w2,
     ])
 
-def compute_Wp_star(p_payload, p_star):
+def compute_Wp_star(p_payload, p_star, q_star):
     Kp_pos, Kd_pos = ctrl_params['Kp_pos'], ctrl_params['Kd_pos']
     v_star = np.zeros(3)
     v_payload = data.cvel[payload_id][3:6].copy()                 
     w_payload = data.cvel[payload_id][0:3].copy() 
     F_p_star = PAYLOAD_MASS * (np.array([0.0, 0.0, G_ACCEL])) + Kp_pos * (p_star - p_payload) + Kd_pos * (v_star - v_payload)
     
-    Kr, Kw = 15.0, 5.0
+    Kr, Kw = ctrl_params['Kr'], ctrl_params['Kw']
 
     q = data.body("payload").xquat
-    q_star = np.array([1.0, 0.0, 0.0, 0.0])
     q_inv = np.array([q[0], -q[1], -q[2], -q[3]])
     q_err = quaternon_multiply(q_inv, q_star)
     sign = np.sign(q_err[0]) if q_err[0] != 0 else 1.0
@@ -103,14 +56,16 @@ def compute_Wp_star(p_payload, p_star):
 step_counter = 0
 iteration = 1
 
-p_star = np.array([ctrl_params['px'], ctrl_params['py'], ctrl_params['pz']])
-data.mocap_pos[0] = p_star
+p_star, q_star, R_star = read_desired_pose()
+set_desired_pose(p_star, q_star)
+
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while viewer.is_running():
         step_start = time.time()
         viewer.sync()
-        p_star = np.array([ctrl_params['px'], ctrl_params['py'], ctrl_params['pz']])
-        data.mocap_pos[0] = p_star
+
+        p_star, q_star, R_star = read_desired_pose()
+        set_desired_pose(p_star, q_star)
         
         # 1. Capture current payload operational state 
         p_payload = data.body("payload").xpos                
@@ -118,7 +73,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
 
         if step_counter % OPTIMIZATION_FREQUENCY == 0:
             print(f"{iteration} Computing {strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))}")
-            W_p_star = compute_Wp_star(p_payload, p_star)
+            W_p_star = compute_Wp_star(p_payload, p_star, q_star)
 
             p_drone_targets, optimal_tensions = optimize_drone_positions(
                 p_star, R_star, P_GROUND_ANCHORS, DRONE_MASSES, 
