@@ -21,10 +21,15 @@ drone = FreeFlightDrone(model, drone_name="drone")
 
 drone_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "drone")
 
-# Shared state parameters for the tuning GUI
 ctrl_params = {
     'px': 1.0, 'py': -1.0, 'pz': 1.5,
 }
+
+# ---------------- Actuators and winch ids ---------------------------------------------
+thrust_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, "thrust")
+roll_id   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, "roll")
+pitch_id  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, "pitch")
+yaw_id    = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, "yaw")
 
 def run_tuning_gui():
     root = tk.Tk()
@@ -52,7 +57,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
     while viewer.is_running():
         step_start = time.time()
 
-        # 1. State extraction directly from MuJoCo structures
+        # State extraction directly from MuJoCo structures
         p = data.xpos[drone_id].copy()
         v = data.qvel[0:3].copy()
         
@@ -63,16 +68,15 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         # Local body angular velocities
         angular_vel = R_mat.T @ data.qvel[3:6]
 
-        # 2. Map GUI references to Target Trajectory state arrays
         pd = np.array([ctrl_params['px'], ctrl_params['py'], ctrl_params['pz']])
         vd = np.zeros(3)
 
-        # 3. Calculate system wrenches using the ROS 2 node's algorithmic logic
         wrench, R_des = drone.compute_motor_wrenches(pd, p, vd, v, current_quat, angular_vel)
 
-        # 4. Map body wrench array values to MuJoCo applied forces vectors
-        data.xfrc_applied[drone_id, 0:3] = wrench[0] * R_mat[:, 2] # Apply collective thrust along body Z axis
-        data.xfrc_applied[drone_id, 3:6] = R_mat @ wrench[1:4]     # Map roll/pitch/yaw moments to global frame
+        data.ctrl[thrust_id] = wrench[0]  # Thrust
+        data.ctrl[roll_id]   = wrench[1]  # Roll torque
+        data.ctrl[pitch_id]  = wrench[2]  # Pitch torque
+        data.ctrl[yaw_id]    = wrench[3]  # Yaw torque
 
         # Step simulation physics
         mujoco.mj_step(model, data)

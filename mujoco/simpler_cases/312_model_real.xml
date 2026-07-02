@@ -35,4 +35,12 @@
             <site site="drone_attachment"/>
         </spatial>
     </tendon>
+
+    <actuator>
+      <motor name="thrust" site="drone_attachment" gear="0 0 1 0 0 0"/>
+      <motor name="roll"   site="drone_attachment" gear="0 0 0 1 0 0"/>
+      <motor name="pitch"  site="drone_attachment" gear="0 0 0 0 1 0"/>
+      <motor name="yaw"    site="drone_attachment" gear="0 0 0 0 0 1"/>
+      <position name="cable_2_winch" tendon="cable_2" kp="2000" kv="150" ctrlrange="0 10.0"/>
+    </actuator>
 </mujoco>

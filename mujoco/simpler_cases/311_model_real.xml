@@ -30,4 +30,11 @@
     </spatial>
   </tendon>
 
+  <actuator>
+      <motor name="thrust" site="attachment_a" gear="0 0 1 0 0 0"/>
+      <motor name="roll"   site="attachment_a" gear="0 0 0 1 0 0"/>
+      <motor name="pitch"  site="attachment_a" gear="0 0 0 0 1 0"/>
+      <motor name="yaw"    site="attachment_a" gear="0 0 0 0 0 1"/>
+  </actuator>
+
 </mujoco>

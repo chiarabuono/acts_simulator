@@ -87,29 +87,66 @@
             <site site="hook_3"/>
         </spatial>
 
-        <spatial name="cable_4" limited="true" range="0 1.5" width="0.015" rgba="1 0.3 0.3 1">
+        <spatial name="cable_4" limited="true" range="0 40.0" width="0.015" rgba="1 0.3 0.3 1">
             <site site="ground_anchor_4"/>
             <site site="hook_4"/>
         </spatial>
-        <spatial name="cable_5" limited="true" range="0 1.5" width="0.015" rgba="1 0.6 0.3 1">
+        <spatial name="cable_5" limited="true" range="0 40.0" width="0.015" rgba="1 0.6 0.3 1">
             <site site="ground_anchor_5"/>
             <site site="hook_5"/>
         </spatial>
-        <spatial name="cable_6" limited="true" range="0 1.5" width="0.015" rgba="0.3 1 0.3 1">
+        <spatial name="cable_6" limited="true" range="0 40.0" width="0.015" rgba="0.3 1 0.3 1">
             <site site="ground_anchor_6"/>
             <site site="hook_6"/>
         </spatial>
-        <spatial name="cable_7" limited="true" range="0 1.5" width="0.015" rgba="0.3 1 0.6 1">
+        <spatial name="cable_7" limited="true" range="0 40.0" width="0.015" rgba="0.3 1 0.6 1">
             <site site="ground_anchor_7"/>
             <site site="hook_7"/>
         </spatial>
-        <spatial name="cable_8" limited="true" range="0 1.5" width="0.015" rgba="0.3 0.3 1 1">
+        <spatial name="cable_8" limited="true" range="0 40.0" width="0.015" rgba="0.3 0.3 1 1">
             <site site="ground_anchor_8"/>
             <site site="hook_8"/>
         </spatial>
-        <spatial name="cable_9" limited="true" range="0 1.5" width="0.015" rgba="0.7 0.3 1 1">
+        <spatial name="cable_9" limited="true" range="0 40.0" width="0.015" rgba="0.7 0.3 1 1">
             <site site="ground_anchor_9"/>
             <site site="hook_9"/>
         </spatial>
     </tendon>
+
+    <actuator>
+      <motor name="drone_1_thrust" site="drone_1_com" gear="0 0 1 0 0 0"/>
+      <motor name="drone_1_roll"   site="drone_1_com" gear="0 0 0 1 0 0"/>
+      <motor name="drone_1_pitch"  site="drone_1_com" gear="0 0 0 0 1 0"/>
+      <motor name="drone_1_yaw"    site="drone_1_com" gear="0 0 0 0 0 1"/>
+
+      <motor name="drone_2_thrust" site="drone_2_com" gear="0 0 1 0 0 0"/>
+      <motor name="drone_2_roll"   site="drone_2_com" gear="0 0 0 1 0 0"/>
+      <motor name="drone_2_pitch"  site="drone_2_com" gear="0 0 0 0 1 0"/>
+      <motor name="drone_2_yaw"    site="drone_2_com" gear="0 0 0 0 0 1"/>
+
+      <motor name="drone_3_thrust" site="drone_3_com" gear="0 0 1 0 0 0"/>
+      <motor name="drone_3_roll"   site="drone_3_com" gear="0 0 0 1 0 0"/>
+      <motor name="drone_3_pitch"  site="drone_3_com" gear="0 0 0 0 1 0"/>
+      <motor name="drone_3_yaw"    site="drone_3_com" gear="0 0 0 0 0 1"/>
+
+      <position name="cable_4_winch" tendon="cable_4" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_5_winch" tendon="cable_5" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_6_winch" tendon="cable_6" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_7_winch" tendon="cable_7" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_8_winch" tendon="cable_8" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_9_winch" tendon="cable_9" kp="2000" kv="150" ctrlrange="0 40.0"/>
+  </actuator>
+
+<sensor>
+    <tendonlimitfrc name="cable_1_tension" tendon="cable_1"/>
+    <tendonlimitfrc name="cable_2_tension" tendon="cable_2"/>
+    <tendonlimitfrc name="cable_3_tension" tendon="cable_3"/>
+    <tendonlimitfrc name="cable_4_tension" tendon="cable_4"/>
+    <tendonlimitfrc name="cable_5_tension" tendon="cable_5"/>
+    <tendonlimitfrc name="cable_6_tension" tendon="cable_6"/>
+    <tendonlimitfrc name="cable_7_tension" tendon="cable_7"/>
+    <tendonlimitfrc name="cable_8_tension" tendon="cable_8"/>
+    <tendonlimitfrc name="cable_9_tension" tendon="cable_9"/>
+</sensor>
+
 </mujoco>

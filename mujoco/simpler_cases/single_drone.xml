@@ -14,15 +14,18 @@
       <freejoint name="drone_joint"/>
       <inertial pos="0 0 0" mass="1.0" diaginertia="0.005 0.005 0.01"/>
       <geom name="drone_geom" type="cylinder" size="0.17 0.05" rgba="0 0.7 0.9 1" mass="1.0"/>
+      
+      <site name="attachment_a" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
+      
       <site name="forward_marker" type="box" pos="0.17 0 0" size="0.04 0.01 0.01" rgba="1 0 0 1"/>
       <site name="left_marker" type="box" pos="0 0.17 0" size="0.01 0.04 0.01" rgba="0 1 0 1"/>
     </body>
   </worldbody>
 
   <actuator>
-    <motor name="motor_1" joint="drone_joint" gear="1 0 0 0 0 0"/>
-    <motor name="motor_2" joint="drone_joint" gear="0 1 0 0 0 0"/>
-    <motor name="motor_3" joint="drone_joint" gear="0 0 1 0 0 0"/>
-    <motor name="motor_4" joint="drone_joint" gear="0 0 0 1 0 0"/>
+      <motor name="thrust" site="attachment_a" gear="0 0 1 0 0 0"/>
+      <motor name="roll"   site="attachment_a" gear="0 0 0 1 0 0"/>
+      <motor name="pitch"  site="attachment_a" gear="0 0 0 0 1 0"/>
+      <motor name="yaw"    site="attachment_a" gear="0 0 0 0 0 1"/>
   </actuator>
 </mujoco>

@@ -156,6 +156,12 @@ class ACTScontrolDrone(BaseDrone):
         
         self.tau_star = 0.0
         self.p_hook = np.zeros(3)
+
+        # ---------------- Actuators and winch ids ---------------------------------------------
+        self.thrust_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, f"{drone_name}_thrust")
+        self.roll_id   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, f"{drone_name}_roll")
+        self.pitch_id  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, f"{drone_name}_pitch")
+        self.yaw_id    = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, f"{drone_name}_yaw")
     
     def update_data(self, data):
         self.data = data
@@ -179,8 +185,10 @@ class ACTScontrolDrone(BaseDrone):
 
         wrench, R_des = self.compute_motor_wrenches(a_star, a, a_star_dot, a_dot, current_quat, angular_vel)
 
-        self.data.xfrc_applied[drone_id, 0:3] = wrench[0] * R_des[:, 2] 
-        self.data.xfrc_applied[drone_id, 3:6] = R_des @ wrench[1:4]  
+        self.data.ctrl[self.thrust_id] = wrench[0]  # Thrust
+        self.data.ctrl[self.roll_id]   = wrench[1]  # Roll torque
+        self.data.ctrl[self.pitch_id]  = wrench[2]  # Pitch torque
+        self.data.ctrl[self.yaw_id]    = wrench[3]  # Yaw torque  
     
     def position_controller(self, pd, p, vd, v):
         g_vec = np.array([0, 0, self.GRAVITY])

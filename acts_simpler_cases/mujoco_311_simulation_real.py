@@ -30,6 +30,12 @@ drone = CableTetheredDrone(
     f_star= f_star
 )
 
+# ---------------- Actuators and winch ids ---------------------------------------------
+thrust_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, "thrust")
+roll_id   = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, "roll")
+pitch_id  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, "pitch")
+yaw_id    = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, "yaw")
+
 with mujoco.viewer.launch_passive(model, data) as viewer:
 
     while viewer.is_running():
@@ -52,8 +58,10 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
 
         wrench, R_des = drone.compute_motor_wrenches(a_star, p, a_star_dot, v, current_quat, angular_vel)
 
-        data.xfrc_applied[drone_id, 0:3] = wrench[0] * R_mat[:, 2] # Apply collective thrust along body Z axis
-        data.xfrc_applied[drone_id, 3:6] = R_mat @ wrench[1:4]     # Map roll/pitch/yaw moments to global frame
+        data.ctrl[thrust_id] = wrench[0]  # Thrust
+        data.ctrl[roll_id]   = wrench[1]  # Roll torque
+        data.ctrl[pitch_id]  = wrench[2]  # Pitch torque
+        data.ctrl[yaw_id]    = wrench[3]  # Yaw torque
 
         # Step simulation physics
         mujoco.mj_step(model, data)
