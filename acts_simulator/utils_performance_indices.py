@@ -2,6 +2,8 @@ import numpy as np
 from itertools import combinations
 from scipy.spatial import ConvexHull
 from utils_optimization import compute_payload_jacobian
+import os
+import pandas as pd
 
 
 def compute_aws_vertices(Jp_t: np.ndarray, tau_min: np.ndarray, tau_max: np.ndarray) -> np.ndarray:
@@ -137,3 +139,36 @@ def compute_rig_performance_indices(p_payload, R_mat_payload,
         "composite_score": N,
     }
 
+def append_robot_data(filename, config, pos, quat, indices):
+
+    new_row = {
+        "config" : config,
+        "pos_x": pos[0],
+        "pos_y": pos[1],
+        "pos_z": pos[2],
+        "quat_w": quat[0],
+        "quat_x": quat[1],
+        "quat_y": quat[2],
+        "quat_z": quat[3],
+        "conditioning_index": indices["conditioning_index"],
+        "manipulability": indices["manipulability"],
+        "radius_available_wrench": indices["radius_available_wrench"],
+        "capacity_margin": indices["capacity_margin"],
+        "worst_case_capacity_margin": indices["worst_case_capacity_margin"],
+        "composite_score": indices["composite_score"],
+    }
+
+    df_new = pd.DataFrame([new_row])
+
+    if not os.path.exists(filename):
+        df_new.to_excel(filename, index=False)
+    else:
+        with pd.ExcelWriter(
+            filename, mode="a", engine="openpyxl", if_sheet_exists="overlay"
+        ) as writer:
+            # Find the next available row in the active sheet
+            start_row = writer.sheets["Sheet1"].max_row
+            # Write data without headers
+            df_new.to_excel(
+                writer, index=False, header=False, startrow=start_row
+            )

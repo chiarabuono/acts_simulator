@@ -4,7 +4,8 @@ import tkinter as tk
 from utils_control import ACTScontrolDrone
 from scipy.spatial.transform import Rotation as R
 
-with open("mujoco/acts_stewart.xml", "r") as f:
+FILENAME = "acts_stewart"
+with open(f"mujoco/{FILENAME}.xml", "r") as f:
     xml_model = f.read()
 
 print("Compiling multi-drone payload model...")
@@ -44,6 +45,7 @@ GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground
 # ------ Optimization parameters  ------------------------------------------------------------
 CABLE_FILTER_ALPHA = 0.05
 OPTIMIZATION_FREQUENCY = 1000
+ITERATION_COLLECTION = 30 # Iteration at which indices are collected
 
 kp = 21.0
 kr = 50.0

@@ -6,7 +6,7 @@ from utils_optimization import *
 from params_acts import *
 from utils_visual import * 
 from time import strftime, localtime
-from utils_performance_indices import compute_rig_performance_indices
+from utils_performance_indices import compute_rig_performance_indices, append_robot_data
 
 def set_cable_length(tendon_idx, max_len):
     if max_len < 0: 
@@ -96,6 +96,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
                 W_p_star, PAYLOAD_MASS,
             )
             plot.update(data.time, indices)
+            if iteration == ITERATION_COLLECTION: append_robot_data("indices.xlsx", FILENAME, p_star, q_star, indices)
             iteration += 1
         step_counter += 1
 
