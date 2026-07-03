@@ -1,0 +1,1468 @@
+{
+    "line": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                74,
+                187
+            ]
+        },
+        "B": {
+            "coords": [
+                0.0,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                153,
+                186
+            ]
+        },
+        "C": {
+            "coords": [
+                0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                231,
+                189
+            ]
+        }
+    },
+    "diagonal": {
+        "A": {
+            "coords": [
+                -0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                71,
+                206
+            ]
+        },
+        "B": {
+            "coords": [
+                0.0,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                156,
+                182
+            ]
+        },
+        "C": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                254,
+                151
+            ]
+        }
+    },
+    "triangle": {
+        "A": {
+            "coords": [
+                0.4763,
+                0.275,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                78,
+                157
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.4763,
+                0.275,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                163,
+                207
+            ]
+        },
+        "C": {
+            "coords": [
+                0.0,
+                -0.55,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                241,
+                151
+            ]
+        }
+    },
+    "rectangle-same": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                71,
+                149
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                73,
+                201
+            ]
+        },
+        "C": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                265,
+                151
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                272,
+                198
+            ]
+        }
+    },
+    "rectangle-opposite": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                63,
+                155
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                66,
+                205
+            ]
+        },
+        "C": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                264,
+                153
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                266,
+                202
+            ]
+        }
+    },
+    "rhombus-ext": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                69,
+                169
+            ]
+        },
+        "B": {
+            "coords": [
+                0.0,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                166,
+                139
+            ]
+        },
+        "C": {
+            "coords": [
+                0.0,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                169,
+                203
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                267,
+                174
+            ]
+        }
+    },
+    "rhombus-int": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                75,
+                169
+            ]
+        },
+        "B": {
+            "coords": [
+                0.0,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                177,
+                133
+            ]
+        },
+        "C": {
+            "coords": [
+                0.0,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                174,
+                191
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                269,
+                170
+            ]
+        }
+    },
+    "parallelepiped-ext": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                67,
+                146
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.1,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                140,
+                143
+            ]
+        },
+        "C": {
+            "coords": [
+                0.6,
+                -0.1,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                204,
+                202
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                276,
+                200
+            ]
+        }
+    },
+    "parallelepiped-int": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                86,
+                166
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.1,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                160,
+                162
+            ]
+        },
+        "C": {
+            "coords": [
+                0.1,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                222,
+                219
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                293,
+                220
+            ]
+        }
+    },
+    "trapezoid-ext": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                59,
+                157
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.1,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                132,
+                214
+            ]
+        },
+        "C": {
+            "coords": [
+                0.1,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                211,
+                213
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                272,
+                164
+            ]
+        }
+    },
+    "trapezoid-int": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                67,
+                161
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.1,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                139,
+                217
+            ]
+        },
+        "C": {
+            "coords": [
+                0.1,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                213,
+                218
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                278,
+                165
+            ]
+        }
+    },
+    "pentagon": {
+        "A": {
+            "coords": [
+                -0.48,
+                0.16,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                79,
+                158
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.29,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                135,
+                188
+            ]
+        },
+        "C": {
+            "coords": [
+                0.29,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                213,
+                187
+            ]
+        },
+        "D": {
+            "coords": [
+                0.48,
+                0.16,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                261,
+                165
+            ]
+        },
+        "E": {
+            "coords": [
+                0.0,
+                0.5,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                165,
+                135
+            ]
+        }
+    },
+    "arrow": {
+        "A": {
+            "coords": [
+                -0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                62,
+                196
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.2,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                119,
+                166
+            ]
+        },
+        "C": {
+            "coords": [
+                0.0,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                169,
+                139
+            ]
+        },
+        "D": {
+            "coords": [
+                -0.2,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                222,
+                168
+            ]
+        },
+        "E": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                262,
+                195
+            ]
+        }
+    },
+    "cross": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                70,
+                163
+            ]
+        },
+        "B": {
+            "coords": [
+                0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                263,
+                164
+            ]
+        },
+        "C": {
+            "coords": [
+                0.0,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                157,
+                126
+            ]
+        },
+        "D": {
+            "coords": [
+                0.0,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                161,
+                162
+            ]
+        },
+        "E": {
+            "coords": [
+                0.0,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                163,
+                192
+            ]
+        }
+    },
+    "central-trapezoid": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                80,
+                144
+            ]
+        },
+        "B": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                285,
+                139
+            ]
+        },
+        "C": {
+            "coords": [
+                -0.2,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                149,
+                195
+            ]
+        },
+        "D": {
+            "coords": [
+                0.0,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                178,
+                165
+            ]
+        },
+        "E": {
+            "coords": [
+                0.2,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                219,
+                192
+            ]
+        }
+    },
+    "wave": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                90,
+                168
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.2,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                130,
+                137
+            ]
+        },
+        "C": {
+            "coords": [
+                0.0,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                183,
+                166
+            ]
+        },
+        "D": {
+            "coords": [
+                0.2,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                237,
+                195
+            ]
+        },
+        "E": {
+            "coords": [
+                0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                272,
+                165
+            ]
+        }
+    },
+    "base-trapezoid": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                70,
+                133
+            ]
+        },
+        "B": {
+            "coords": [
+                0.0,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                162,
+                138
+            ]
+        },
+        "C": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                265,
+                130
+            ]
+        },
+        "D": {
+            "coords": [
+                -0.2,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                114,
+                184
+            ]
+        },
+        "E": {
+            "coords": [
+                0.2,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                225,
+                191
+            ]
+        }
+    },
+    "central-parallelepiped": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                69,
+                136
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                68,
+                190
+            ]
+        },
+        "C": {
+            "coords": [
+                0.0,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                178,
+                163
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                280,
+                137
+            ]
+        },
+        "E": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                280,
+                191
+            ]
+        }
+    },
+    "2X3": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                46,
+                132
+            ]
+        },
+        "B": {
+            "coords": [
+                0.0,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                147,
+                137
+            ]
+        },
+        "C": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                237,
+                135
+            ]
+        },
+        "D": {
+            "coords": [
+                -0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                43,
+                185
+            ]
+        },
+        "E": {
+            "coords": [
+                0.0,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                146,
+                183
+            ]
+        },
+        "F": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                240,
+                185
+            ]
+        }
+    },
+    "two-triangles": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                68,
+                139
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.1,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                128,
+                136
+            ]
+        },
+        "C": {
+            "coords": [
+                -0.25,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                101,
+                180
+            ]
+        },
+        "D": {
+            "coords": [
+                0.25,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                226,
+                136
+            ]
+        },
+        "E": {
+            "coords": [
+                0.1,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                190,
+                186
+            ]
+        },
+        "F": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                262,
+                186
+            ]
+        }
+    },
+    "vertical-parallelepiped": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                85,
+                141
+            ]
+        },
+        "B": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                284,
+                140
+            ]
+        },
+        "C": {
+            "coords": [
+                -0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                87,
+                197
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                288,
+                191
+            ]
+        },
+        "E": {
+            "coords": [
+                0.0,
+                0.2,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                188,
+                145
+            ]
+        },
+        "F": {
+            "coords": [
+                0.0,
+                -0.2,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                188,
+                176
+            ]
+        }
+    },
+    "pyramid": {
+        "A": {
+            "coords": [
+                -0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                66,
+                187
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.2,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                108,
+                159
+            ]
+        },
+        "C": {
+            "coords": [
+                0.0,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                160,
+                130
+            ]
+        },
+        "D": {
+            "coords": [
+                0.2,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                213,
+                155
+            ]
+        },
+        "E": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                260,
+                184
+            ]
+        },
+        "F": {
+            "coords": [
+                0.0,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                161,
+                191
+            ]
+        }
+    },
+    "horizzontal-parallelepiped": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                99,
+                139
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                99,
+                197
+            ]
+        },
+        "C": {
+            "coords": [
+                0.4,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                312,
+                135
+            ]
+        },
+        "D": {
+            "coords": [
+                0.4,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                311,
+                195
+            ]
+        },
+        "E": {
+            "coords": [
+                -0.2,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                177,
+                171
+            ]
+        },
+        "F": {
+            "coords": [
+                0.2,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                238,
+                167
+            ]
+        }
+    },
+    "3X2": {
+        "A": {
+            "coords": [
+                -0.2,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                93,
+                141
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.2,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                96,
+                174
+            ]
+        },
+        "C": {
+            "coords": [
+                -0.2,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                96,
+                205
+            ]
+        },
+        "D": {
+            "coords": [
+                0.2,
+                0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                186,
+                143
+            ]
+        },
+        "E": {
+            "coords": [
+                0.2,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                188,
+                169
+            ]
+        },
+        "F": {
+            "coords": [
+                0.2,
+                -0.4,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                189,
+                197
+            ]
+        }
+    },
+    "hexagon": {
+        "A": {
+            "coords": [
+                0.2,
+                0.34,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                209,
+                140
+            ]
+        },
+        "B": {
+            "coords": [
+                -0.2,
+                0.34,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                124,
+                138
+            ]
+        },
+        "C": {
+            "coords": [
+                -0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                65,
+                167
+            ]
+        },
+        "D": {
+            "coords": [
+                -0.2,
+                -0.34,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                128,
+                193
+            ]
+        },
+        "E": {
+            "coords": [
+                0.2,
+                -0.34,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                207,
+                193
+            ]
+        },
+        "F": {
+            "coords": [
+                0.4,
+                0.0,
+                -0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                262,
+                161
+            ]
+        }
+    }
+}

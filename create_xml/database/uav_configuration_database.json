@@ -1,0 +1,182 @@
+{
+    "point": {
+        "A": {
+            "coords": [
+                0.0,
+                0.0,
+                0.1
+            ],
+            "max_cables": 3,
+            "visual_annotation_pixel": [
+                100,
+                91
+            ]
+        }
+    },
+    "aligned": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.0,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                49,
+                89
+            ]
+        },
+        "B": {
+            "coords": [
+                0.4,
+                0.0,
+                0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                161,
+                93
+            ]
+        }
+    },
+    "disaligned": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                0.1
+            ],
+            "max_cables": 2,
+            "visual_annotation_pixel": [
+                60,
+                89
+            ]
+        },
+        "B": {
+            "coords": [
+                0.4,
+                -0.4,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                171,
+                106
+            ]
+        }
+    },
+    "line": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.0,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                40,
+                80
+            ]
+        },
+        "B": {
+            "coords": [
+                0.0,
+                0.0,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                101,
+                81
+            ]
+        },
+        "C": {
+            "coords": [
+                0.4,
+                0.0,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                161,
+                80
+            ]
+        }
+    },
+    "triangle": {
+        "A": {
+            "coords": [
+                -0.4763,
+                0.275,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                74,
+                69
+            ]
+        },
+        "B": {
+            "coords": [
+                0.4763,
+                0.275,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                145,
+                70
+            ]
+        },
+        "C": {
+            "coords": [
+                0.0,
+                -0.55,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                112,
+                90
+            ]
+        }
+    },
+    "diagonal": {
+        "A": {
+            "coords": [
+                -0.4,
+                0.4,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                49,
+                87
+            ]
+        },
+        "B": {
+            "coords": [
+                0.0,
+                0.0,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                111,
+                96
+            ]
+        },
+        "C": {
+            "coords": [
+                0.4,
+                -0.4,
+                0.1
+            ],
+            "max_cables": 1,
+            "visual_annotation_pixel": [
+                172,
+                109
+            ]
+        }
+    }
+}
