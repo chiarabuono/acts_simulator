@@ -1,5 +1,9 @@
 {
     "line": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -38,6 +42,10 @@
         }
     },
     "diagonal": {
+        "symmetry_metadata": {
+            "is_x_symmetric": false,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -76,13 +84,17 @@
         }
     },
     "triangle": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 0.4763,
                 0.275,
                 -0.1
             ],
-            "max_cables": 1,
+            "max_cables": 2,
             "visual_annotation_pixel": [
                 78,
                 157
@@ -94,7 +106,7 @@
                 0.275,
                 -0.1
             ],
-            "max_cables": 1,
+            "max_cables": 2,
             "visual_annotation_pixel": [
                 163,
                 207
@@ -106,7 +118,7 @@
                 -0.55,
                 -0.1
             ],
-            "max_cables": 1,
+            "max_cables": 2,
             "visual_annotation_pixel": [
                 241,
                 151
@@ -114,6 +126,10 @@
         }
     },
     "rectangle-same": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -164,6 +180,10 @@
         }
     },
     "rectangle-opposite": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -214,6 +234,10 @@
         }
     },
     "rhombus-ext": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -264,6 +288,10 @@
         }
     },
     "rhombus-int": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -314,6 +342,10 @@
         }
     },
     "parallelepiped-ext": {
+        "symmetry_metadata": {
+            "is_x_symmetric": false,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -364,6 +396,10 @@
         }
     },
     "parallelepiped-int": {
+        "symmetry_metadata": {
+            "is_x_symmetric": false,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -414,6 +450,10 @@
         }
     },
     "trapezoid-ext": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -464,6 +504,10 @@
         }
     },
     "trapezoid-int": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -514,6 +558,10 @@
         }
     },
     "pentagon": {
+        "symmetry_metadata": {
+            "is_x_symmetric": false,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.48,
@@ -576,6 +624,10 @@
         }
     },
     "arrow": {
+        "symmetry_metadata": {
+            "is_x_symmetric": false,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -638,6 +690,10 @@
         }
     },
     "cross": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -680,7 +736,7 @@
                 0.4,
                 -0.1
             ],
-            "max_cables": 1,
+            "max_cables": 2,
             "visual_annotation_pixel": [
                 161,
                 162
@@ -700,6 +756,10 @@
         }
     },
     "central-trapezoid": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -762,6 +822,10 @@
         }
     },
     "wave": {
+        "symmetry_metadata": {
+            "is_x_symmetric": false,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -824,6 +888,10 @@
         }
     },
     "base-trapezoid": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -886,6 +954,10 @@
         }
     },
     "central-parallelepiped": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -916,7 +988,7 @@
                 0.0,
                 -0.1
             ],
-            "max_cables": 1,
+            "max_cables": 2,
             "visual_annotation_pixel": [
                 178,
                 163
@@ -948,6 +1020,10 @@
         }
     },
     "2X3": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -1022,6 +1098,10 @@
         }
     },
     "two-triangles": {
+        "symmetry_metadata": {
+            "is_x_symmetric": false,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -1096,6 +1176,10 @@
         }
     },
     "vertical-parallelepiped": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -1170,6 +1254,10 @@
         }
     },
     "pyramid": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -1244,6 +1332,10 @@
         }
     },
     "horizzontal-parallelepiped": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -1318,6 +1410,10 @@
         }
     },
     "3X2": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.2,
@@ -1392,10 +1488,14 @@
         }
     },
     "hexagon": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
-                0.2,
-                0.34,
+                0.4,
+                0.68,
                 -0.1
             ],
             "max_cables": 1,
@@ -1406,8 +1506,8 @@
         },
         "B": {
             "coords": [
-                -0.2,
-                0.34,
+                -0.4,
+                0.68,
                 -0.1
             ],
             "max_cables": 1,
@@ -1418,7 +1518,7 @@
         },
         "C": {
             "coords": [
-                -0.4,
+                -0.8,
                 0.0,
                 -0.1
             ],
@@ -1430,8 +1530,8 @@
         },
         "D": {
             "coords": [
-                -0.2,
-                -0.34,
+                -0.4,
+                -0.68,
                 -0.1
             ],
             "max_cables": 1,
@@ -1442,8 +1542,8 @@
         },
         "E": {
             "coords": [
-                0.2,
-                -0.34,
+                0.4,
+                -0.68,
                 -0.1
             ],
             "max_cables": 1,
@@ -1454,7 +1554,7 @@
         },
         "F": {
             "coords": [
-                0.4,
+                0.8,
                 0.0,
                 -0.1
             ],

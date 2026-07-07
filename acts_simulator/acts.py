@@ -63,10 +63,25 @@ iteration = 1
 p_star, q_star, R_star = read_desired_pose()
 set_desired_pose(p_star, q_star)
 
-with mujoco.viewer.launch_passive(model, data) as viewer:
+is_paused = False
+
+def key_callback(keycode):
+    global is_paused
+    # 32 is the keycode for the Spacebar
+    if keycode == 32:
+        is_paused = not is_paused
+        print(f"Simulation {'PAUSED' if is_paused else 'RESUMED'}")
+
+with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as viewer:
     while viewer.is_running():
         step_start = time.time()
         viewer.sync()
+
+        if is_paused:
+            time_until_next_step = model.opt.timestep - (time.time() - step_start)
+            if time_until_next_step > 0:
+                time.sleep(time_until_next_step)
+            continue  # Skips optimization loops and physics updates completely
 
         p_star, q_star, R_star = read_desired_pose()
         set_desired_pose(p_star, q_star)

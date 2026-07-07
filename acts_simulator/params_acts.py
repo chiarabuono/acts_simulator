@@ -116,13 +116,13 @@ GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground
 # ------ Optimization parameters  ------------------------------------------------------------
 CABLE_FILTER_ALPHA = 0.05
 OPTIMIZATION_FREQUENCY = 1000
-ITERATION_COLLECTION = 30 # Iteration at which indices are collected
+ITERATION_COLLECTION = 20 # Iteration at which indices are collected
 
 kp = 21.0
 kr = 50.0
 ctrl_params = {
-    'px': 0.5,
-    'py': 0.0,
+    'px': 1.0,
+    'py': -0.5,
     'pz': 2.0,
     'Kp_pos' : kp,
     'Kd_pos' : 2*(kp)**0.5,

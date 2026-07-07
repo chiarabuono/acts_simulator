@@ -22,13 +22,13 @@ GRID_MAPPING_UGV = {
 
 # --- UAV BOUNDING CROP BOXES ---
 GRID_MAPPING_UAV = {
-    "point": (0, 0, 300, 300),
-    "aligned": (300, 0, 600, 300),
-    "disaligned": (600, 0, 900, 300),
-    "line": (0, 300, 300, 600),
-    "triangle": (300, 300, 600, 600),
-    "diagonal": (600, 300, 900, 600),
-}
+            "point": (24, 14, 203, 177),
+            "aligned": (230, 11, 426, 175),
+            "disaligned": (444, 6, 669, 179),
+            "line": (16, 215, 203, 364),
+            "triangle": (240, 213, 432, 366),
+            "diagonal": (478, 192, 699, 371),
+        }
 
 # --- MUJOCO CORE XML STRING TEMPLATE ---
 MUJOCO_TEMPLATE = """<mujoco model="acts">
@@ -51,8 +51,8 @@ MUJOCO_TEMPLATE = """<mujoco model="acts">
         <light pos="0 0 10" dir="0 0 -1"/>
         <geom name="ground" type="plane" size="10 10 0.1" material="grid_mat" condim="3" friction="1 0.005 0.0001"/>
         <body name="target_marker" mocap="true" pos="0.0 0 1.0" euler="0 0 0">
-            <site name="target_com" type="sphere" size="0.05" rgba="1 0 0 0.6"/>
-            <geom type="box" size="1.0 1.0 0.1" rgba="1 0.5 0 0.25" contype="0" conaffinity="0"/>
+            <site name="target_com" type="sphere" size="0.05" rgba="1 0 0 0.6" group="1"/>
+            <geom type="box" size="1.0 1.0 0.1" rgba="1 0.5 0 0.25" contype="0" conaffinity="0" group="1"/>
         </body>
         <body name="payload" pos="0 0 0.11">
             <freejoint name="payload_joint"/>

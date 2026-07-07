@@ -1,5 +1,9 @@
 {
     "point": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 0.0,
@@ -14,6 +18,10 @@
         }
     },
     "aligned": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -40,6 +48,10 @@
         }
     },
     "disaligned": {
+        "symmetry_metadata": {
+            "is_x_symmetric": false,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -66,6 +78,10 @@
         }
     },
     "line": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4,
@@ -104,6 +120,10 @@
         }
     },
     "triangle": {
+        "symmetry_metadata": {
+            "is_x_symmetric": true,
+            "is_y_symmetric": true
+        },
         "A": {
             "coords": [
                 -0.4763,
@@ -142,6 +162,10 @@
         }
     },
     "diagonal": {
+        "symmetry_metadata": {
+            "is_x_symmetric": false,
+            "is_y_symmetric": false
+        },
         "A": {
             "coords": [
                 -0.4,
