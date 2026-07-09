@@ -6,7 +6,7 @@ from utils_optimization import *
 from params_acts import *
 from utils_visual import * 
 from time import strftime, localtime
-from utils_performance_indices import compute_rig_performance_indices, append_robot_data
+from utils_performance_indices import compute_rig_performance_indices, append_robot_data, pose_reached
 
 def set_cable_length(tendon_idx, max_len):
     if max_len < 0: 
@@ -57,6 +57,43 @@ def compute_Wp_star(p_payload, p_star, q_star):
 
     return W_p_star
 
+def vee(S: np.ndarray) -> np.ndarray:
+    """Inverse of the skew-symmetric (hat) map. S must be skew-symmetric."""
+    return np.array([S[2, 1], S[0, 2], S[1, 0]])
+
+
+def compute_Wp_star_geometric(p_payload, R_mat_payload, p_star, R_star):
+    """
+    SO(3) geometric PD regulator (Lee et al., 2010), for a constant setpoint
+    (R_star, p_star), i.e. Omega_star = 0, R_star_dot = 0.
+    """
+    Kp_pos, Kd_pos = ctrl_params['Kp_pos'], ctrl_params['Kd_pos']
+    v_star = np.zeros(3)
+    v_payload = data.cvel[payload_id][3:6].copy()
+    w_payload_world = data.cvel[payload_id][0:3].copy()
+
+    # --- translational part (unchanged) ---
+    F_p_star = (PAYLOAD_MASS * np.array([0.0, 0.0, G_ACCEL])
+                + Kp_pos * (p_star - p_payload)
+                + Kd_pos * (v_star - v_payload))
+
+    # --- rotational part, geometric on SO(3) ---
+    Kr, Kw = ctrl_params['Kr'], ctrl_params['Kw']
+
+    Omega_body = R_mat_payload.T @ w_payload_world       # world -> body frame
+    Omega_star_body = np.zeros(3)                        # regulation: Omega_star = 0
+
+    e_R_mat = 0.5 * (R_star.T @ R_mat_payload - R_mat_payload.T @ R_star)
+    e_R = vee(e_R_mat)                                    # body-frame attitude error
+    e_Omega = Omega_body - Omega_star_body                # body-frame rate error
+
+    M_body = -Kr * e_R - Kw * e_Omega
+
+    M_p_star = R_mat_payload @ M_body                     # body -> world frame
+
+    W_p_star = np.concatenate([F_p_star, M_p_star])
+    return W_p_star
+
 step_counter = 0
 iteration = 1
 
@@ -92,7 +129,8 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
 
         if step_counter % OPTIMIZATION_FREQUENCY == 0:
             print(f"{iteration} Computing {strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))}")
-            W_p_star = compute_Wp_star(p_payload, p_star, q_star)
+            # W_p_star = compute_Wp_star(p_payload, p_star, q_star)
+            W_p_star = compute_Wp_star_geometric(p_payload, R_mat_payload, p_star, R_star)
 
             p_drone_targets, optimal_tensions = optimize_drone_positions(
                 p_star, R_star, P_GROUND_ANCHORS, DRONE_MASSES,
@@ -111,7 +149,9 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
                 W_p_star, PAYLOAD_MASS,
             )
             plot.update(data.time, indices)
-            if iteration == ITERATION_COLLECTION: append_robot_data("indices.xlsx", FILENAME, p_star, q_star, indices)
+            if iteration == ITERATION_COLLECTION: 
+                pose_params = pose_reached(p_payload, R_mat_payload, p_star, R_star)
+                append_robot_data("indices.xlsx", FILENAME, p_star, q_star, indices, pose_params)
             iteration += 1
         step_counter += 1
 

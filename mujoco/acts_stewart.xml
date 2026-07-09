@@ -2,15 +2,15 @@
     <compiler angle="radian" autolimits="true"/>
     <option gravity="0 0 -9.81" timestep="0.002"/>
 
-    <visual>
+<visual>
         <headlight ambient="0.4 0.4 0.4" diffuse="0.8 0.8 0.8"/>
-        <rgba haze="0.15 0.25 0.35 1"/>
+        <rgba haze="0 0 0 0"/>
     </visual>
 
     <asset>
-        <texture type="skybox" builtin="gradient" rgb1="0.4 0.6 0.8" rgb2="0.0 0.0 0.0" width="512" height="512"/>
-        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" rgb2=".2 .3 .4" width="300" height="300"/>
-        <material name="grid_mat" texture="grid" texrepeat="10 10"/>
+        <texture name="skybox" type="skybox" builtin="flat" rgb1="1 1 1" width="800" height="800" /> 
+        <texture name="clean_ground" type="2d" builtin="flat" rgb1="1 1 1" width="300" height="300"/>
+        <material name="grid_mat" texture="clean_ground" texrepeat="10 10" reflectance="0"/>
         <material name="payload_mat" rgba="0.6 0.4 0.2 1"/>
     </asset>
 

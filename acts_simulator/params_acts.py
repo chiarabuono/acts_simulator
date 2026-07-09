@@ -1,72 +1,8 @@
 import mujoco
 import numpy as np
-import tkinter as tk
 from utils_control import ACTScontrolDrone
 from scipy.spatial.transform import Rotation as R
-import os
-import glob
-from tkinter import ttk, messagebox
-
-# ----- Select dynamically the xml file -------------------------------------------------
-def select_and_load_xml():
-    target_dir = "mujoco"
-    
-    if not os.path.exists(target_dir):
-        messagebox.showerror("Error", f"Directory '{target_dir}' does not exist.")
-        return None
-        
-    xml_files = [os.path.basename(f) for f in glob.glob(f"{target_dir}/*.xml")]
-    
-    if not xml_files:
-        messagebox.showinfo("Empty Directory", f"No XML configuration files found in '{target_dir}'.")
-        return None
-    
-    result = {"content": None, "filename": None}
-
-    ui = tk.Tk()
-    ui.title("Select MuJoCo Configuration Target")
-    ui.geometry("500x350")
-    
-    lbl = ttk.Label(ui, text="Choose a layout configuration to initialize:", font=("Arial", 11, "bold"))
-    lbl.pack(anchor=tk.W, padx=15, pady=(15, 5))
-
-    list_frame = ttk.Frame(ui)
-    list_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=5)
-    
-    scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL)
-    listbox = tk.Listbox(list_frame, yscrollcommand=scrollbar.set, font=("Arial", 10))
-    scrollbar.config(command=listbox.yview)
-    
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-    listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-    # Populate files sorted alphabetically
-    for file in sorted(xml_files):
-        listbox.insert(tk.END, file)
-
-    def on_confirm():
-        selection = listbox.curselection()
-        if not selection:
-            messagebox.showwarning("Selection Required", "Please highlight an XML file configuration first.")
-            return
-            
-        chosen_file = listbox.get(selection[0])
-        full_path = os.path.join(target_dir, chosen_file)
-        
-        try:
-            with open(full_path, "r") as f:
-                result["content"] = f.read()
-                result["filename"] = chosen_file.replace(".xml", "")
-            ui.destroy()
-        except IOError as e:
-            messagebox.showerror("File Read Error", f"Could not load system data:\n{e}")
-
-    btn_load = ttk.Button(ui, text="Load Configuration Model", command=on_confirm)
-    btn_load.pack(fill=tk.X, padx=15, pady=15)
-    listbox.bind("<Double-1>", lambda event: on_confirm())
-    ui.mainloop()
-    
-    return result["filename"], result["content"]
+from utils_configuration_selection import select_and_load_xml
 
 FILENAME, xml_model = select_and_load_xml()
 
@@ -76,8 +12,9 @@ if xml_model:
 else:
     print("--> Configuration load aborted or canceled.")
 
-with open(f"mujoco/{FILENAME}.xml", "r") as f:
-    xml_model = f.read()
+# with open(f"mujoco/{FILENAME}.xml", "r") as f:
+#     xml_model = f.read()
+
 
 print("Compiling multi-drone payload model...")
 model = mujoco.MjModel.from_xml_string(xml_model)
@@ -119,9 +56,9 @@ OPTIMIZATION_FREQUENCY = 1000
 ITERATION_COLLECTION = 20 # Iteration at which indices are collected
 
 kp = 21.0
-kr = 50.0
+kr = 15.0
 ctrl_params = {
-    'px': 1.0,
+    'px': 0.5,
     'py': -0.5,
     'pz': 2.0,
     'Kp_pos' : kp,

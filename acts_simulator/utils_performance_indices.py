@@ -87,7 +87,43 @@ def composite_score(gamma, rAW, zeta, w1=1/3, w2=1/3, w3=1/3,
                      gamma_ref=1.0, rAW_ref=1.0, zeta_ref=1.0) -> float:
     return w1 * (gamma / gamma_ref) + w2 * (rAW / rAW_ref) + w3 * (zeta / zeta_ref)
 
+def pose_error(p_payload: np.ndarray, R_mat_payload: np.ndarray,
+               p_star: np.ndarray, R_star: np.ndarray) -> tuple[float, float]:
+    """
+    Returns (position_error [m], orientation_error [rad]).
+    Orientation error is the geodesic angle on SO(3): the same rotation
+    magnitude used inside the geometric controller's e_R, just converted
+    to a scalar angle instead of a body-frame vector.
+    """
+    pos_err = np.linalg.norm(p_payload - p_star)
 
+    R_rel = R_star.T @ R_mat_payload
+    cos_angle = (np.trace(R_rel) - 1.0) / 2.0
+    cos_angle = np.clip(cos_angle, -1.0, 1.0)  # guard against numerical drift
+    ang_err = np.arccos(cos_angle)
+
+    return float(pos_err), float(ang_err)
+
+
+def pose_reached(p_payload: np.ndarray, R_mat_payload: np.ndarray,
+                  p_star: np.ndarray, R_star: np.ndarray,
+                  pos_tol: float = 1e-1, rot_tol: float = np.deg2rad(2.0)
+                  ) -> dict:
+    """
+    pos_tol: meters, rot_tol: radians.
+    Returns a dict with individual and combined acceptability flags.
+    """
+    pos_err, ang_err = pose_error(p_payload, R_mat_payload, p_star, R_star)
+    pos_ok = pos_err <= pos_tol
+    orient_ok = ang_err <= rot_tol
+
+    return {
+        "position_error": pos_err,
+        "orientation_error": ang_err,
+        "position_reached": pos_ok,
+        "orientation_reached": orient_ok,
+        "pose_reached": pos_ok and orient_ok,
+    }
 
 def compute_rig_performance_indices(p_payload, R_mat_payload,
                                      p_drone_targets, P_GROUND_ANCHORS,
@@ -130,6 +166,7 @@ def compute_rig_performance_indices(p_payload, R_mat_payload,
 
     N = composite_score(gamma, rAW, zeta) if np.isfinite(gamma) else np.nan
 
+
     return {
         "conditioning_index": nu,
         "manipulability": w,
@@ -139,7 +176,10 @@ def compute_rig_performance_indices(p_payload, R_mat_payload,
         "composite_score": N,
     }
 
-def append_robot_data(filename, config, pos, quat, indices):
+def append_robot_data(filename, config, pos, quat, indices, pose_params):
+
+    print(pose_params)
+    print(pose_params["position_error"])
 
     new_row = {
         "config" : config,
@@ -156,6 +196,11 @@ def append_robot_data(filename, config, pos, quat, indices):
         "capacity_margin": indices["capacity_margin"],
         "worst_case_capacity_margin": indices["worst_case_capacity_margin"],
         "composite_score": indices["composite_score"],
+        "position_error" : pose_params["position_error"],
+        "orientation_error": pose_params["orientation_error"],
+        "position_reached": pose_params["position_reached"],
+        "orientation_reached": pose_params["orientation_reached"],
+        "pose_reached": pose_params["pose_reached"],
     }
 
     df_new = pd.DataFrame([new_row])

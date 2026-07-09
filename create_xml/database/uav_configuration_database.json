@@ -122,7 +122,7 @@
     "triangle": {
         "symmetry_metadata": {
             "is_x_symmetric": true,
-            "is_y_symmetric": true
+            "is_y_symmetric": false
         },
         "A": {
             "coords": [
@@ -163,7 +163,7 @@
     },
     "diagonal": {
         "symmetry_metadata": {
-            "is_x_symmetric": false,
+            "is_x_symmetric": true,
             "is_y_symmetric": false
         },
         "A": {
