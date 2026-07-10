@@ -1,4 +1,9 @@
 import os
+import sys
+import json
+import tkinter as tk
+from tkinter import messagebox, ttk
+
 
 # --- PATH CONFIGURATIONS ---
 IMAGE_PATH_UGV = "create_xml/images/6_ugv_config.jpeg"
@@ -74,3 +79,17 @@ MUJOCO_TEMPLATE = """<mujoco model="acts">
 {uav_sensors_string}
 {sensor_elements}    </sensor>
 </mujoco>"""
+
+ 
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.append(_PROJECT_ROOT)
+ 
+from acts_simulator import TAU_MIN, TAU_MAX, D_SAFE, W_MIN, PAYLOAD_HALF_EXTENTS
+
+def _load_json_db(path):
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            return json.load(f)
+    messagebox.showerror("Missing File", f"Could not find '{path}'. Run annotations first!")
+    return None

@@ -4,21 +4,16 @@ from utils_control import ACTScontrolDrone
 from scipy.spatial.transform import Rotation as R
 from utils_configuration_selection import select_and_load_xml
 
-FILENAME, xml_model = select_and_load_xml()
 
+FILENAME, xml_model = select_and_load_xml()
 if xml_model:
     print(f"--> Target Loaded Successfully! Active Key: {FILENAME}")
-    # Proceed with your simulation engine using 'xml_model'
 else:
     print("--> Configuration load aborted or canceled.")
 
-# with open(f"mujoco/{FILENAME}.xml", "r") as f:
-#     xml_model = f.read()
-
-
 print("Compiling multi-drone payload model...")
 model = mujoco.MjModel.from_xml_string(xml_model)
-data  = mujoco.MjData(model)
+data = mujoco.MjData(model)
 
 # ------ Payload ------------------------------------------------------------
 PAYLOAD_MASS = model.body("payload").mass[0]
@@ -40,20 +35,18 @@ L_CABLES_DRONES = [
     model.tendon_range[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, "cable_3")][1] ]
 
 # ------ Global variables ------------------------------------------------------------
-G_ACCEL = np.linalg.norm(model.opt.gravity) 
-W_MIN = 5.0                                  
-D_SAFE = 0.4
+G_ACCEL = np.linalg.norm(model.opt.gravity)
 
 # ------ Cables  ------------------------------------------------------------
-HOOK_OFFSETS_DRONE = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"hook_{i}")] for i in range(1, 4) ]
-HOOK_OFFSETS_GROUND = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"hook_{i}")] for i in range(4, 10) ]
+HOOK_OFFSETS_DRONE = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"hook_{i}")] for i in range(1, 4)]
+HOOK_OFFSETS_GROUND = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"hook_{i}")] for i in range(4, 10)]
 P_GROUND_ANCHORS = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground_anchor_{i}")] for i in range(4, 10)]
 GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground_anchor_{i}") for i in range(4, 10)]
 
 # ------ Optimization parameters  ------------------------------------------------------------
 CABLE_FILTER_ALPHA = 0.05
 OPTIMIZATION_FREQUENCY = 1000
-ITERATION_COLLECTION = 20 # Iteration at which indices are collected
+ITERATION_COLLECTION = 20  # Iteration at which indices are collected
 
 kp = 21.0
 kr = 15.0

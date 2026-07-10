@@ -2,6 +2,16 @@ import numpy as np
 from scipy.optimize import minimize
 from utils_control import kt, kd, MAX_ROTOR_VELOCITY
 
+import os
+import sys
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.append(_PROJECT_ROOT)
+from acts_simulator import W_MIN, D_SAFE, TAU_MIN, TAU_MAX, PAYLOAD_HALF_EXTENTS
+
+#TODO: implement payload_half_extens? Is really usefull since we suppose all the attachment points are on the bottom façade?
+#TODO: implement TAU_MAX
+
 def compute_payload_jacobian(p_payload, R_mat_payload, p_anchors, hook_offsets):
     m = len(p_anchors)
     J_p = np.zeros((6, m))
@@ -18,13 +28,10 @@ def compute_payload_jacobian(p_payload, R_mat_payload, p_anchors, hook_offsets):
         
     return J_p
 
-def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors, 
-                             drone_masses, l_cables_drone, hook_offsets_drone, 
-                             hook_offsets_ground, W_p_star, tau_min=5.5, w_min=5.0, d_safe=0.5, g=9.81):
-    """
-    Optimizes drone positions p_a to minimize propulsion force squaring based on the 
-    simplified strategy where every cable tension is fixed at the minimum admissible value tau_min.
-    """
+def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
+                              drone_masses, l_cables_drone, hook_offsets_drone,
+                              hook_offsets_ground, W_p_star,
+                              tau_min=TAU_MIN, w_min=W_MIN, d_safe=D_SAFE, g=9.81):
     n_a = len(drone_masses)
     n_g = len(p_ground_anchors)
     

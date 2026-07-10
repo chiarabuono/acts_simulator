@@ -4,10 +4,15 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
 
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # Clean absolute import from our data parameters module
 from config_params import (
     IMAGE_PATH_UGV, IMAGE_PATH_UAV, UGV_DB_PATH, UAV_DB_PATH,
-    GRID_MAPPING_UGV, GRID_MAPPING_UAV, MUJOCO_TEMPLATE
+    GRID_MAPPING_UGV, GRID_MAPPING_UAV, MUJOCO_TEMPLATE,
+    _load_json_db
 )
 
 class MultiStepSelectorApp:
@@ -17,8 +22,8 @@ class MultiStepSelectorApp:
         self.root.geometry("950x950")
 
         # Load databases safely
-        self.ugv_geo_db = self._load_json_db(UGV_DB_PATH)
-        self.uav_geo_db = self._load_json_db(UAV_DB_PATH)
+        self.ugv_geo_db = _load_json_db(UGV_DB_PATH)
+        self.uav_geo_db = _load_json_db(UAV_DB_PATH)
         if not self.ugv_geo_db or not self.uav_geo_db:
             return
 
@@ -34,13 +39,6 @@ class MultiStepSelectorApp:
         self.setup_ui_containers()
         self.load_stage(self.current_stage_idx)
 
-    def _load_json_db(self, path):
-        if os.path.exists(path):
-            with open(path, "r") as f:
-                return json.load(f)
-        messagebox.showerror("Missing File", f"Could not find '{path}'. Run annotations first!")
-        self.root.destroy()
-        return None
 
     def setup_ui_containers(self):
         self.left_frame = ttk.Frame(self.root, padding=10, width=320)
@@ -405,8 +403,8 @@ class MultiStepSelectorApp:
         # --- SAVE ARCHITECTURE LOOKUP (COORDINATE FINGERPRINT) ---
         import re
 
-        os.makedirs("mujoco", exist_ok=True)
-        base_name = f"mujoco/{pay_layout.upper()}-{gnd_layout.upper()}-{uav_layout.upper()}"
+        os.makedirs("mujoco/hand_made", exist_ok=True)
+        base_name = f"mujoco/hand_made/{pay_layout.upper()}-{gnd_layout.upper()}-{uav_layout.upper()}"
         
         if scale_mode == "Small":
             base_name += f"-small-{factor}".replace('.', '_')
