@@ -135,7 +135,7 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
             p_drone_targets, optimal_tensions = optimize_drone_positions(
                 p_star, R_star, P_GROUND_ANCHORS, DRONE_MASSES,
                 L_CABLES_DRONES, HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
-                W_p_star, w_min=W_MIN, d_safe=D_SAFE, g=G_ACCEL
+                W_p_star, tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE, g=G_ACCEL
             )
 
             tau_drone_actual = np.array([get_cable_tension(model, data, f"cable_{i}") for i in (1, 2, 3)])

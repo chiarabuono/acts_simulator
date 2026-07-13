@@ -47,6 +47,7 @@ GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground
 CABLE_FILTER_ALPHA = 0.05
 OPTIMIZATION_FREQUENCY = 1000
 ITERATION_COLLECTION = 20  # Iteration at which indices are collected
+MODE = "tau_min" # tau_min or tau_optimal
 
 kp = 21.0
 kr = 15.0
