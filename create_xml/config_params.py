@@ -85,7 +85,7 @@ _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
  
-from acts_simulator import TAU_MIN, TAU_MAX, D_SAFE, W_MIN, PAYLOAD_HALF_EXTENTS
+from acts_simulator import TAU_MIN, TAU_MAX, D_SAFE
 
 def _load_json_db(path):
     if os.path.exists(path):

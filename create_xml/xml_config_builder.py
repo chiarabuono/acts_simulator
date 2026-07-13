@@ -136,7 +136,7 @@ def build_xml(cfg: UGVUAVConfig, ugv_geo_db: dict, uav_geo_db: dict) -> str:
                 ux, uy = raw_px - 0.20, raw_py - 0.20
             elif cables[letter] == 3:
                 ux, uy = raw_px + 0.20, raw_py - 0.20
-            uz = 0.60
+            uz = 0.25
             drone_idx += 1
 
             payload_sites += f'       <site name="hook_{drone_idx}" pos="{raw_px} {raw_py} 0.10" size="0.04" rgba="1 1 0 1"/>\n'

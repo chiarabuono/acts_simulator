@@ -1,26 +1,14 @@
-"""
-USAGE: single pose via --px --py --pz --quat W X Y Z (defaults match your
-ctrl_params target: 0.5 -0.5 2.0 / 1 0 0 0), or several poses at once via
---poses-csv pointing at a CSV with columns px,py,pz,quat_w,quat_x,quat_y,quat_z
-
-To turn on the new checks:
-    --enable-wfc --tau-min 5 --tau-max 100 --wfc-wrench 0 0 0 0 0 0
-    --enable-ifc --d-safe 0.05 --payload-half-extents 0.3 0.3 0.05
-"""
-
 import argparse
 import itertools
-import json
-import random
 
 import numpy as np
 import pandas as pd
 from scipy.optimize import linprog, minimize_scalar
 
-from config_params import UGV_DB_PATH, GRID_MAPPING_UGV
 from xml_config_builder import build_xml, save_xml, RoutingValidationError, UGVUAVConfig
-from config_params import UAV_DB_PATH, _load_json_db, TAU_MIN, TAU_MAX, D_SAFE, PAYLOAD_HALF_EXTENTS
-import json
+from config_params import _load_json_db
+from config_params import UAV_DB_PATH, UGV_DB_PATH, GRID_MAPPING_UGV, TAU_MIN, TAU_MAX, D_SAFE
+
 import os
 import glob
 
@@ -39,21 +27,12 @@ def quat_to_R(w, x, y, z):
         [    2 * (x * z - y * w),     2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
     ])
 
-
-# ---------------------------------------------------------------------------
-# DB helpers
-# ---------------------------------------------------------------------------
-
 def node_letters(db, layout):
     return [k for k in db[layout].keys() if k != "symmetry_metadata"]
 
 def max_cables(db, layout, letter):
     return db[layout][letter].get("max_cables", 999)
 
-
-# ---------------------------------------------------------------------------
-# Exhaustive routing enumeration (capacity-aware, dedup built in by construction)
-# ---------------------------------------------------------------------------
 
 def enumerate_routings(db, pay_layout, gnd_layout, n_cables=6, max_results=None):
     """
@@ -108,19 +87,19 @@ def build_Jp_ground(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payloa
         bi = np.array(ugv_db[pay_layout][p_node]["coords"], dtype=float)
         ai = np.array(ugv_db[gnd_layout][g_node]["coords"], dtype=float)
         ai = ai.copy()
-        ai[2] = 0.0  # ground anchors sit at z=0
+        ai[2] = 0.0  # ground anchors sit at z=0, matching the wizard's XML generation
 
         ri = payload_pos + payload_R @ bi
         li = ai - ri
         norm = np.linalg.norm(li)
         if norm < 1e-9:
-            return None
+            return None  # degenerate: anchor coincides with payload node
 
         ui = li / norm
         Jp_row = np.concatenate([ui, np.cross(payload_R @ bi, ui)])
         rows.append(Jp_row)
 
-    return np.array(rows)
+    return np.array(rows)  # (6, 6)
 
 
 def score_Jp(Jp):
@@ -139,27 +118,11 @@ def score_Jp(Jp):
     }
 
 
+# ---------------------------------------------------------------------------
+# WRENCH FEASIBLE CONDITION (WFC) - Eq. 1.9 / 2.35
+# ---------------------------------------------------------------------------
+
 def check_wfc(Jp, tau_min, tau_max, W_target):
-    """
-    Tests whether there EXISTS a tension vector tau, with
-        tau_min <= tau_i <= tau_max   for every cable   (cables only pull),
-    such that
-        J_p^T tau = W_target
-    (Eq. 1.9, restated as the equality-constrained feasibility problem of
-    Eq. 2.35 with the LS-relaxation term set to zero). Solved as an LP
-    feasibility problem via scipy.optimize.linprog (zero objective - we only
-    care whether the feasible set is non-empty, not which point in it is
-    "best"; if you want the specific solution your tension planner would
-    pick, replace the objective with your actual H matrix from Eq. 2.35/2.36).
-
-    Jp: (m, 6) ground Jacobian (m = number of ground cables, 6 here).
-    tau_min, tau_max: scalars or length-m arrays, your actuator/cable limits.
-    W_target: (6,) desired ground-cable wrench at this pose.
-
-    Returns dict with:
-        wfc_ok   : bool, feasible or not
-        tau      : the feasible tension vector if found, else None
-    """
     m = Jp.shape[0]
     tau_min_vec = np.full(m, tau_min) if np.isscalar(tau_min) else np.asarray(tau_min, dtype=float)
     tau_max_vec = np.full(m, tau_max) if np.isscalar(tau_max) else np.asarray(tau_max, dtype=float)
@@ -217,76 +180,97 @@ def segment_segment_distance(p1, p2, q1, q2):
     c2 = q1 + t * d2
     return float(np.linalg.norm(c1 - c2))
 
-
-def cable_box_distance(seg_start, seg_end, box_center, box_R, box_half_extents):
-    Rt = box_R.T
-    p1_l = Rt @ (seg_start - box_center)
-    p2_l = Rt @ (seg_end - box_center)
-
-    def sqdist_at(t):
-        pt = p1_l + t * (p2_l - p1_l)
-        d = np.maximum(np.abs(pt) - box_half_extents, 0.0)
-        return float(np.dot(d, d))
-
-    res = minimize_scalar(sqdist_at, bounds=(0.0, 1.0), method="bounded")
-    return float(np.sqrt(max(res.fun, 0.0)))
-
-
-def check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R,
-              d_safe, payload_half_extents=None):
+def check_cable_exit_angle(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R,
+                            min_exit_angle_deg=15.0, face_normal_local=None):
     """
-    Full IFC check (Eq. 2.20) for one routing at one pose:
-      (a) every pair of ground cables must clear each other by >= d_safe
-      (b) every ground cable must clear the payload body by >= d_safe
-          (skipped, with a one-time warning upstream, if
-          payload_half_extents is None - you haven't told this script your
-          payload's dimensions yet)
-
     Returns dict:
-        ifc_ok                    : bool
-        min_cable_cable_dist      : float or None (None if <2 cables)
-        min_cable_payload_dist    : float or None (None if box not given)
+        exit_angle_ok            : bool
+        min_exit_angle_margin    : float or None - smallest (sin(actual
+                                    angle) - sin(min_exit_angle_deg)) across
+                                    all cables; negative means a violation
     """
-    segments = []  # (r_i, a_i) per cable, world frame
+    if face_normal_local is None:
+        face_normal_local = np.array([0.0, 0.0, -1.0])
+    world_normal = payload_R @ face_normal_local
+    min_sin = np.sin(np.radians(min_exit_angle_deg))
+
+    worst_margin = None
     for p_node, g_node in routing:
         bi = np.array(ugv_db[pay_layout][p_node]["coords"], dtype=float)
         ai = np.array(ugv_db[gnd_layout][g_node]["coords"], dtype=float)
         ai = ai.copy()
         ai[2] = 0.0
         ri = payload_pos + payload_R @ bi
-        segments.append((ri, ai))
+        direction = ai - ri
+        norm = np.linalg.norm(direction)
+        if norm < 1e-9:
+            continue
+        u = direction / norm
+        sin_angle = np.dot(u, world_normal)  # projection onto the outward normal
+        margin = sin_angle - min_sin
+        worst_margin = margin if worst_margin is None else min(worst_margin, margin)
 
-    # (a) cable-cable clearance
+    ok = (worst_margin is None) or (worst_margin >= 0.0)
+    return {"exit_angle_ok": ok, "min_exit_angle_margin": worst_margin}
+
+
+def check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R,
+              d_safe, min_exit_angle_deg=15.0, face_normal_local=None):
+
+    segments = []  # (r_i, a_i, p_node, g_node) per cable, world frame
+    for p_node, g_node in routing:
+        bi = np.array(ugv_db[pay_layout][p_node]["coords"], dtype=float)
+        ai = np.array(ugv_db[gnd_layout][g_node]["coords"], dtype=float)
+        ai = ai.copy()
+        ai[2] = 0.0
+        ri = payload_pos + payload_R @ bi
+        segments.append((ri, ai, p_node, g_node))
+
+    # cable-cable clearance - skip pairs sharing a payload or ground node
     min_cc = None
-    for (r1, a1), (r2, a2) in itertools.combinations(segments, 2):
+    n_skipped = 0
+    for (r1, a1, p1n, g1n), (r2, a2, p2n, g2n) in itertools.combinations(segments, 2):
+        if p1n == p2n or g1n == g2n:
+            n_skipped += 1
+            continue
         d = segment_segment_distance(r1, a1, r2, a2)
         min_cc = d if min_cc is None else min(min_cc, d)
 
-    # (b) cable-payload clearance
-    min_cp = None
-    if payload_half_extents is not None:
-        for ri, ai in segments:
-            d = cable_box_distance(ri, ai, payload_pos, payload_R, payload_half_extents)
-            min_cp = d if min_cp is None else min(min_cp, d)
+    # cable exit angle vs. the payload's attachment face
+    angle_result = check_cable_exit_angle(routing, ugv_db, pay_layout, gnd_layout,
+                                           payload_pos, payload_R,
+                                           min_exit_angle_deg=min_exit_angle_deg,
+                                           face_normal_local=face_normal_local)
 
     ok = True
     if min_cc is not None and min_cc < d_safe:
         ok = False
-    if min_cp is not None and min_cp < d_safe:
+    if not angle_result["exit_angle_ok"]:
         ok = False
 
     return {
         "ifc_ok": ok,
         "min_cable_cable_dist": min_cc,
-        "min_cable_payload_dist": min_cp,
+        "min_exit_angle_margin": angle_result["min_exit_angle_margin"],
+        "n_pairs_skipped_shared_anchor": n_skipped,
     }
 
 
 def score_routing_across_poses(routing, ugv_db, pay_layout, gnd_layout, poses,
                                 enable_wfc=False, tau_min=5.0, tau_max=100.0,
                                 wfc_wrench=None,
-                                enable_ifc=False, d_safe=0.05, payload_half_extents=None):
+                                enable_ifc=True, d_safe=D_SAFE,
+                                min_exit_angle_deg=15.0, face_normal_local=None,
+                                stats=None):
+    """
+    Scores one routing at every (position, R) in `poses` and returns the
+    WORST-CASE result across them (min manipulability, min conditioning
+    index) - so a routing only looks good here if it's good everywhere it
+    was checked, not just at whichever pose happened to flatter it.
+    Returns None if the routing is infeasible (degenerate, rank-deficient,
+    WFC-infeasible, or IFC-violating) at ANY of the given poses.
 
+    """
     if wfc_wrench is None:
         wfc_wrench = np.zeros(6)
 
@@ -298,22 +282,32 @@ def score_routing_across_poses(routing, ugv_db, pay_layout, gnd_layout, poses,
         Jp = build_Jp_ground(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R)
         score = score_Jp(Jp)
         if score is None or not score["rank_ok"]:
-            return None  # fails WCC
+            if stats is not None:
+                stats["wcc_fail"] = stats.get("wcc_fail", 0) + 1
+            return None 
 
         if enable_wfc:
             wfc = check_wfc(Jp, tau_min, tau_max, wfc_wrench)
             if not wfc["wfc_ok"]:
-                return None  # fails WFC
+                if stats is not None:
+                    stats["wfc_fail"] = stats.get("wfc_fail", 0) + 1
+                return None 
             per_pose_wfc.append(wfc)
 
         if enable_ifc:
             ifc = check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R,
-                             d_safe, payload_half_extents)
+                             d_safe, min_exit_angle_deg=min_exit_angle_deg,
+                             face_normal_local=face_normal_local)
             if not ifc["ifc_ok"]:
-                return None  # fails IFC
+                if stats is not None:
+                    stats["ifc_fail"] = stats.get("ifc_fail", 0) + 1
+                return None
             per_pose_ifc.append(ifc)
 
         per_pose_scores.append(score)
+
+    if stats is not None:
+        stats["passed"] = stats.get("passed", 0) + 1
 
     result = {
         "conditioning_index": min(s["conditioning_index"] for s in per_pose_scores),
@@ -325,21 +319,29 @@ def score_routing_across_poses(routing, ugv_db, pay_layout, gnd_layout, poses,
     }
 
     if enable_wfc:
-        result["wfc_ok"] = True  # only reaches here if every pose passed
+        result["wfc_ok"] = True 
     if enable_ifc:
         cc_vals = [d["min_cable_cable_dist"] for d in per_pose_ifc if d["min_cable_cable_dist"] is not None]
-        cp_vals = [d["min_cable_payload_dist"] for d in per_pose_ifc if d["min_cable_payload_dist"] is not None]
+        angle_vals = [d["min_exit_angle_margin"] for d in per_pose_ifc if d["min_exit_angle_margin"] is not None]
         result["ifc_ok"] = True
         result["min_cable_cable_dist"] = min(cc_vals) if cc_vals else None
-        result["min_cable_payload_dist"] = min(cp_vals) if cp_vals else None
+        result["min_exit_angle_margin"] = min(angle_vals) if angle_vals else None
 
     return result
 
 
+# ---------------------------------------------------------------------------
+# Full screening loop
+# ---------------------------------------------------------------------------
 
 def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=20000, seed=0,
                          enable_wfc=False, tau_min=5.0, tau_max=100.0, wfc_wrench=None,
-                         enable_ifc=False, d_safe=0.05, payload_half_extents=None):
+                         enable_ifc=True, d_safe=D_SAFE,
+                         min_exit_angle_deg=15.0, face_normal_local=None):
+    """
+    Picks the routing with the best WORST-CASE manipulability across all poses,
+    among routings that pass WCC (always) and, if enabled, WFC and IFC too.
+    """
     upper_bound = count_routings_upper_bound(ugv_db, pay_layout, gnd_layout)
     if upper_bound == 0:
         return None
@@ -349,16 +351,22 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
     else:
         routings = enumerate_routings(ugv_db, pay_layout, gnd_layout, max_results=max_enumerate)
 
+    stats = {"wcc_fail": 0, "wfc_fail": 0, "ifc_fail": 0, "passed": 0}
     best = None
     for routing in routings:
         gnd_nodes_used = [g for (p, g) in routing]
         from collections import Counter
         gnd_counts = Counter(gnd_nodes_used)
 
+        if any(count >= 3 for count in gnd_counts.values()):
+            continue
+
         score = score_routing_across_poses(
             routing, ugv_db, pay_layout, gnd_layout, poses,
             enable_wfc=enable_wfc, tau_min=tau_min, tau_max=tau_max, wfc_wrench=wfc_wrench,
-            enable_ifc=enable_ifc, d_safe=d_safe, payload_half_extents=payload_half_extents,
+            enable_ifc=enable_ifc, d_safe=d_safe,
+            min_exit_angle_deg=min_exit_angle_deg, face_normal_local=face_normal_local,
+            stats=stats,
         )
         if score is None:
             continue
@@ -369,33 +377,32 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
         return {
             "pay_layout": pay_layout, "gnd_layout": gnd_layout,
             "n_routings_checked": len(routings), "n_poses_checked": len(poses), "feasible": False,
+            "n_wcc_fail": stats["wcc_fail"], "n_wfc_fail": stats["wfc_fail"], "n_ifc_fail": stats["ifc_fail"],
         }
 
     return {
         "pay_layout": pay_layout, "gnd_layout": gnd_layout,
         "n_routings_checked": len(routings), "feasible": True,
+        "n_wcc_fail": stats["wcc_fail"], "n_wfc_fail": stats["wfc_fail"], "n_ifc_fail": stats["ifc_fail"],
         **{k: v for k, v in best.items() if k != "routing"},
         "best_routing": "|".join(f"{p}-{g}" for p, g in best["routing"]),
     }
 
 
-def screen_all(poses, pay_layouts=None, gnd_layouts=None, max_enumerate=20000, seed=0,
+def screen_all(poses, max_enumerate=20000, seed=0,
                 enable_wfc=False, tau_min=5.0, tau_max=100.0, wfc_wrench=None,
-                enable_ifc=False, d_safe=0.05, payload_half_extents=None):
+                enable_ifc=True, d_safe=D_SAFE,
+                min_exit_angle_deg=15.0, face_normal_local=None):
     ugv_db = _load_json_db(UGV_DB_PATH)
     ugv_db.pop("rectangle-same", None)
 
-    pay_layouts = pay_layouts or list(GRID_MAPPING_UGV.keys())
-    gnd_layouts = gnd_layouts or list(GRID_MAPPING_UGV.keys())
+    pay_layouts = list(GRID_MAPPING_UGV.keys())
+    gnd_layouts = list(GRID_MAPPING_UGV.keys())
 
     if "rectangle-same" in pay_layouts:
         pay_layouts.remove("rectangle-same")
     if "rectangle-same" in gnd_layouts:
         gnd_layouts.remove("rectangle-same")
-
-    if enable_ifc and payload_half_extents is None:
-        print("--enable-ifc was set but no --payload-half-extents given: "
-              "only cable-cable clearance will be checked, NOT cable-payload clearance.")
 
     rows = []
     total = len(pay_layouts) * len(gnd_layouts)
@@ -404,7 +411,8 @@ def screen_all(poses, pay_layouts=None, gnd_layouts=None, max_enumerate=20000, s
         result = screen_architecture(
             ugv_db, pay_layout, gnd_layout, poses, max_enumerate=max_enumerate, seed=seed,
             enable_wfc=enable_wfc, tau_min=tau_min, tau_max=tau_max, wfc_wrench=wfc_wrench,
-            enable_ifc=enable_ifc, d_safe=d_safe, payload_half_extents=payload_half_extents,
+            enable_ifc=enable_ifc, d_safe=d_safe,
+            min_exit_angle_deg=min_exit_angle_deg, face_normal_local=face_normal_local,
         )
         if result is None:
             print("no valid pairs (fewer nodes than 6 cables need)")
@@ -430,7 +438,7 @@ def build_poses_from_csv(path):
 
 def main():
     ap = argparse.ArgumentParser()
-
+    
     ap.add_argument("--out", type=str, default=None, help="Optional specific output CSV path override")
     ap.add_argument("--px", type=float, default=0.5, help="single-pose x (used only if CSVs are missing)")
     ap.add_argument("--py", type=float, default=-0.5, help="single-pose y")
@@ -445,7 +453,16 @@ def main():
 
     # --- WFC (Eq. 1.9 / 2.35) ---
     ap.add_argument("--enable-wfc", action="store_true",
-                     help="Enable Wrench Feasible Condition check (adds one LP solve per routing per pose)")
+                     help="Enable Wrench Feasible Condition check. OFF by default: this check "
+                          "demands EXACT equality (J_p^T tau = W_target) from the 6 ground "
+                          "cables ALONE, but your live controller (utils_optimization.py's "
+                          "lsq_linear) solves for all 9 cables JOINTLY as a least-squares best "
+                          "fit, with drones absorbing whatever the ground cables can't provide. "
+                          "There's no principled single W_target to hand this check that matches "
+                          "how the live system actually behaves - see conversation history for "
+                          "the full reasoning. A routing this rejects may work fine live. Only "
+                          "enable this once you've decided on an explicit ground/drone wrench "
+                          "split, or built a joint (9-cable) version of this check instead.")
     ap.add_argument("--tau-min", type=float, default=TAU_MIN,
                      help=f"minimum admissible cable tension [N], from config_params.TAU_MIN (default {TAU_MIN})")
     ap.add_argument("--tau-max", type=float, default=TAU_MAX,
@@ -456,18 +473,19 @@ def main():
                      help="target ground-cable wrench W_target for the WFC check - "
                           "REPLACE with what your tension planner actually asks the ground cables for (Eq. 2.35)")
 
-    # --- IFC (Eq. 2.20) ---
-    ap.add_argument("--enable-ifc", action="store_true",
-                     help="Enable Interference-Free Condition check (cable-cable always; "
-                          "cable-payload only if --payload-half-extents is given)")
+    ap.add_argument("--disable-ifc", dest="enable_ifc", action="store_false",
+                     help="Turn OFF the Interference-Free Condition check (it's ON by default now "
+                          "that config_params has a real D_SAFE value)")
+    ap.set_defaults(enable_ifc=True)
     ap.add_argument("--d-safe", type=float, default=D_SAFE,
-                     help=f"minimum clearance [m] between cables and between cables/payload, "
-                          f"from config_params.D_SAFE (default {D_SAFE})")
-    ap.add_argument("--payload-half-extents", type=float, nargs=3, default=PAYLOAD_HALF_EXTENTS,
-                     metavar=("HX", "HY", "HZ"),
-                     help="payload modeled as an oriented box with these half-extents [m], "
-                          "centered/oriented at each pose. Defaults to config_params.PAYLOAD_HALF_EXTENTS "
-                          "(currently None - fill that in once known)")
+                     help=f"minimum clearance [m] between cables (cable-cable only) (default {D_SAFE})")
+
+    ap.add_argument("--face-normal-local", type=float, nargs=3, default=[0.0, 0.0, -1.0],
+                     metavar=("NX", "NY", "NZ"),
+                     help="outward normal of the payload's attachment face, in the payload's own "
+                          "body frame. Default (0,0,-1) assumes all attachments are on the bottom "
+                          "facade, per utils_optimization.py's stated assumption - change this if "
+                          "that's not true for your setup")
 
     args = ap.parse_args()
 
@@ -485,18 +503,45 @@ def main():
         poses = [(pos, R)]
         print(f"⚠️ Default CSV not found at {default_csv_path}. Evaluating single command-line pose instead.")
 
-    payload_half_extents = (np.array(args.payload_half_extents, dtype=float)
-                             if args.payload_half_extents is not None else None)
+    face_normal_local = np.array(args.face_normal_local, dtype=float)
     wfc_wrench = np.array(args.wfc_wrench, dtype=float)
 
+    # 2. Run the exhaustive screening loop in memory
     df = screen_all(
         poses, max_enumerate=args.max_enumerate, seed=args.seed,
         enable_wfc=args.enable_wfc, tau_min=args.tau_min, tau_max=args.tau_max, wfc_wrench=wfc_wrench,
-        enable_ifc=args.enable_ifc, d_safe=args.d_safe, payload_half_extents=payload_half_extents,
+        enable_ifc=args.enable_ifc, d_safe=args.d_safe,
+        min_exit_angle_deg=args.min_exit_angle_deg, face_normal_local=face_normal_local,
     )
 
     if df.empty:
         print("\nNo architectures found during screening.")
+        return
+
+    if "conditioning_index" not in df.columns or not df["feasible"].any():
+        # Every architecture came back infeasible - no routing survived WCC/WFC/IFC
+        # for ANY (pay_layout, gnd_layout) pair. Aggregate the rejection-reason
+        # counters (added specifically for this situation) so you can tell WHICH
+        # check is doing this, instead of a bare crash with no diagnosis.
+        n_wcc = int(df["n_wcc_fail"].sum()) if "n_wcc_fail" in df.columns else None
+        n_wfc = int(df["n_wfc_fail"].sum()) if "n_wfc_fail" in df.columns else None
+        n_ifc = int(df["n_ifc_fail"].sum()) if "n_ifc_fail" in df.columns else None
+        print("\n" + "=" * 80)
+        print("[NO FEASIBLE ARCHITECTURES] Every (pay_layout, gnd_layout) pair had")
+        print("zero routings survive. Rejection counts across ALL architectures checked:")
+        print(f"    failed WCC (rank-deficient / degenerate) : {n_wcc}")
+        print(f"    failed WFC (tension outside [tau_min, tau_max] for wfc_wrench) : {n_wfc}")
+        print(f"    failed IFC (cable-cable clearance < d_safe, or exit angle < min_exit_angle_deg) : {n_ifc}")
+        print("If IFC dominates: check whether it's d_safe (cable-cable, currently "
+              f"{args.d_safe} m) or --min-exit-angle-deg (currently {args.min_exit_angle_deg} deg) "
+              "that's doing it - try --disable-ifc to confirm IFC is the cause, then relax "
+              "whichever threshold is too strict for your geometry.")
+        print("If WFC dominates: --wfc-wrench is still a zero-vector placeholder by "
+              "default - an all-zero target wrench with tau_min>0 may be infeasible for "
+              "some routing geometries (this can be a legitimate result, not just a "
+              "placeholder problem); supply your real target wrench if you have one, or "
+              "use --disable-wfc while you work out what that should be.")
+        print("=" * 80 + "\n")
         return
 
     df = df.sort_values(by=["conditioning_index", "manipulability"], ascending=[False, False]).reset_index(drop=True)
@@ -514,19 +559,20 @@ def main():
         if os.path.exists(csv_path):
             try:
                 existing_df = pd.read_csv(csv_path)
+                # Ensure dataframes match structurally and element-by-element
                 if df.shape == existing_df.shape and df.equals(existing_df):
                     match_found = True
                     referring_folder = folder
                     break
             except Exception:
                 continue
-    
+
     if match_found:
         print("\n" + "=" * 80)
         print(f"[SKIPPED] Identical screening results already exist.")
         print(f"--> Please refer to this existing folder: '{referring_folder}'")
         print("=" * 80 + "\n")
-        return
+        return 
 
     else:
         counter = 1
