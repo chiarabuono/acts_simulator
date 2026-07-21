@@ -7,6 +7,7 @@ from params_acts import *
 from utils_visual import * 
 from time import strftime, localtime
 from utils_performance_indices import compute_rig_performance_indices, append_robot_data, pose_reached
+from video_recorder import VideoRecorder
 
 def set_cable_length(tendon_idx, max_len):
     if max_len < 0: 
@@ -19,9 +20,14 @@ def get_cable_length(tendon_idx):
     cable_idx = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_TENDON, f"cable_{tendon_idx}")
     return data.ten_length[cable_idx]
 
-def get_cable_tension(model, data, tendon_name):
-    sensor_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SENSOR, f"{tendon_name}_tension")
-    return data.sensordata[model.sensor_adr[sensor_id]]
+def get_cable_tension(model, data, cable_idx):
+    if cable_idx in (1, 2, 3):
+        sensor_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SENSOR, f"cable_{cable_idx}_tension")
+        return data.sensordata[model.sensor_adr[sensor_id]]
+    else:
+        actuator_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, f"cable_{cable_idx}_winch")
+        assert actuator_id >= 0, f"actuator 'cable_{cable_idx}_winch' not found in model"
+        return -data.actuator_force[actuator_id]
 
 def quaternon_multiply(q1, q2):
     w1, x1, y1, z1 = q1
@@ -109,6 +115,7 @@ def key_callback(keycode):
         is_paused = not is_paused
         print(f"Simulation {'PAUSED' if is_paused else 'RESUMED'}")
 
+recorder = VideoRecorder(model, fps=15, width=640, height=480)
 with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as viewer:
     while viewer.is_running():
         step_start = time.time()
@@ -133,13 +140,14 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
             W_p_star = compute_Wp_star_geometric(p_payload, R_mat_payload, p_star, R_star)
 
             p_drone_targets, optimal_tensions = optimize_drone_positions(
-                p_star, R_star, P_GROUND_ANCHORS, DRONE_MASSES,
+                p_payload, R_mat_payload, P_GROUND_ANCHORS, DRONE_MASSES,
                 L_CABLES_DRONES, HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
-                W_p_star, tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE, g=G_ACCEL
+                W_p_star, tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=G_ACCEL
             )
 
-            tau_drone_actual = np.array([get_cable_tension(model, data, f"cable_{i}") for i in (1, 2, 3)])
-            tau_ground_actual = np.array([get_cable_tension(model, data, f"cable_{i}") for i in (4, 5, 6, 7, 8, 9)])
+            tau = np.array([get_cable_tension(model, data, i) for i in range(1, 10)])
+            tau_drone_actual = np.array([get_cable_tension(model, data, i) for i in (1, 2, 3)])
+            tau_ground_actual = np.array([get_cable_tension(model, data, i) for i in (4, 5, 6, 7, 8, 9)])
 
             indices = compute_rig_performance_indices(
                 p_payload, R_mat_payload,
@@ -165,12 +173,19 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
             rho_star = np.linalg.norm(p_anchor_global - b_k_global)
             
             current_len = get_cable_length(k + 4) 
-            new_len = current_len + CABLE_FILTER_ALPHA * (rho_star - current_len)
+
+            MAX_WINCH_SPEED = 1.50  # m/s
+            dt = model.opt.timestep
+
+            delta = rho_star - current_len
+            max_step = MAX_WINCH_SPEED * dt
+            step = np.clip(delta, -max_step, max_step)
+            new_len = current_len + step
             set_cable_length(k + 4, new_len)
 
-        p_hook1 = p_star + R_mat_payload @ HOOK_OFFSETS_DRONE[0]
-        p_hook2 = p_star + R_mat_payload @ HOOK_OFFSETS_DRONE[1]
-        p_hook3 = p_star + R_mat_payload @ HOOK_OFFSETS_DRONE[2]
+        p_hook1 = p_payload + R_mat_payload @ HOOK_OFFSETS_DRONE[0]
+        p_hook2 = p_payload + R_mat_payload @ HOOK_OFFSETS_DRONE[1]
+        p_hook3 = p_payload + R_mat_payload @ HOOK_OFFSETS_DRONE[2]
 
         drone1.set_cable_target(optimal_tensions[0], p_hook1)
         drone2.set_cable_target(optimal_tensions[1], p_hook2)
@@ -185,7 +200,10 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
         drone2.update_data(data)
         drone3.update_data(data)
         viewer.sync()
+        recorder.capture_frame(data)
 
         time_until_next_step = model.opt.timestep - (time.time() - step_start)
         if time_until_next_step > 0:
             time.sleep(time_until_next_step)
+        
+    recorder.save(f"{VIDEONAME}")

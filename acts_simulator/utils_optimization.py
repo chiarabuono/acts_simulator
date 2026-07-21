@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
-from utils_control import kt, kd, MAX_ROTOR_VELOCITY
+from utils_control import max_thrust
 from params_acts import MODE
 
 import os
@@ -8,7 +8,7 @@ import sys
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
-from acts_simulator import D_SAFE, TAU_MIN, TAU_MAX
+from acts_simulator import D_SAFE_DRONE, TAU_MIN, TAU_MAX
 
 def compute_payload_jacobian(p_payload, R_mat_payload, p_anchors, hook_offsets):
     m = len(p_anchors)
@@ -29,7 +29,7 @@ def compute_payload_jacobian(p_payload, R_mat_payload, p_anchors, hook_offsets):
 def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
                               drone_masses, l_cables_drone, hook_offsets_drone,
                               hook_offsets_ground, W_p_star,
-                              tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE, g=9.81):
+                              tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=9.81):
     n_a = len(drone_masses)
     n_g = len(p_ground_anchors)
     
@@ -57,7 +57,7 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
         # Using a bounded least-squares approach to handle the physics mapping
         from scipy.optimize import lsq_linear
         # Set bounds: Drones have thrust limits, Ground cables must be taut (> 0)
-        max_thrust = 4 * kt * MAX_ROTOR_VELOCITY**2  # ≈ 44 N
+
         bounds = (
             [1.0] * n_a + [tau_min] * n_g,
             [max_thrust] * n_a + [tau_max] * n_g

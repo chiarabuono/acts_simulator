@@ -107,7 +107,7 @@ def pose_error(p_payload: np.ndarray, R_mat_payload: np.ndarray,
 
 def pose_reached(p_payload: np.ndarray, R_mat_payload: np.ndarray,
                   p_star: np.ndarray, R_star: np.ndarray,
-                  pos_tol: float = 1e-1, rot_tol: float = np.deg2rad(2.0)
+                  pos_tol: float = 1e-1, rot_tol: float = np.deg2rad(3.0)
                   ) -> dict:
     """
     pos_tol: meters, rot_tol: radians.

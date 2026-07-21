@@ -5,6 +5,7 @@ from scipy.spatial.transform import Rotation as R
 MAX_ROTOR_VELOCITY = 1666.0
 kt = 5.5e-6
 kd = 3.299e-7
+max_thrust = 4 * kt * MAX_ROTOR_VELOCITY**2 
 
 class BaseDrone:
     def __init__(self, model, drone_name="drone", payload_mass=0.0):

@@ -59,28 +59,28 @@ def run_tuning_gui():
 
 
     # ==================== SECTION 3: CONTROLLER GAINS ====================
-    gain_frame = tk.LabelFrame(root, text="Controller PID Tuning Gains", font=('Helvetica', 10, 'bold'), fg="darkgreen")
-    gain_frame.pack(fill='x', padx=10, pady=5)
+    # gain_frame = tk.LabelFrame(root, text="Controller PID Tuning Gains", font=('Helvetica', 10, 'bold'), fg="darkgreen")
+    # gain_frame.pack(fill='x', padx=10, pady=5)
 
-    tk.Label(gain_frame, text="Kp Position Gain").pack(anchor='w', padx=5)
-    s_kp = tk.Scale(gain_frame, from_=0.0, to=100.0, resolution=0.5, orient='horizontal', command=lambda v: update_val('Kp_pos', v))
-    s_kp.set(ctrl_params['Kp_pos'])
-    s_kp.pack(fill='x', padx=10, pady=2)
+    # tk.Label(gain_frame, text="Kp Position Gain").pack(anchor='w', padx=5)
+    # s_kp = tk.Scale(gain_frame, from_=0.0, to=100.0, resolution=0.5, orient='horizontal', command=lambda v: update_val('Kp_pos', v))
+    # s_kp.set(ctrl_params['Kp_pos'])
+    # s_kp.pack(fill='x', padx=10, pady=2)
 
-    tk.Label(gain_frame, text="Kd Position Derivative Gain").pack(anchor='w', padx=5)
-    s_kd = tk.Scale(gain_frame, from_=0.0, to=50.0, resolution=0.1, orient='horizontal', command=lambda v: update_val('Kd_pos', v))
-    s_kd.set(ctrl_params['Kd_pos'])
-    s_kd.pack(fill='x', padx=10, pady=2)
+    # tk.Label(gain_frame, text="Kd Position Derivative Gain").pack(anchor='w', padx=5)
+    # s_kd = tk.Scale(gain_frame, from_=0.0, to=50.0, resolution=0.1, orient='horizontal', command=lambda v: update_val('Kd_pos', v))
+    # s_kd.set(ctrl_params['Kd_pos'])
+    # s_kd.pack(fill='x', padx=10, pady=2)
 
-    tk.Label(gain_frame, text="Kr Attitude Orientation Gain").pack(anchor='w', padx=5)
-    s_kr = tk.Scale(gain_frame, from_=0.0, to=50.0, resolution=0.5, orient='horizontal', command=lambda v: update_val('Kr', v))
-    s_kr.set(ctrl_params['Kr'])
-    s_kr.pack(fill='x', padx=10, pady=2)
+    # tk.Label(gain_frame, text="Kr Attitude Orientation Gain").pack(anchor='w', padx=5)
+    # s_kr = tk.Scale(gain_frame, from_=0.0, to=50.0, resolution=0.5, orient='horizontal', command=lambda v: update_val('Kr', v))
+    # s_kr.set(ctrl_params['Kr'])
+    # s_kr.pack(fill='x', padx=10, pady=2)
 
-    tk.Label(gain_frame, text="Kw Angular Velocity Damping Gain").pack(anchor='w', padx=5)
-    s_kw = tk.Scale(gain_frame, from_=0.0, to=20.0, resolution=0.1, orient='horizontal', command=lambda v: update_val('Kw', v))
-    s_kw.set(ctrl_params['Kw'])
-    s_kw.pack(fill='x', padx=10, pady=2)
+    # tk.Label(gain_frame, text="Kw Angular Velocity Damping Gain").pack(anchor='w', padx=5)
+    # s_kw = tk.Scale(gain_frame, from_=0.0, to=20.0, resolution=0.1, orient='horizontal', command=lambda v: update_val('Kw', v))
+    # s_kw.set(ctrl_params['Kw'])
+    # s_kw.pack(fill='x', padx=10, pady=2)
 
     root.mainloop()
 
