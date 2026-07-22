@@ -46,3 +46,4 @@ sudo apt install --reinstall python3-numpy python3-scipy
 
 ## Dependencies
 - To create an xml file using the interactive guide pip install Pillow
+- To plot pip install pyqtgraph PySide6

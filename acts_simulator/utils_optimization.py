@@ -29,17 +29,22 @@ def compute_payload_jacobian(p_payload, R_mat_payload, p_anchors, hook_offsets):
 def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
                               drone_masses, l_cables_drone, hook_offsets_drone,
                               hook_offsets_ground, W_p_star,
-                              tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=9.81):
+                              tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=9.81,
+                              x0_warm=None):
+    
     n_a = len(drone_masses)
     n_g = len(p_ground_anchors)
-    
+
     p_hooks_drone = [p_payload + R_mat_payload @ hook_offsets_drone[i] for i in range(n_a)]
-    
-    x0 = []
-    for i in range(n_a):
-        init_pos = p_hooks_drone[i] + np.array([0.0, 0.0, l_cables_drone[i]])
-        x0.extend(init_pos)
-    x0 = np.array(x0)
+
+    if x0_warm is not None:
+        x0 = np.asarray(x0_warm).flatten()
+    else:
+        x0 = []
+        for i in range(n_a):
+            init_pos = p_hooks_drone[i] + np.array([0.0, 0.0, l_cables_drone[i]])
+            x0.extend(init_pos)
+        x0 = np.array(x0)
 
     def evaluate_tensions_for_layout(p_a_flat):
         p_a = p_a_flat.reshape((n_a, 3))
@@ -87,7 +92,7 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
         W_p_generated = J_p @ tau 
         
         # Penalize the difference between generated wrench and desired tracking wrench
-        wrench_mismatch_cost = 1000.0 * np.sum((W_p_generated - W_p_star)**2)
+        wrench_mismatch_cost = 100.0 * np.sum((W_p_generated - W_p_star)**2)
         
         return drone_cost + wrench_mismatch_cost
 
@@ -128,11 +133,10 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
             return d_i - d_safe
         constraints.append({'type': 'ineq', 'fun': payload_collision_constraint})
 
-    res = minimize(objective, x0, method='SLSQP', constraints=constraints)
+    res = minimize(objective, x0, method='SLSQP', constraints=constraints, options={'maxiter': 500})   # default is often 100
+    print(f"SLSQP success={res.success}, message={res.message}")
     
-    if res.success:
-        optimized_drones = res.x.reshape((n_a, 3))
-        opt_tau, _ = evaluate_tensions_for_layout(res.x)
-        return optimized_drones, opt_tau[:n_a]
-    else:
-        return x0.reshape((n_a, 3)), [tau_min] * n_a
+    
+    optimized_drones = res.x.reshape((n_a, 3))
+    opt_tau, _ = evaluate_tensions_for_layout(res.x)
+    return optimized_drones, opt_tau[:n_a]

@@ -100,32 +100,50 @@ def compute_Wp_star_geometric(p_payload, R_mat_payload, p_star, R_star):
     W_p_star = np.concatenate([F_p_star, M_p_star])
     return W_p_star
 
+# Create Qt Application context once
+app = QtWidgets.QApplication.instance()
+if app is None:
+    app = QtWidgets.QApplication(sys.argv)
+
+index_plot = LiveIndexPlot(max_points=500)
+error_plot = LiveErrorPlot(max_points=500)
+index_plot.show()
+error_plot.show()
+
+# Set up update decimation rates
+# If model.opt.timestep = 0.002s (500 Hz), updating every 16 steps gives ~30 FPS tracking plots
+ERROR_PLOT_FREQUENCY = 16  
+
 step_counter = 0
 iteration = 1
 
 p_star, q_star, R_star = read_desired_pose()
 set_desired_pose(p_star, q_star)
+p_drone_targets_warm = None
 
 is_paused = False
 
 def key_callback(keycode):
     global is_paused
-    # 32 is the keycode for the Spacebar
-    if keycode == 32:
+    if keycode == 32:  # Spacebar
         is_paused = not is_paused
         print(f"Simulation {'PAUSED' if is_paused else 'RESUMED'}")
 
 recorder = VideoRecorder(model, fps=15, width=640, height=480)
+
 with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as viewer:
     while viewer.is_running():
         step_start = time.time()
         viewer.sync()
 
+        # Keep Qt event loop alive without blocking physics
+        app.processEvents()
+
         if is_paused:
             time_until_next_step = model.opt.timestep - (time.time() - step_start)
             if time_until_next_step > 0:
                 time.sleep(time_until_next_step)
-            continue  # Skips optimization loops and physics updates completely
+            continue
 
         p_star, q_star, R_star = read_desired_pose()
         set_desired_pose(p_star, q_star)
@@ -134,21 +152,32 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
         p_payload = data.body("payload").xpos                
         R_mat_payload = data.xmat[payload_id].reshape(3, 3).copy()   
 
+        # --- LOW FREQUENCY UPDATE: OPTIMIZATION & INDEX PLOTS ---
         if step_counter % OPTIMIZATION_FREQUENCY == 0:
             print(f"{iteration} Computing {strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))}")
-            # W_p_star = compute_Wp_star(p_payload, p_star, q_star)
+            
             W_p_star = compute_Wp_star_geometric(p_payload, R_mat_payload, p_star, R_star)
 
+            app.processEvents()
             p_drone_targets, optimal_tensions = optimize_drone_positions(
                 p_payload, R_mat_payload, P_GROUND_ANCHORS, DRONE_MASSES,
                 L_CABLES_DRONES, HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
-                W_p_star, tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=G_ACCEL
+                W_p_star, tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=G_ACCEL,
+                x0_warm=p_drone_targets_warm
             )
+            app.processEvents()
+            p_drone_targets_warm = p_drone_targets
 
             tau = np.array([get_cable_tension(model, data, i) for i in range(1, 10)])
             tau_drone_actual = np.array([get_cable_tension(model, data, i) for i in (1, 2, 3)])
             tau_ground_actual = np.array([get_cable_tension(model, data, i) for i in (4, 5, 6, 7, 8, 9)])
 
+            anchors = list(p_drone_targets) + list(P_GROUND_ANCHORS)
+            all_offsets = list(HOOK_OFFSETS_DRONE) + list(HOOK_OFFSETS_GROUND)
+            Jp = compute_payload_jacobian(p_payload, R_mat_payload, anchors, all_offsets)
+            M_desired = W_p_star[3:]
+            M_actual = (Jp @ tau)[3:]
+            
             indices = compute_rig_performance_indices(
                 p_payload, R_mat_payload,
                 p_drone_targets, P_GROUND_ANCHORS,
@@ -156,12 +185,14 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
                 tau_drone_actual, tau_ground_actual,
                 W_p_star, PAYLOAD_MASS,
             )
-            plot.update(data.time, indices)
+            
+            # UPDATED: Low-Frequency Index Plot
+            index_plot.update(data.time, indices)
+
             if iteration == ITERATION_COLLECTION: 
                 pose_params = pose_reached(p_payload, R_mat_payload, p_star, R_star)
                 append_robot_data("indices.xlsx", FILENAME, p_star, q_star, indices, pose_params)
             iteration += 1
-        step_counter += 1
 
         a1_star, a2_star, a3_star = p_drone_targets[0], p_drone_targets[1], p_drone_targets[2]
 
@@ -199,6 +230,13 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
         drone1.update_data(data)
         drone2.update_data(data)
         drone3.update_data(data)
+
+        # --- MEDIUM FREQUENCY UPDATE: ERROR PLOTS (e.g. 30 Hz / 30 FPS) ---
+        if step_counter % ERROR_PLOT_FREQUENCY == 0:
+            error_plot.update(data.time, p_payload, R_mat_payload, p_star, q_star)
+
+        step_counter += 1
+
         viewer.sync()
         recorder.capture_frame(data)
 
@@ -207,3 +245,5 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
             time.sleep(time_until_next_step)
         
     recorder.save(f"{VIDEONAME}")
+    index_plot.export_image(f"{GRAPHNAME}_indices.png")
+    error_plot.export_image(f"{GRAPHNAME}_errors.png")

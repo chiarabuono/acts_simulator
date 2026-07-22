@@ -50,9 +50,9 @@ P_GROUND_ANCHORS = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_
 GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground_anchor_{i}") for i in range(4, 10)]
 
 # ------ Optimization parameters  ------------------------------------------------------------
-CABLE_FILTER_ALPHA = 0.05
-OPTIMIZATION_FREQUENCY = 1000
-ITERATION_COLLECTION = 20  # Iteration at which indices are collected
+OPTIMIZATION_FREQUENCY = 500
+RENDER_EVERY_N_STEPS = 50
+ITERATION_COLLECTION = 35  # Iteration at which indices are collected
 MODE = "tau_optimal" # tau_min or tau_optimal
 
 payload_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "payload")
@@ -71,11 +71,12 @@ ctrl_params = {
     'Kd_pos': 2 * (kp)**0.5,
     'Kr': np.array([kr_xy, kr_xy, kr_z]),
     'Kw': np.array([2 * (kr_xy)**0.5, 2 * (kr_xy)**0.5, 2 * (kr_z)**0.5]),
-    'quat_w': 1.0, 'quat_x': 0.1, 'quat_y': 0.1, 'quat_z': 0.3
+    'quat_w': 1.0, 'quat_x': 0.1, 'quat_y': 0.1, 'quat_z': 0.1
 }
 
 
 VIDEONAME = f"{FILENAME}_{MODE}_{ctrl_params['px']}-{ctrl_params['py']}-{ctrl_params['pz']}_{ctrl_params['quat_w']}-{ctrl_params['quat_x']}-{ctrl_params['quat_y']}-{ctrl_params['quat_z']}.mp4"
+GRAPHNAME = f"{FILENAME}_{MODE}_{ctrl_params['px']}-{ctrl_params['py']}-{ctrl_params['pz']}_{ctrl_params['quat_w']}-{ctrl_params['quat_x']}-{ctrl_params['quat_y']}-{ctrl_params['quat_z']}"
 
 # ------ Desired pose parameters  ------------------------------------------------------------
 def read_desired_pose():
