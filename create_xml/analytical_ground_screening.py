@@ -1,19 +1,57 @@
-import argparse
 import itertools
+import os
+import glob
+from collections import Counter
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import linprog, minimize_scalar
+from scipy.optimize import linprog, lsq_linear, minimize
 
 from xml_config_builder import build_xml, save_xml, RoutingValidationError, UGVUAVConfig
 from config_params import _load_json_db
-from config_params import UAV_DB_PATH, UGV_DB_PATH, GRID_MAPPING_UGV, TAU_MIN, TAU_MAX, D_SAFE
-
-import os
-import glob
+from config_params import UAV_DB_PATH, UGV_DB_PATH, GRID_MAPPING_UGV, TAU_MIN, TAU_MAX, D_SAFE_CABLE
 
 EPS_RANK = 1e-6
+OUT_PATH = None
 
+# Fallback single pose, used only if no poses CSV is found
+PX, PY, PZ = 0.5, -0.5, 2.0
+QUAT_WXYZ = (1.0, 0.0, 0.0, 0.0)
+
+POSES_CSV = None                   # override path; None -> default below
+DEFAULT_POSES_CSV = "create_xml/poses_to_analyze.csv"
+
+MAX_ENUMERATE = 20000              # per-architecture routing cap before capping/sampling
+
+# --- Wrench Feasible Condition (WFC) ---
+ENABLE_WFC = True
+GROUND_TAU_MIN = TAU_MIN
+GROUND_TAU_MAX = TAU_MAX
+DRONE_THRUST_MIN = 1.0
+DRONE_THRUST_MAX = 44.0            # ~= 4 * kt * MAX_ROTOR_VELOCITY**2
+
+PAYLOAD_MASS = 1.0                 # [kg] -> default gravity-compensation target wrench
+G_ACCEL = 9.81
+WFC_WRENCH = None                  # None -> [0, 0, payload_mass * g_accel, 0, 0, 0]
+
+UAV_LAYOUT = "triangle"
+UAV_CABLE_LENGTH = 1.5             # [m] nominal drone cable length
+
+WFC_RESIDUAL_TOL = 1.0             # combined force+moment tolerance (coarse, backward-compatible)
+WFC_FORCE_TOL = None               # separate force-only tolerance [N]
+WFC_MOMENT_TOL = None              # separate moment-only tolerance [N*m]
+
+WFC_VERIFY_TOP_K = 10              # 0 = strict/cheap-only mode 
+WFC_VERIFY_MAX_ITER = 100
+
+# --- Interference-Free Condition (IFC) ---
+ENABLE_IFC = True
+D_SAFE = D_SAFE_CABLE
+
+
+# ---------------------------------------------------------------------------
+# Geometry helpers
+# ---------------------------------------------------------------------------
 
 def quat_to_R(w, x, y, z):
     """Standard (w,x,y,z) unit-quaternion to rotation matrix. Normalizes defensively."""
@@ -27,8 +65,10 @@ def quat_to_R(w, x, y, z):
         [    2 * (x * z - y * w),     2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
     ])
 
+
 def node_letters(db, layout):
     return [k for k in db[layout].keys() if k != "symmetry_metadata"]
+
 
 def max_cables(db, layout, letter):
     return db[layout][letter].get("max_cables", 999)
@@ -79,7 +119,6 @@ def count_routings_upper_bound(db, pay_layout, gnd_layout, n_cables=6):
     from math import comb
     return comb(n_pairs, n_cables)
 
-
 def build_Jp_ground(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R=None):
     payload_R = np.eye(3) if payload_R is None else payload_R
     rows = []
@@ -87,7 +126,7 @@ def build_Jp_ground(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payloa
         bi = np.array(ugv_db[pay_layout][p_node]["coords"], dtype=float)
         ai = np.array(ugv_db[gnd_layout][g_node]["coords"], dtype=float)
         ai = ai.copy()
-        ai[2] = 0.0  # ground anchors sit at z=0, matching the wizard's XML generation
+        ai[2] = 0.0  # ground anchors sit at z=0
 
         ri = payload_pos + payload_R @ bi
         li = ai - ri
@@ -111,26 +150,23 @@ def score_Jp(Jp):
         return None
     return {
         "conditioning_index": sigma_min / sigma_max,
-        "manipulability": float(np.prod(svals)),  # sqrt(det(Jp Jp^T)) == product of singular values
+        "manipulability": float(np.prod(svals)),  # == sqrt(det(Jp Jp^T))
         "sigma_min": sigma_min,
         "sigma_max": sigma_max,
         "rank_ok": bool(sigma_min > EPS_RANK),
     }
 
 
-# ---------------------------------------------------------------------------
-# WRENCH FEASIBLE CONDITION (WFC) - Eq. 1.9 / 2.35
-# ---------------------------------------------------------------------------
-
 def check_wfc(Jp, tau_min, tau_max, W_target):
+    """Ground-only, exact-equality WFC check (the literal Eq. 1.9/2.35 formulation)."""
     m = Jp.shape[0]
     tau_min_vec = np.full(m, tau_min) if np.isscalar(tau_min) else np.asarray(tau_min, dtype=float)
     tau_max_vec = np.full(m, tau_max) if np.isscalar(tau_max) else np.asarray(tau_max, dtype=float)
 
-    A_eq = Jp.T  # (6, m)
+    A_eq = Jp.T
     b_eq = np.asarray(W_target, dtype=float)
     bounds = list(zip(tau_min_vec, tau_max_vec))
-    c = np.zeros(m)  # feasibility only - no preference among feasible tau
+    c = np.zeros(m)  # feasibility only
 
     res = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method="highs")
     if res.success:
@@ -138,13 +174,142 @@ def check_wfc(Jp, tau_min, tau_max, W_target):
     return {"wfc_ok": False, "tau": None}
 
 
+def get_uav_hook_offsets(uav_db, uav_layout):
+    """Payload-side attachment points for the 3 drone cables."""
+    letters = [k for k in uav_db[uav_layout].keys() if k != "symmetry_metadata"]
+    return [np.array(uav_db[uav_layout][l]["coords"], dtype=float) for l in letters]
+
+
+def nominal_drone_positions(uav_hook_offsets, payload_pos, payload_R, uav_cable_length):
+    """Places each drone directly above its payload hook - cheap approximation."""
+    positions = []
+    for bi in uav_hook_offsets:
+        ri = payload_pos + payload_R @ bi
+        positions.append(ri + np.array([0.0, 0.0, uav_cable_length]))
+    return positions
+
+
+def build_Jp_full(ground_routing, ugv_db, pay_layout, gnd_layout,
+                   uav_hook_offsets, drone_positions, payload_pos, payload_R):
+    """Full (n_ground + n_drone, 6) Jacobian - ground rows first, then drone rows."""
+    rows = []
+    for p_node, g_node in ground_routing:
+        bi = np.array(ugv_db[pay_layout][p_node]["coords"], dtype=float)
+        ai = np.array(ugv_db[gnd_layout][g_node]["coords"], dtype=float).copy()
+        ai[2] = 0.0
+        ri = payload_pos + payload_R @ bi
+        li = ai - ri
+        ui = li / np.linalg.norm(li)
+        rows.append(np.concatenate([ui, np.cross(payload_R @ bi, ui)]))
+
+    for bi, ai in zip(uav_hook_offsets, drone_positions):
+        ri = payload_pos + payload_R @ bi
+        li = ai - ri
+        ui = li / np.linalg.norm(li)
+        rows.append(np.concatenate([ui, np.cross(payload_R @ bi, ui)]))
+
+    return np.array(rows)
+
+
+def check_joint_wfc(Jp_full, n_ground, n_drone,
+                     ground_tau_min, ground_tau_max,
+                     drone_thrust_min, drone_thrust_max,
+                     W_target, residual_tol=1.0,
+                     residual_force_tol=None, residual_moment_tol=None):
+    """
+    Joint (9-cable) WFC check: least-squares tension solve (matches the live
+    controller's actual formulation) accepted within a residual tolerance,
+    rather than exact equality. Splits the residual into force/moment and
+    lateral/vertical-force components so failures can be diagnosed.
+    """
+    m = Jp_full.shape[0]
+    assert m == n_ground + n_drone, "Jp_full row count must match n_ground + n_drone"
+
+    A = Jp_full.T
+    b = np.asarray(W_target, dtype=float)
+    lb = [ground_tau_min] * n_ground + [drone_thrust_min] * n_drone
+    ub = [ground_tau_max] * n_ground + [drone_thrust_max] * n_drone
+
+    res = lsq_linear(A, b, bounds=(lb, ub), method="bvls")
+    mismatch = A @ res.x - b
+    residual = float(np.linalg.norm(mismatch))
+    residual_force = float(np.linalg.norm(mismatch[:3]))
+    residual_moment = float(np.linalg.norm(mismatch[3:]))
+    residual_force_lateral = float(np.linalg.norm(mismatch[:2]))
+    residual_force_vertical = float(abs(mismatch[2]))
+
+    ok = residual <= residual_tol
+    if residual_force_tol is not None:
+        ok = ok and (residual_force <= residual_force_tol)
+    if residual_moment_tol is not None:
+        ok = ok and (residual_moment <= residual_moment_tol)
+
+    return {
+        "joint_wfc_ok": ok,
+        "residual": residual,
+        "residual_force": residual_force,
+        "residual_moment": residual_moment,
+        "residual_force_lateral": residual_force_lateral,
+        "residual_force_vertical": residual_force_vertical,
+        "tau": res.x,
+    }
+
+
+def optimize_drone_positions_for_wfc(uav_hook_offsets, payload_pos, payload_R, uav_cable_length,
+                                      ground_routing, ugv_db, pay_layout, gnd_layout,
+                                      ground_tau_min, ground_tau_max,
+                                      drone_thrust_min, drone_thrust_max, W_target,
+                                      max_iter=200):
+    """
+    Searches each drone's position on the sphere of radius uav_cable_length 
+    around its hook to minimize the joint WFC residual.
+    """
+    n_drone = len(uav_hook_offsets)
+    n_ground = len(ground_routing)
+    hooks_world = [payload_pos + payload_R @ bi for bi in uav_hook_offsets]
+
+    def angles_to_positions(angles_flat):
+        positions = []
+        for i in range(n_drone):
+            theta, phi = angles_flat[2 * i], angles_flat[2 * i + 1]
+            direction = np.array([
+                np.sin(theta) * np.cos(phi),
+                np.sin(theta) * np.sin(phi),
+                np.cos(theta),
+            ])
+            positions.append(hooks_world[i] + direction * uav_cable_length)
+        return positions
+
+    def objective(angles_flat):
+        drone_positions = angles_to_positions(angles_flat)
+        Jp_full = build_Jp_full(ground_routing, ugv_db, pay_layout, gnd_layout,
+                                 uav_hook_offsets, drone_positions, payload_pos, payload_R)
+        wfc = check_joint_wfc(Jp_full, n_ground=n_ground, n_drone=n_drone,
+                               ground_tau_min=ground_tau_min, ground_tau_max=ground_tau_max,
+                               drone_thrust_min=drone_thrust_min, drone_thrust_max=drone_thrust_max,
+                               W_target=W_target, residual_tol=0.0)
+        return wfc["residual"]
+
+    x0 = np.zeros(2 * n_drone)  # theta=0 for all -> starts exactly at nominal_drone_positions
+    res = minimize(objective, x0, method="Nelder-Mead",
+                    options={"xatol": 1e-3, "fatol": 1e-3, "maxiter": max_iter})
+
+    best_positions = angles_to_positions(res.x)
+    Jp_full_best = build_Jp_full(ground_routing, ugv_db, pay_layout, gnd_layout,
+                                  uav_hook_offsets, best_positions, payload_pos, payload_R)
+    best_wfc = check_joint_wfc(Jp_full_best, n_ground=n_ground, n_drone=n_drone,
+                                ground_tau_min=ground_tau_min, ground_tau_max=ground_tau_max,
+                                drone_thrust_min=drone_thrust_min, drone_thrust_max=drone_thrust_max,
+                                W_target=W_target, residual_tol=0.0)
+    return best_positions, best_wfc["residual"], best_wfc
+
+
+# ---------------------------------------------------------------------------
+# INTERFERENCE-FREE CONDITION (IFC) - Eq. 2.20
+# ---------------------------------------------------------------------------
+
 def segment_segment_distance(p1, p2, q1, q2):
-    """
-    Exact minimum distance between two 3D line segments [p1,p2] and [q1,q2].
-    Standard closed-form closest-point algorithm (Ericson, "Real-Time
-    Collision Detection"). Used for the cable-cable clearance term of
-    Eq. 2.20: d_ij = dist(cable_i, cable_j) >= d_safe.
-    """
+    """Exact minimum distance between two 3D line segments [p1,p2] and [q1,q2]."""
     d1 = p2 - p1
     d2 = q2 - q1
     r = p1 - q1
@@ -180,44 +345,10 @@ def segment_segment_distance(p1, p2, q1, q2):
     c2 = q1 + t * d2
     return float(np.linalg.norm(c1 - c2))
 
-def check_cable_exit_angle(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R,
-                            min_exit_angle_deg=15.0, face_normal_local=None):
-    """
-    Returns dict:
-        exit_angle_ok            : bool
-        min_exit_angle_margin    : float or None - smallest (sin(actual
-                                    angle) - sin(min_exit_angle_deg)) across
-                                    all cables; negative means a violation
-    """
-    if face_normal_local is None:
-        face_normal_local = np.array([0.0, 0.0, -1.0])
-    world_normal = payload_R @ face_normal_local
-    min_sin = np.sin(np.radians(min_exit_angle_deg))
 
-    worst_margin = None
-    for p_node, g_node in routing:
-        bi = np.array(ugv_db[pay_layout][p_node]["coords"], dtype=float)
-        ai = np.array(ugv_db[gnd_layout][g_node]["coords"], dtype=float)
-        ai = ai.copy()
-        ai[2] = 0.0
-        ri = payload_pos + payload_R @ bi
-        direction = ai - ri
-        norm = np.linalg.norm(direction)
-        if norm < 1e-9:
-            continue
-        u = direction / norm
-        sin_angle = np.dot(u, world_normal)  # projection onto the outward normal
-        margin = sin_angle - min_sin
-        worst_margin = margin if worst_margin is None else min(worst_margin, margin)
+def check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R, d_safe):
 
-    ok = (worst_margin is None) or (worst_margin >= 0.0)
-    return {"exit_angle_ok": ok, "min_exit_angle_margin": worst_margin}
-
-
-def check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R,
-              d_safe, min_exit_angle_deg=15.0, face_normal_local=None):
-
-    segments = []  # (r_i, a_i, p_node, g_node) per cable, world frame
+    segments = []
     for p_node, g_node in routing:
         bi = np.array(ugv_db[pay_layout][p_node]["coords"], dtype=float)
         ai = np.array(ugv_db[gnd_layout][g_node]["coords"], dtype=float)
@@ -236,47 +367,42 @@ def check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R,
         d = segment_segment_distance(r1, a1, r2, a2)
         min_cc = d if min_cc is None else min(min_cc, d)
 
-    # cable exit angle vs. the payload's attachment face
-    angle_result = check_cable_exit_angle(routing, ugv_db, pay_layout, gnd_layout,
-                                           payload_pos, payload_R,
-                                           min_exit_angle_deg=min_exit_angle_deg,
-                                           face_normal_local=face_normal_local)
-
-    ok = True
-    if min_cc is not None and min_cc < d_safe:
-        ok = False
-    if not angle_result["exit_angle_ok"]:
-        ok = False
+    ok = (min_cc is None) or (min_cc >= d_safe)
 
     return {
         "ifc_ok": ok,
         "min_cable_cable_dist": min_cc,
-        "min_exit_angle_margin": angle_result["min_exit_angle_margin"],
         "n_pairs_skipped_shared_anchor": n_skipped,
     }
 
 
+# ---------------------------------------------------------------------------
+# Per-routing, per-pose scoring
+# ---------------------------------------------------------------------------
+
 def score_routing_across_poses(routing, ugv_db, pay_layout, gnd_layout, poses,
                                 enable_wfc=False, tau_min=5.0, tau_max=100.0,
-                                wfc_wrench=None,
-                                enable_ifc=True, d_safe=D_SAFE,
-                                min_exit_angle_deg=15.0, face_normal_local=None,
+                                wfc_wrench=None, uav_hook_offsets=None,
+                                uav_cable_length=1.5, drone_thrust_min=1.0,
+                                drone_thrust_max=44.0, wfc_residual_tol=1.0,
+                                wfc_force_tol=None, wfc_moment_tol=None,
+                                wfc_gate=True,
+                                enable_ifc=True, d_safe=D_SAFE_CABLE,
                                 stats=None):
     """
     Scores one routing at every (position, R) in `poses` and returns the
-    WORST-CASE result across them (min manipulability, min conditioning
-    index) - so a routing only looks good here if it's good everywhere it
-    was checked, not just at whichever pose happened to flatter it.
-    Returns None if the routing is infeasible (degenerate, rank-deficient,
-    WFC-infeasible, or IFC-violating) at ANY of the given poses.
-
+    WORST-CASE result across them. Returns None if the routing fails WCC
+    or IFC at any pose; a WFC failure's effect depends on wfc_gate.
     """
     if wfc_wrench is None:
         wfc_wrench = np.zeros(6)
+    if enable_wfc and uav_hook_offsets is None:
+        raise ValueError("enable_wfc=True requires uav_hook_offsets (see get_uav_hook_offsets)")
 
     per_pose_scores = []
     per_pose_wfc = []
     per_pose_ifc = []
+    any_wfc_soft_fail = False
 
     for payload_pos, payload_R in poses:
         Jp = build_Jp_ground(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R)
@@ -284,25 +410,38 @@ def score_routing_across_poses(routing, ugv_db, pay_layout, gnd_layout, poses,
         if score is None or not score["rank_ok"]:
             if stats is not None:
                 stats["wcc_fail"] = stats.get("wcc_fail", 0) + 1
-            return None 
-
-        if enable_wfc:
-            wfc = check_wfc(Jp, tau_min, tau_max, wfc_wrench)
-            if not wfc["wfc_ok"]:
-                if stats is not None:
-                    stats["wfc_fail"] = stats.get("wfc_fail", 0) + 1
-                return None 
-            per_pose_wfc.append(wfc)
+            return None  # fails WCC
 
         if enable_ifc:
-            ifc = check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R,
-                             d_safe, min_exit_angle_deg=min_exit_angle_deg,
-                             face_normal_local=face_normal_local)
+            ifc = check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R, d_safe)
             if not ifc["ifc_ok"]:
                 if stats is not None:
                     stats["ifc_fail"] = stats.get("ifc_fail", 0) + 1
-                return None
+                return None  # fails IFC
             per_pose_ifc.append(ifc)
+
+        if enable_wfc:
+            drone_positions = nominal_drone_positions(uav_hook_offsets, payload_pos, payload_R,
+                                                        uav_cable_length)
+            Jp_full = build_Jp_full(routing, ugv_db, pay_layout, gnd_layout,
+                                     uav_hook_offsets, drone_positions, payload_pos, payload_R)
+            wfc = check_joint_wfc(Jp_full, n_ground=len(routing), n_drone=len(uav_hook_offsets),
+                                   ground_tau_min=tau_min, ground_tau_max=tau_max,
+                                   drone_thrust_min=drone_thrust_min, drone_thrust_max=drone_thrust_max,
+                                   W_target=wfc_wrench, residual_tol=wfc_residual_tol,
+                                   residual_force_tol=wfc_force_tol, residual_moment_tol=wfc_moment_tol)
+            if not wfc["joint_wfc_ok"]:
+                if stats is not None:
+                    stats["wfc_fail"] = stats.get("wfc_fail", 0) + 1
+                    stats.setdefault("wfc_fail_residuals", []).append(wfc["residual"])
+                    stats.setdefault("wfc_fail_residual_force", []).append(wfc["residual_force"])
+                    stats.setdefault("wfc_fail_residual_moment", []).append(wfc["residual_moment"])
+                    stats.setdefault("wfc_fail_residual_force_lateral", []).append(wfc["residual_force_lateral"])
+                    stats.setdefault("wfc_fail_residual_force_vertical", []).append(wfc["residual_force_vertical"])
+                if wfc_gate:
+                    return None  # fails WFC (strict mode)
+                any_wfc_soft_fail = True
+            per_pose_wfc.append(wfc)
 
         per_pose_scores.append(score)
 
@@ -319,28 +458,38 @@ def score_routing_across_poses(routing, ugv_db, pay_layout, gnd_layout, poses,
     }
 
     if enable_wfc:
-        result["wfc_ok"] = True 
+        result["wfc_ok"] = not any_wfc_soft_fail
+        result["max_wfc_residual"] = max(w["residual"] for w in per_pose_wfc)
+        result["max_wfc_residual_force"] = max(w["residual_force"] for w in per_pose_wfc)
+        result["max_wfc_residual_moment"] = max(w["residual_moment"] for w in per_pose_wfc)
     if enable_ifc:
         cc_vals = [d["min_cable_cable_dist"] for d in per_pose_ifc if d["min_cable_cable_dist"] is not None]
-        angle_vals = [d["min_exit_angle_margin"] for d in per_pose_ifc if d["min_exit_angle_margin"] is not None]
         result["ifc_ok"] = True
         result["min_cable_cable_dist"] = min(cc_vals) if cc_vals else None
-        result["min_exit_angle_margin"] = min(angle_vals) if angle_vals else None
 
     return result
 
 
-# ---------------------------------------------------------------------------
-# Full screening loop
-# ---------------------------------------------------------------------------
-
-def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=20000, seed=0,
+def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=20000,
                          enable_wfc=False, tau_min=5.0, tau_max=100.0, wfc_wrench=None,
-                         enable_ifc=True, d_safe=D_SAFE,
-                         min_exit_angle_deg=15.0, face_normal_local=None):
+                         uav_hook_offsets=None, uav_cable_length=1.5,
+                         drone_thrust_min=1.0, drone_thrust_max=44.0, wfc_residual_tol=1.0,
+                         wfc_force_tol=None, wfc_moment_tol=None,
+                         wfc_verify_top_k=0, wfc_verify_max_iter=100,
+                         enable_ifc=True, d_safe=D_SAFE_CABLE):
     """
-    Picks the routing with the best WORST-CASE manipulability across all poses,
-    among routings that pass WCC (always) and, if enabled, WFC and IFC too.
+    Picks the routing with the best worst-case manipulability across all
+    poses, among routings the ones that pass
+
+    wfc_verify_top_k=0: strict mode - a WFC failure discards the routing
+    immediately (same behavior/cost as before this feature existed).
+
+    wfc_verify_top_k>0: two-phase workflow - first sweep with wfc_gate=False
+    to find every WCC+IFC survivor regardless of the cheap WFC outcome; if
+    nothing fully passes, re-check the top-K of those by manipulability
+    using the expensive optimize_drone_positions_for_wfc, promoting the
+    first one that passes real tolerances. Rescues routings whose only
+    problem was a lateral-force/moment mismatch a repositioned drone can fix.
     """
     upper_bound = count_routings_upper_bound(ugv_db, pay_layout, gnd_layout)
     if upper_bound == 0:
@@ -351,68 +500,134 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
     else:
         routings = enumerate_routings(ugv_db, pay_layout, gnd_layout, max_results=max_enumerate)
 
+    use_two_phase = enable_wfc and wfc_verify_top_k > 0
+
     stats = {"wcc_fail": 0, "wfc_fail": 0, "ifc_fail": 0, "passed": 0}
     best = None
-    for routing in routings:
-        gnd_nodes_used = [g for (p, g) in routing]
-        from collections import Counter
-        gnd_counts = Counter(gnd_nodes_used)
+    pending_candidates = []  # (manipulability, routing, score) - only used if use_two_phase
 
+    for routing in routings:
+        gnd_counts = Counter(g for (_, g) in routing)
         if any(count >= 3 for count in gnd_counts.values()):
-            continue
+            continue  # no ground node may take 3+ cables
 
         score = score_routing_across_poses(
             routing, ugv_db, pay_layout, gnd_layout, poses,
             enable_wfc=enable_wfc, tau_min=tau_min, tau_max=tau_max, wfc_wrench=wfc_wrench,
+            uav_hook_offsets=uav_hook_offsets, uav_cable_length=uav_cable_length,
+            drone_thrust_min=drone_thrust_min, drone_thrust_max=drone_thrust_max,
+            wfc_residual_tol=wfc_residual_tol, wfc_force_tol=wfc_force_tol, wfc_moment_tol=wfc_moment_tol,
+            wfc_gate=not use_two_phase,
             enable_ifc=enable_ifc, d_safe=d_safe,
-            min_exit_angle_deg=min_exit_angle_deg, face_normal_local=face_normal_local,
             stats=stats,
         )
         if score is None:
             continue
+        if use_two_phase and not score.get("wfc_ok", True):
+            pending_candidates.append((score["manipulability"], routing, score))
+            continue
         if best is None or score["manipulability"] > best["manipulability"]:
             best = {**score, "routing": routing}
+
+    n_wfc_verify_attempted = 0
+    n_wfc_verify_rescued = 0
+    if best is None and use_two_phase and pending_candidates:
+        pending_candidates.sort(key=lambda t: t[0], reverse=True)
+        for manipulability, routing, score in pending_candidates[:wfc_verify_top_k]:
+            n_wfc_verify_attempted += 1
+            all_poses_pass = True
+            for payload_pos, payload_R in poses:
+                _, residual, wfc_result = optimize_drone_positions_for_wfc(
+                    uav_hook_offsets, payload_pos, payload_R, uav_cable_length,
+                    routing, ugv_db, pay_layout, gnd_layout,
+                    tau_min, tau_max, drone_thrust_min, drone_thrust_max, wfc_wrench,
+                    max_iter=wfc_verify_max_iter,
+                )
+                # re-check against the REAL configured tolerances, not the
+                # internal residual_tol=0.0 used to drive the search itself
+                ok = residual <= wfc_residual_tol
+                if wfc_force_tol is not None:
+                    ok = ok and (wfc_result["residual_force"] <= wfc_force_tol)
+                if wfc_moment_tol is not None:
+                    ok = ok and (wfc_result["residual_moment"] <= wfc_moment_tol)
+                if not ok:
+                    all_poses_pass = False
+                    break
+            if all_poses_pass:
+                n_wfc_verify_rescued += 1
+                best = {**score, "routing": routing, "wfc_ok": True, "wfc_rescued_by_reposition": True}
+                break  # sorted by manipulability descending - first success is best available
+
+    wfc_residuals = stats.get("wfc_fail_residuals", [])
+    wfc_force_residuals = stats.get("wfc_fail_residual_force", [])
+    wfc_moment_residuals = stats.get("wfc_fail_residual_moment", [])
+    wfc_lateral_residuals = stats.get("wfc_fail_residual_force_lateral", [])
+    wfc_vertical_residuals = stats.get("wfc_fail_residual_force_vertical", [])
+    wfc_residual_summary = {
+        "wfc_fail_residual_min": float(np.min(wfc_residuals)) if wfc_residuals else None,
+        "wfc_fail_residual_median": float(np.median(wfc_residuals)) if wfc_residuals else None,
+        "wfc_fail_residual_max": float(np.max(wfc_residuals)) if wfc_residuals else None,
+        "wfc_fail_residual_force_median": float(np.median(wfc_force_residuals)) if wfc_force_residuals else None,
+        "wfc_fail_residual_moment_median": float(np.median(wfc_moment_residuals)) if wfc_moment_residuals else None,
+        "wfc_fail_residual_force_lateral_median": float(np.median(wfc_lateral_residuals)) if wfc_lateral_residuals else None,
+        "wfc_fail_residual_force_vertical_median": float(np.median(wfc_vertical_residuals)) if wfc_vertical_residuals else None,
+        "n_wfc_verify_attempted": n_wfc_verify_attempted,
+        "n_wfc_verify_rescued": n_wfc_verify_rescued,
+    }
 
     if best is None:
         return {
             "pay_layout": pay_layout, "gnd_layout": gnd_layout,
             "n_routings_checked": len(routings), "n_poses_checked": len(poses), "feasible": False,
             "n_wcc_fail": stats["wcc_fail"], "n_wfc_fail": stats["wfc_fail"], "n_ifc_fail": stats["ifc_fail"],
+            **wfc_residual_summary,
         }
 
     return {
         "pay_layout": pay_layout, "gnd_layout": gnd_layout,
         "n_routings_checked": len(routings), "feasible": True,
         "n_wcc_fail": stats["wcc_fail"], "n_wfc_fail": stats["wfc_fail"], "n_ifc_fail": stats["ifc_fail"],
+        **wfc_residual_summary,
         **{k: v for k, v in best.items() if k != "routing"},
         "best_routing": "|".join(f"{p}-{g}" for p, g in best["routing"]),
     }
 
 
-def screen_all(poses, max_enumerate=20000, seed=0,
+def screen_all(poses, max_enumerate=20000,
                 enable_wfc=False, tau_min=5.0, tau_max=100.0, wfc_wrench=None,
-                enable_ifc=True, d_safe=D_SAFE,
-                min_exit_angle_deg=15.0, face_normal_local=None):
+                uav_layout="triangle", uav_cable_length=1.5,
+                drone_thrust_min=1.0, drone_thrust_max=44.0, wfc_residual_tol=1.0,
+                wfc_force_tol=None, wfc_moment_tol=None,
+                wfc_verify_top_k=0, wfc_verify_max_iter=100,
+                enable_ifc=True, d_safe=D_SAFE_CABLE):
     ugv_db = _load_json_db(UGV_DB_PATH)
-    ugv_db.pop("rectangle-same", None)
+    ugv_db.pop("rectangle-same", None)  # known unstable in simulation; excluded from re-screening
 
-    pay_layouts = list(GRID_MAPPING_UGV.keys())
-    gnd_layouts = list(GRID_MAPPING_UGV.keys())
+    layouts = [l for l in GRID_MAPPING_UGV.keys() if l != "rectangle-same"]
 
-    if "rectangle-same" in pay_layouts:
-        pay_layouts.remove("rectangle-same")
-    if "rectangle-same" in gnd_layouts:
-        gnd_layouts.remove("rectangle-same")
+    uav_hook_offsets = None
+    if enable_wfc:
+        uav_db = _load_json_db(UAV_DB_PATH)
+        uav_hook_offsets = get_uav_hook_offsets(uav_db, uav_layout)
+        print(f"Joint WFC enabled: using UAV layout '{uav_layout}' "
+              f"({len(uav_hook_offsets)} drone cables) alongside the ground routing.")
+        if wfc_verify_top_k > 0:
+            print(f"Two-phase WFC verification enabled: up to {wfc_verify_top_k} "
+                  f"best-by-manipulability WCC+IFC survivors per architecture will get the "
+                  f"expensive drone-repositioning check if nothing passes the cheap one.")
 
     rows = []
-    total = len(pay_layouts) * len(gnd_layouts)
-    for i, (pay_layout, gnd_layout) in enumerate(itertools.product(pay_layouts, gnd_layouts), 1):
+    total = len(layouts) * len(layouts)
+    for i, (pay_layout, gnd_layout) in enumerate(itertools.product(layouts, layouts), 1):
         print(f"[{i}/{total}] {pay_layout} / {gnd_layout} ...", end=" ")
         result = screen_architecture(
-            ugv_db, pay_layout, gnd_layout, poses, max_enumerate=max_enumerate, seed=seed,
+            ugv_db, pay_layout, gnd_layout, poses, max_enumerate=max_enumerate,
             enable_wfc=enable_wfc, tau_min=tau_min, tau_max=tau_max, wfc_wrench=wfc_wrench,
+            uav_hook_offsets=uav_hook_offsets, uav_cable_length=uav_cable_length,
+            drone_thrust_min=drone_thrust_min, drone_thrust_max=drone_thrust_max,
+            wfc_residual_tol=wfc_residual_tol, wfc_force_tol=wfc_force_tol, wfc_moment_tol=wfc_moment_tol,
+            wfc_verify_top_k=wfc_verify_top_k, wfc_verify_max_iter=wfc_verify_max_iter,
             enable_ifc=enable_ifc, d_safe=d_safe,
-            min_exit_angle_deg=min_exit_angle_deg, face_normal_local=face_normal_local,
         )
         if result is None:
             print("no valid pairs (fewer nodes than 6 cables need)")
@@ -436,173 +651,55 @@ def build_poses_from_csv(path):
     return poses
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    
-    ap.add_argument("--out", type=str, default=None, help="Optional specific output CSV path override")
-    ap.add_argument("--px", type=float, default=0.5, help="single-pose x (used only if CSVs are missing)")
-    ap.add_argument("--py", type=float, default=-0.5, help="single-pose y")
-    ap.add_argument("--pz", type=float, default=2.0, help="single-pose z")
-    ap.add_argument("--quat", type=float, nargs=4, default=[1.0, 0.0, 0.0, 0.0],
-                     metavar=("W", "X", "Y", "Z"), help="single-pose quaternion, w x y z")
-    ap.add_argument("--poses-csv", type=str, default=None,
-                     help="CSV with columns px,py,pz,quat_w,quat_x,quat_y,quat_z; overrides default file")
-    ap.add_argument("--max-enumerate", type=int, default=20000,
-                     help="per-architecture cap; falls back to a large sample beyond this")
-    ap.add_argument("--seed", type=int, default=0)
+def print_infeasibility_report(df):
+    """Prints a diagnostic breakdown when every architecture came back infeasible."""
+    n_wcc = int(df["n_wcc_fail"].sum()) if "n_wcc_fail" in df.columns else None
+    n_wfc = int(df["n_wfc_fail"].sum()) if "n_wfc_fail" in df.columns else None
+    n_ifc = int(df["n_ifc_fail"].sum()) if "n_ifc_fail" in df.columns else None
 
-    # --- WFC (Eq. 1.9 / 2.35) ---
-    ap.add_argument("--enable-wfc", action="store_true",
-                     help="Enable Wrench Feasible Condition check. OFF by default: this check "
-                          "demands EXACT equality (J_p^T tau = W_target) from the 6 ground "
-                          "cables ALONE, but your live controller (utils_optimization.py's "
-                          "lsq_linear) solves for all 9 cables JOINTLY as a least-squares best "
-                          "fit, with drones absorbing whatever the ground cables can't provide. "
-                          "There's no principled single W_target to hand this check that matches "
-                          "how the live system actually behaves - see conversation history for "
-                          "the full reasoning. A routing this rejects may work fine live. Only "
-                          "enable this once you've decided on an explicit ground/drone wrench "
-                          "split, or built a joint (9-cable) version of this check instead.")
-    ap.add_argument("--tau-min", type=float, default=TAU_MIN,
-                     help=f"minimum admissible cable tension [N], from config_params.TAU_MIN (default {TAU_MIN})")
-    ap.add_argument("--tau-max", type=float, default=TAU_MAX,
-                     help=f"maximum admissible cable tension [N], from config_params.TAU_MAX (default {TAU_MAX} - "
-                          f"still a placeholder, see config_params.py)")
-    ap.add_argument("--wfc-wrench", type=float, nargs=6, default=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                     metavar=("FX", "FY", "FZ", "MX", "MY", "MZ"),
-                     help="target ground-cable wrench W_target for the WFC check - "
-                          "REPLACE with what your tension planner actually asks the ground cables for (Eq. 2.35)")
+    print("\n" + "=" * 80)
+    print("[NO FEASIBLE ARCHITECTURES] Every (pay_layout, gnd_layout) pair had")
+    print("zero routings survive. Rejection counts across ALL architectures checked:")
+    print(f"    failed WCC (rank-deficient / degenerate)                                   : {n_wcc}")
+    print(f"    failed WFC (residual mismatch > tolerance, joint 9-cable solve)             : {n_wfc}")
+    print(f"    failed IFC (cable-cable clearance < d_safe)                                : {n_ifc}")
 
-    ap.add_argument("--disable-ifc", dest="enable_ifc", action="store_false",
-                     help="Turn OFF the Interference-Free Condition check (it's ON by default now "
-                          "that config_params has a real D_SAFE value)")
-    ap.set_defaults(enable_ifc=True)
-    ap.add_argument("--d-safe", type=float, default=D_SAFE,
-                     help=f"minimum clearance [m] between cables (cable-cable only) (default {D_SAFE})")
+    if n_wfc and "wfc_fail_residual_median" in df.columns:
+        med_vals = df["wfc_fail_residual_median"].dropna()
+        min_vals = df["wfc_fail_residual_min"].dropna()
+        max_vals = df["wfc_fail_residual_max"].dropna()
+        force_med = df.get("wfc_fail_residual_force_median", pd.Series(dtype=float)).dropna()
+        moment_med = df.get("wfc_fail_residual_moment_median", pd.Series(dtype=float)).dropna()
+        lateral_med = df.get("wfc_fail_residual_force_lateral_median", pd.Series(dtype=float)).dropna()
+        vertical_med = df.get("wfc_fail_residual_force_vertical_median", pd.Series(dtype=float)).dropna()
 
-    ap.add_argument("--face-normal-local", type=float, nargs=3, default=[0.0, 0.0, -1.0],
-                     metavar=("NX", "NY", "NZ"),
-                     help="outward normal of the payload's attachment face, in the payload's own "
-                          "body frame. Default (0,0,-1) assumes all attachments are on the bottom "
-                          "facade, per utils_optimization.py's stated assumption - change this if "
-                          "that's not true for your setup")
+        if len(med_vals) > 0:
+            print(f"    WFC failure residuals actually seen (combined): "
+                  f"smallest={min_vals.min():.3g}, "
+                  f"typical(median of per-arch medians)={med_vals.median():.3g}, "
+                  f"largest={max_vals.max():.3g}")
+            if len(force_med) > 0 and len(moment_med) > 0:
+                print(f"    Split by type - typical FORCE mismatch: {force_med.median():.3g} N, "
+                      f"typical MOMENT mismatch: {moment_med.median():.3g} N*m")
+            if len(lateral_med) > 0 and len(vertical_med) > 0:
+                print(f"    Force further split - typical LATERAL (XY) mismatch: {lateral_med.median():.3g} N, "
+                      f"typical VERTICAL (Z) mismatch: {vertical_med.median():.3g} N")
+                print("    LATERAL mismatch is diagnostic: nominal_drone_positions locks every "
+                      "drone's cable direction to (0,0,1), so drones structurally CANNOT "
+                      "contribute lateral force. If lateral dominates, tightening a force "
+                      "tolerance won't fix it - drones need to be REPOSITIONED (see "
+                      "optimize_drone_positions_for_wfc).")
 
-    args = ap.parse_args()
 
-    default_csv_path = "create_xml/poses_to_analyze.csv"
-
-    if args.poses_csv:
-        poses = build_poses_from_csv(args.poses_csv)
-        print(f"Evaluating across {len(poses)} poses from user-specified {args.poses_csv}")
-    elif os.path.exists(default_csv_path):
-        poses = build_poses_from_csv(default_csv_path)
-        print(f"Evaluating across {len(poses)} poses from default file: {default_csv_path}")
-    else:
-        R = quat_to_R(*args.quat)
-        pos = np.array([args.px, args.py, args.pz])
-        poses = [(pos, R)]
-        print(f"⚠️ Default CSV not found at {default_csv_path}. Evaluating single command-line pose instead.")
-
-    face_normal_local = np.array(args.face_normal_local, dtype=float)
-    wfc_wrench = np.array(args.wfc_wrench, dtype=float)
-
-    # 2. Run the exhaustive screening loop in memory
-    df = screen_all(
-        poses, max_enumerate=args.max_enumerate, seed=args.seed,
-        enable_wfc=args.enable_wfc, tau_min=args.tau_min, tau_max=args.tau_max, wfc_wrench=wfc_wrench,
-        enable_ifc=args.enable_ifc, d_safe=args.d_safe,
-        min_exit_angle_deg=args.min_exit_angle_deg, face_normal_local=face_normal_local,
-    )
-
-    if df.empty:
-        print("\nNo architectures found during screening.")
-        return
-
-    if "conditioning_index" not in df.columns or not df["feasible"].any():
-        # Every architecture came back infeasible - no routing survived WCC/WFC/IFC
-        # for ANY (pay_layout, gnd_layout) pair. Aggregate the rejection-reason
-        # counters (added specifically for this situation) so you can tell WHICH
-        # check is doing this, instead of a bare crash with no diagnosis.
-        n_wcc = int(df["n_wcc_fail"].sum()) if "n_wcc_fail" in df.columns else None
-        n_wfc = int(df["n_wfc_fail"].sum()) if "n_wfc_fail" in df.columns else None
-        n_ifc = int(df["n_ifc_fail"].sum()) if "n_ifc_fail" in df.columns else None
-        print("\n" + "=" * 80)
-        print("[NO FEASIBLE ARCHITECTURES] Every (pay_layout, gnd_layout) pair had")
-        print("zero routings survive. Rejection counts across ALL architectures checked:")
-        print(f"    failed WCC (rank-deficient / degenerate) : {n_wcc}")
-        print(f"    failed WFC (tension outside [tau_min, tau_max] for wfc_wrench) : {n_wfc}")
-        print(f"    failed IFC (cable-cable clearance < d_safe, or exit angle < min_exit_angle_deg) : {n_ifc}")
-        print("If IFC dominates: check whether it's d_safe (cable-cable, currently "
-              f"{args.d_safe} m) or --min-exit-angle-deg (currently {args.min_exit_angle_deg} deg) "
-              "that's doing it - try --disable-ifc to confirm IFC is the cause, then relax "
-              "whichever threshold is too strict for your geometry.")
-        print("If WFC dominates: --wfc-wrench is still a zero-vector placeholder by "
-              "default - an all-zero target wrench with tau_min>0 may be infeasible for "
-              "some routing geometries (this can be a legitimate result, not just a "
-              "placeholder problem); supply your real target wrench if you have one, or "
-              "use --disable-wfc while you work out what that should be.")
-        print("=" * 80 + "\n")
-        return
-
-    df = df.sort_values(by=["conditioning_index", "manipulability"], ascending=[False, False]).reset_index(drop=True)
-
-    base_dir = "mujoco"
-    search_pattern = os.path.join(base_dir, "mujoco_outputs*")
-    existing_folders = glob.glob(search_pattern)
-
-    match_found = False
-    referring_folder = None
-
-    print("\nChecking existing results directories for identical data...")
-    for folder in existing_folders:
-        csv_path = os.path.join(folder, "ground_screening_results.csv")
-        if os.path.exists(csv_path):
-            try:
-                existing_df = pd.read_csv(csv_path)
-                # Ensure dataframes match structurally and element-by-element
-                if df.shape == existing_df.shape and df.equals(existing_df):
-                    match_found = True
-                    referring_folder = folder
-                    break
-            except Exception:
-                continue
-
-    if match_found:
-        print("\n" + "=" * 80)
-        print(f"[SKIPPED] Identical screening results already exist.")
-        print(f"--> Please refer to this existing folder: '{referring_folder}'")
-        print("=" * 80 + "\n")
-        return 
-
-    else:
-        counter = 1
-        while os.path.exists(os.path.join(base_dir, f"mujoco_outputs_{counter}")):
-            counter += 1
-
-        target_output_dir = os.path.join(base_dir, f"mujoco_outputs_{counter}")
-        os.makedirs(target_output_dir, exist_ok=True)
-        print(f"--> No identical results found. Creating new directory: '{target_output_dir}'")
-
-    csv_out_path = args.out if args.out else os.path.join(target_output_dir, "ground_screening_results.csv")
-    os.makedirs(os.path.dirname(csv_out_path), exist_ok=True)
-
-    df.to_csv(csv_out_path, index=False)
-    print(f"\nWrote {len(df)} architecture results to {csv_out_path}")
-
-    print("\nTop 5 architectures by worst-case conditioning index (each already using its best routing):")
-    print(df.head(5).to_string(index=False))
-
+def generate_top_xml_configs(df, target_output_dir, chosen_uav_layout="triangle"):
     uav_geo_db = _load_json_db(UAV_DB_PATH)
     ugv_geo_db = _load_json_db(UGV_DB_PATH)
-    chosen_uav_layout = "triangle"
 
     print("\nGenerating MuJoCo XML configurations for the top architectures...")
     top_feasible_df = df[df["feasible"] == True].head(5)
 
     for idx, row in top_feasible_df.iterrows():
-        routing_string = row["best_routing"]
-        routing_pairs = [pair.split("-") for pair in routing_string.split("|")]
-
+        routing_pairs = [pair.split("-") for pair in row["best_routing"].split("|")]
         routing_dict = {
             i + 4: {"payload_anchor": p, "ground_anchor": g}
             for i, (p, g) in enumerate(routing_pairs)
@@ -615,22 +712,95 @@ def main():
             routing=routing_dict,
             mirror_gnd_x=False,
             mirror_gnd_y=False,
-            scale_mode="Normal"
+            scale_mode="Normal",
         )
 
         try:
             xml_content = build_xml(config, ugv_geo_db, uav_geo_db)
             file_path, msg = save_xml(config, xml_content, ugv_geo_db, out_dir=target_output_dir)
-
             if msg:
                 print(f"  [SKIPPED Top {idx+1}] {msg}")
             else:
                 print(f"  [SUCCESS Top {idx+1}] Saved config to {file_path}")
-
         except RoutingValidationError as e:
             print(f"  [VALIDATION ERROR Top {idx+1}] {e}")
         except Exception as e:
             print(f"  [ERROR Top {idx+1}] Failed generation: {e}")
+
+
+def main():
+    if POSES_CSV:
+        poses = build_poses_from_csv(POSES_CSV)
+        print(f"Evaluating across {len(poses)} poses from {POSES_CSV}")
+    elif os.path.exists(DEFAULT_POSES_CSV):
+        poses = build_poses_from_csv(DEFAULT_POSES_CSV)
+        print(f"Evaluating across {len(poses)} poses from default file: {DEFAULT_POSES_CSV}")
+    else:
+        R = quat_to_R(*QUAT_WXYZ)
+        pos = np.array([PX, PY, PZ])
+        poses = [(pos, R)]
+        print(f"Default CSV not found at {DEFAULT_POSES_CSV}. Evaluating single fallback pose instead.")
+
+    wfc_wrench = WFC_WRENCH
+    if wfc_wrench is None:
+        # Static gravity-compensation wrench (F=[0,0,mg], M=0)
+        wfc_wrench = np.array([0.0, 0.0, PAYLOAD_MASS * G_ACCEL, 0.0, 0.0, 0.0])
+        print(f"Using default static WFC target wrench (gravity compensation only): {wfc_wrench}")
+
+    df = screen_all(
+        poses, max_enumerate=MAX_ENUMERATE,
+        enable_wfc=ENABLE_WFC, tau_min=GROUND_TAU_MIN, tau_max=GROUND_TAU_MAX, wfc_wrench=wfc_wrench,
+        uav_layout=UAV_LAYOUT, uav_cable_length=UAV_CABLE_LENGTH,
+        drone_thrust_min=DRONE_THRUST_MIN, drone_thrust_max=DRONE_THRUST_MAX,
+        wfc_residual_tol=WFC_RESIDUAL_TOL, wfc_force_tol=WFC_FORCE_TOL, wfc_moment_tol=WFC_MOMENT_TOL,
+        wfc_verify_top_k=WFC_VERIFY_TOP_K, wfc_verify_max_iter=WFC_VERIFY_MAX_ITER,
+        enable_ifc=ENABLE_IFC, d_safe=D_SAFE,
+    )
+
+    if df.empty:
+        print("\nNo architectures found during screening.")
+        return
+
+    if "conditioning_index" not in df.columns or not df["feasible"].any():
+        print_infeasibility_report(df)
+        return
+
+    df = df.sort_values(by=["conditioning_index", "manipulability"], ascending=[False, False]).reset_index(drop=True)
+
+    # Check whether identical results already exist, to avoid redundant work
+    base_dir = "mujoco"
+    existing_folders = glob.glob(os.path.join(base_dir, "mujoco_outputs*"))
+    print("\nChecking existing results directories for identical data...")
+    for folder in existing_folders:
+        csv_path = os.path.join(folder, "ground_screening_results.csv")
+        if os.path.exists(csv_path):
+            try:
+                existing_df = pd.read_csv(csv_path)
+                if df.shape == existing_df.shape and df.equals(existing_df):
+                    print("\n" + "=" * 80)
+                    print("[SKIPPED] Identical screening results already exist.")
+                    print(f"--> Please refer to this existing folder: '{folder}'")
+                    print("=" * 80 + "\n")
+                    return
+            except Exception:
+                continue
+
+    counter = 1
+    while os.path.exists(os.path.join(base_dir, f"mujoco_outputs_{counter}")):
+        counter += 1
+    target_output_dir = os.path.join(base_dir, f"mujoco_outputs_{counter}")
+    os.makedirs(target_output_dir, exist_ok=True)
+    print(f"--> No identical results found. Creating new directory: '{target_output_dir}'")
+
+    csv_out_path = OUT_PATH if OUT_PATH else os.path.join(target_output_dir, "ground_screening_results.csv")
+    os.makedirs(os.path.dirname(csv_out_path), exist_ok=True)
+    df.to_csv(csv_out_path, index=False)
+    print(f"\nWrote {len(df)} architecture results to {csv_out_path}")
+
+    print("\nTop 5 architectures by worst-case conditioning index (each already using its best routing):")
+    print(df.head(5).to_string(index=False))
+
+    generate_top_xml_configs(df, target_output_dir, chosen_uav_layout="triangle")
 
 
 if __name__ == "__main__":
