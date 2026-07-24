@@ -6,10 +6,19 @@ import sys
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
+from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, MODE, max_thrust
 
-from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, MODE
-
+# -----------------------------------------------------------------------
+# Geometric helpers for the Interference-Free Condition (Eq. 2.19)
+# -----------------------------------------------------------------------
 def segment_segment_distance(p1, p2, p3, p4):
+    """
+    Minimum distance between segment [p1, p2] and segment [p3, p4] in 3D.
+    Standard closest-point-between-two-segments algorithm
+    (see e.g. Ericson, "Real-Time Collision Detection", Ch. 5.1.9).
+    This is what d_ij = dist(cable_i, cable_j) actually means in Eq. 2.19 -
+    NOT the distance between the segment endpoints.
+    """
     d1 = p2 - p1
     d2 = p4 - p3
     r = p1 - p3
@@ -66,25 +75,26 @@ def point_segment_distance(p, a, b):
 def compute_payload_jacobian(p_payload, R_mat_payload, p_anchors, hook_offsets):
     m = len(p_anchors)
     J_p = np.zeros((6, m))
-    
+
     for i in range(m):
         b_i_global = R_mat_payload @ hook_offsets[i]
         r_i = p_payload + b_i_global
-        
+
         l_vector = p_anchors[i] - r_i
         u_i = l_vector / np.linalg.norm(l_vector)
 
         J_p[0:3, i] = u_i
         J_p[3:6, i] = np.cross(b_i_global, u_i)
-        
+
     return J_p
+
 
 def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
                               drone_masses, l_cables_drone, hook_offsets_drone,
-                              hook_offsets_ground, W_p_star, max_thrust,
+                              hook_offsets_ground, W_p_star,
                               tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=9.81,
                               x0_warm=None):
-    
+
     n_a = len(drone_masses)
     n_g = len(p_ground_anchors)
 
@@ -99,6 +109,11 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
             x0.extend(init_pos)
         x0 = np.array(x0)
 
+    # ---------------------------------------------------------------
+    # [A] / [C] Cache: x_flat.tobytes() -> (tau, p_a, J_p)
+    # Populated once per distinct point, reused by objective() and by
+    # every constraint function called at that same point.
+    # ---------------------------------------------------------------
     _cache = {}
 
     def evaluate_tensions_for_layout(p_a_flat):
@@ -152,13 +167,17 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
         W_p_generated = J_p @ tau
 
         # Penalize the difference between generated wrench and desired tracking wrench
-        wrench_mismatch_cost = 100.0 * np.sum((W_p_generated - W_p_star)**2)
-        
+        wrench_mismatch_cost = 100.0 * np.sum((W_p_generated - W_p_star) ** 2)
+
         return drone_cost + wrench_mismatch_cost
 
     constraints = []
 
-    # Constraint 1: Cable Length Equalities for Drones
+    # -----------------------------------------------------------------
+    # Constraint 1 [D]: Cable Length Equalities for Drones (vectorized)
+    # dist_sq_i - l_i^2 == 0 for every drone i.
+    # [B] Analytic jacobian: purely geometric in p_a, no dependence on tau.
+    # -----------------------------------------------------------------
     def cable_length_constraint(x_flat):
         _, p_a = evaluate_tensions_for_layout(x_flat)
         out = np.empty(n_a)
@@ -177,7 +196,11 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
 
     constraints.append({'type': 'eq', 'fun': cable_length_constraint, 'jac': cable_length_jac})
 
+    # -----------------------------------------------------------------
     # Constraint 2: tau_min^2 - w^2 <= 0  -> Ground Tensions >= tau_min
+    # (vectorized; left on numerical differencing since it depends on tau,
+    #  which comes out of the bvls solve and has no convenient closed form)
+    # -----------------------------------------------------------------
     if MODE == "tau_optimal":
         def ground_tension_constraint(x_flat):
             tau, _ = evaluate_tensions_for_layout(x_flat)
@@ -185,7 +208,10 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
 
         constraints.append({'type': 'ineq', 'fun': ground_tension_constraint})
 
-    # Constraint 3: Inter-drone Collision Avoidance (d_ij >= d_safe)
+    # -----------------------------------------------------------------
+    # Constraint 3 [D]: Inter-drone Collision Avoidance (d_ij >= d_safe), vectorized
+    # [B] Analytic jacobian: purely geometric in p_a.
+    # -----------------------------------------------------------------
     drone_pairs = list(itertools.combinations(range(n_a), 2))
 
     def drone_collision_constraint(x_flat):
@@ -211,7 +237,10 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
     if drone_pairs:
         constraints.append({'type': 'ineq', 'fun': drone_collision_constraint, 'jac': drone_collision_jac})
 
-    # Constraint 4: Payload Collision Avoidance (d_i >= d_safe)
+    # -----------------------------------------------------------------
+    # Constraint 4 [D]: Payload Collision Avoidance (d_i >= d_safe), vectorized
+    # [B] Analytic jacobian: purely geometric in p_a.
+    # -----------------------------------------------------------------
     def payload_collision_constraint(x_flat):
         _, p_a = evaluate_tensions_for_layout(x_flat)
         out = np.empty(n_a)
@@ -235,7 +264,7 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
     res = minimize(objective, x0, method='SLSQP', constraints=constraints,
                     options={'maxiter': 500})  # default is often 100
     print(f"SLSQP success={res.success}, message={res.message}")
-    
+
     optimized_drones = res.x.reshape((n_a, 3))
     opt_tau, _ = evaluate_tensions_for_layout(res.x)
     return optimized_drones, opt_tau[:n_a]
@@ -243,7 +272,30 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
 
 def check_ground_cable_rubbing(p_payload, R_mat_payload, p_ground_anchors,
                                 hook_offsets_ground, d_safe=D_SAFE_CABLE):
+    """
+    Interference-Free Condition (Eq. 2.19) restricted to the n_g ground
+    cables against each other: d_ij = dist(cable_i, cable_j) >= d_safe.
 
+    Both endpoints of every ground cable are fixed given the current
+    payload pose (anchor is fixed in the world; hook only depends on
+    p_payload / R_mat_payload) - this does NOT depend on the drone
+    positions being optimized in optimize_drone_positions, so it is kept
+    as a separate, independent check rather than an SLSQP constraint.
+
+    Call once per control iteration (or offline per routing candidate)
+    right after you compute p_payload / R_mat_payload.
+
+    Returns
+    -------
+    min_distance : float
+        Smallest pairwise segment-to-segment distance found.
+    ok : bool
+        True if all pairs respect the clearance (min_distance >= d_safe).
+    pair_distances : dict[(i, j) -> float]
+        Distance for every one of the n_g*(n_g-1)/2 ground-cable pairs,
+        indexed by ground-cable index (0-based, matching the order of
+        p_ground_anchors / hook_offsets_ground).
+    """
     n_g = len(p_ground_anchors)
     p_hooks_ground = [p_payload + R_mat_payload @ hook_offsets_ground[k] for k in range(n_g)]
 

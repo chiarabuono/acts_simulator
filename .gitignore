@@ -8,3 +8,5 @@ acts_simulator/__pycache__/
 *.xml
 *.png
 *.mp4
+*.csv
+*.xlsx

@@ -1,14 +1,14 @@
 import mujoco
 import numpy as np
-from acts_simulator.utils_control import ACTScontrolDrone
 from scipy.spatial.transform import Rotation as R
+from acts_simulator.utils_control import ACTScontrolDrone
 from acts_simulator.utils_configuration_selection import select_and_load_xml
 
 import os, sys
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
-from acts_simulator import D_SAFE_DRONE, TAU_MIN, TAU_MAX, MODE
+from acts_simulator import D_SAFE_DRONE, TAU_MIN, TAU_MAX
 
 
 FILENAME, xml_model = select_and_load_xml()
@@ -52,7 +52,7 @@ GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground
 # ------ Optimization parameters  ------------------------------------------------------------
 OPTIMIZATION_FREQUENCY = 500
 RENDER_EVERY_N_STEPS = 50
-ITERATION_COLLECTION = 30  # Iteration at which indices are collected
+ITERATION_COLLECTION = 35  # Iteration at which indices are collected
 
 payload_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "payload")
 i_xx, i_yy, i_zz = model.body_inertia[payload_id]
@@ -61,7 +61,7 @@ i_xx, i_yy, i_zz = model.body_inertia[payload_id]
 inertia_ratio = i_zz / i_xx
 
 kp = 28.0
-kr_xy = 8.0
+kr_xy = 11.0
 kr_z = kr_xy * inertia_ratio
 
 ctrl_params = {
@@ -70,12 +70,10 @@ ctrl_params = {
     'Kd_pos': 2 * (kp)**0.5,
     'Kr': np.array([kr_xy, kr_xy, kr_z]),
     'Kw': np.array([2 * (kr_xy)**0.5, 2 * (kr_xy)**0.5, 2 * (kr_z)**0.5]),
-    'quat_w': 1.0, 'quat_x': 0.2, 'quat_y': 0.1, 'quat_z': 0.1
+    'quat_w': 1.0, 'quat_x': 0.1, 'quat_y': 0.1, 'quat_z': 0.1
 }
 
-MAX_WINCH_SPEED = 1.00  # m/s
-
-
+from acts_simulator import MODE
 VIDEONAME = f"{FILENAME}_{MODE}_{ctrl_params['px']}-{ctrl_params['py']}-{ctrl_params['pz']}_{ctrl_params['quat_w']}-{ctrl_params['quat_x']}-{ctrl_params['quat_y']}-{ctrl_params['quat_z']}.mp4"
 GRAPHNAME = f"{FILENAME}_{MODE}_{ctrl_params['px']}-{ctrl_params['py']}-{ctrl_params['pz']}_{ctrl_params['quat_w']}-{ctrl_params['quat_x']}-{ctrl_params['quat_y']}-{ctrl_params['quat_z']}"
 
