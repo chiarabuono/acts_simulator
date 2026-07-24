@@ -1,7 +1,7 @@
 import numpy as np
 from itertools import combinations
 from scipy.spatial import ConvexHull
-from utils_optimization import compute_payload_jacobian
+from acts_simulator.utils_optimization import compute_payload_jacobian
 import os
 import pandas as pd
 

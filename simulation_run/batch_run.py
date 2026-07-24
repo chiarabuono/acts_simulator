@@ -19,12 +19,14 @@ for p in [_SIMULATOR_PKG, _SRC_DIR]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from acts_simulator.utils_control import ACTScontrolDrone, max_thrust
+from acts_simulator import max_thrust
+from acts_simulator.utils_control import ACTScontrolDrone
 from acts_simulator.utils_optimization import optimize_drone_positions, check_ground_cable_rubbing
 from acts_simulator.utils_performance_indices import compute_rig_performance_indices, append_robot_data, pose_reached
-from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX
+from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, OPTIMIZATION_FREQUENCY, MAX_WINCH_SPEED, CHECK_RUB_FREQUENCY
 from acts_simulator.utils_configuration_selection import select_and_load_folder
-from acts_simulator.params_acts import OPTIMIZATION_FREQUENCY, MODE, MAX_WINCH_SPEED
+
+import os, sys
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
@@ -162,6 +164,7 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
     dt = model.opt.timestep
 
     # 4. Simulation Loop with Early Convergence Exit
+    converged = 0
     while iteration <= MAX_ITERATIONS:
         p_payload = data.body("payload").xpos.copy()             
         R_mat_payload = data.xmat[payload_id].reshape(3, 3).copy()
@@ -179,7 +182,7 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
             p_drone_targets, optimal_tensions = optimize_drone_positions(
                 p_payload, R_mat_payload, p_ground_anchors, drone_masses,
                 l_cables_drones, hook_offsets_drone, hook_offsets_ground,
-                W_p_star, max_thrust, tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=g_accel,
+                W_p_star, tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=g_accel,
                 x0_warm=p_drone_targets_warm
             )
             p_drone_targets_warm = p_drone_targets
@@ -192,8 +195,9 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
             
             is_converged = (pos_error <= POS_TOLERANCE) and (rot_error <= ROT_TOLERANCE)
             is_max_reached = (iteration == MAX_ITERATIONS)
-
-            if is_converged or is_max_reached:
+            
+            if is_converged: converged += 1
+            if converged > 5 or is_max_reached:
                 reason = "CONVERGED" if is_converged else "MAX ITERATIONS REACHED"
                 print(f" Exit condition met ({reason}) at iteration {iteration}. Pos error: {pos_error:.4f} m.")
 
@@ -220,25 +224,26 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
             iteration += 1
 
         # Cable Rubbing Detection
-        min_d, ok, pair_dists = check_ground_cable_rubbing(
-            p_payload, R_mat_payload, p_ground_anchors, hook_offsets_ground, d_safe=D_SAFE_CABLE
-        )
-        if not ok:
-            print(f"[Model: {filename} | Iteration: {iteration}] Cable Rubbing! min_d = {min_d:.3f} < {D_SAFE_CABLE}")
-            rubbing_events.append({
-                "model_xml": filename,
-                "pose_index": pose_idx,
-                "target_pos_x": p_star[0],
-                "target_pos_y": p_star[1],
-                "target_pos_z": p_star[2],
-                "iteration": iteration,
-                "step_counter": step_counter,
-                "simulation_time_s": step_counter * dt,
-                "min_distance_m": min_d,
-                "d_safe_threshold_m": D_SAFE_CABLE,
-                "violation_margin_m": min_d - D_SAFE_CABLE,
-                "status": "RUBBING_DETECTED"
-            })
+        if step_counter % CHECK_RUB_FREQUENCY == 0:
+            min_d, ok, pair_dists = check_ground_cable_rubbing(
+                p_payload, R_mat_payload, p_ground_anchors, hook_offsets_ground, d_safe=D_SAFE_CABLE
+            )
+            if not ok:
+                print(f"[Model: {filename} | Iteration: {iteration}] Cable Rubbing! min_d = {min_d:.3f} < {D_SAFE_CABLE}")
+                rubbing_events.append({
+                    "model_xml": filename,
+                    "pose_index": pose_idx,
+                    "target_pos_x": p_star[0],
+                    "target_pos_y": p_star[1],
+                    "target_pos_z": p_star[2],
+                    "iteration": iteration,
+                    "step_counter": step_counter,
+                    "simulation_time_s": step_counter * dt,
+                    "min_distance_m": min_d,
+                    "d_safe_threshold_m": D_SAFE_CABLE,
+                    "violation_margin_m": min_d - D_SAFE_CABLE,
+                    "status": "RUBBING_DETECTED"
+                })
 
         a1_star, a2_star, a3_star = p_drone_targets[0], p_drone_targets[1], p_drone_targets[2]
 

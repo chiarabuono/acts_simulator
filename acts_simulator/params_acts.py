@@ -8,7 +8,7 @@ import os, sys
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
-from acts_simulator import D_SAFE_DRONE, TAU_MIN, TAU_MAX
+from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, CHECK_RUB_FREQUENCY
 
 
 FILENAME, xml_model = select_and_load_xml()
@@ -65,12 +65,12 @@ kr_xy = 11.0
 kr_z = kr_xy * inertia_ratio
 
 ctrl_params = {
-    'px': 0.5, 'py': -0.5, 'pz': 2.0,
+    'px': 0.0, 'py': 0.0, 'pz': 5.5,
     'Kp_pos': kp, 
     'Kd_pos': 2 * (kp)**0.5,
     'Kr': np.array([kr_xy, kr_xy, kr_z]),
     'Kw': np.array([2 * (kr_xy)**0.5, 2 * (kr_xy)**0.5, 2 * (kr_z)**0.5]),
-    'quat_w': 1.0, 'quat_x': 0.1, 'quat_y': 0.1, 'quat_z': 0.1
+    'quat_w': 1.0, 'quat_x': 0.0, 'quat_y': 0.0, 'quat_z': 0.0
 }
 
 from acts_simulator import MODE

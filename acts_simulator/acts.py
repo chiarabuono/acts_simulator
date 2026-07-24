@@ -2,7 +2,7 @@ import mujoco
 import mujoco.viewer
 import numpy as np
 import time
-from utils_optimization import optimize_drone_positions, compute_payload_jacobian
+from utils_optimization import optimize_drone_positions, compute_payload_jacobian, check_ground_cable_rubbing
 from params_acts import *
 from utils_visual import QtWidgets, LiveIndexPlot, LiveErrorPlot, run_tuning_gui
 from time import strftime, localtime
@@ -199,6 +199,13 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
                 pose_params = pose_reached(p_payload, R_mat_payload, p_star, R_star)
                 append_robot_data("indices.xlsx", FILENAME, p_star, q_star, indices, pose_params)
             iteration += 1
+
+        if step_counter % CHECK_RUB_FREQUENCY == 0:
+            min_d, ok, pair_dists = check_ground_cable_rubbing(
+                    p_payload, R_mat_payload, P_GROUND_ANCHORS, HOOK_OFFSETS_GROUND, d_safe=D_SAFE_CABLE
+                    )
+            if not ok:
+                print(f"Iteration: {iteration}] Cable Rubbing! min_d = {min_d:.3f} < {D_SAFE_CABLE}")
 
         a1_star, a2_star, a3_star = p_drone_targets[0], p_drone_targets[1], p_drone_targets[2]
 
