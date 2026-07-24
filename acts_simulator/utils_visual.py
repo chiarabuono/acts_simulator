@@ -1,7 +1,7 @@
 import sys
 import tkinter as tk
 import threading
-from params_acts import ctrl_params
+from acts_simulator.params_acts import ctrl_params
 import numpy as np
 from collections import deque
 from scipy.spatial.transform import Rotation as R
@@ -27,7 +27,7 @@ def run_tuning_gui():
     pos_frame.pack(fill='x', padx=10, pady=5)
     for k in ['px', 'py', 'pz']:
         tk.Label(pos_frame, text=f"Target {k.upper()}").pack(anchor='w', padx=5)
-        s = tk.Scale(pos_frame, from_=-3.0 if k!='pz' else 0.5, to=3.0 if k!='pz' else 5.0, 
+        s = tk.Scale(pos_frame, from_=-3.0 if k!='pz' else 0.5, to=3.0 if k!='pz' else 8.0, 
                      resolution=0.05, orient='horizontal', command=lambda v, key=k: update_val(key, v))
         s.set(ctrl_params[k])
         s.pack(fill='x', padx=10, pady=2)
@@ -106,7 +106,7 @@ class LiveIndexPlot(QtWidgets.QMainWindow):
 
     def export_image(self, filepath: str = "index_plot.png"):
         """Saves high-res snapshot of the dashboard without needing to right-click."""
-        filepath = f"index/{filepath}"
+        filepath = f"collected_data/indeces/{filepath}"
         exporter = pg.exporters.ImageExporter(self.win.ci)  # Targets central layout item
         exporter.export(filepath)
         print(f"Exported Index Plot to {filepath}")
@@ -179,7 +179,7 @@ class LiveErrorPlot(QtWidgets.QMainWindow):
 
     def export_image(self, filepath: str = "error_plot.png"):
         """Saves high-res snapshot of the dashboard without needing to right-click."""
-        filepath = f"index/{filepath}"
+        filepath = f"collected_data/indeces/{filepath}"
         exporter = pg.exporters.ImageExporter(self.win.ci)  # Targets central layout item
         exporter.export(filepath)
         print(f"Exported Error Plot to {filepath}")

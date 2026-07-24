@@ -29,6 +29,6 @@ class VideoRecorder:
     def save(self, output_path="mujoco_simulation.mp4"):
         if not self.frames:
             return
-        output_path = f"videos/{output_path}"
+        output_path = f"collected_data/videos/{output_path}"
         imageio.mimsave(output_path, self.frames, fps=self.fps)
         print(f"Video saved successfully ({len(self.frames)} frames) to {output_path}")

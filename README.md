@@ -5,36 +5,60 @@
 Here is an overview of how the repository is organized:
 
 ```text
-├── acts_simpler_cases/          # Simplified test scenarios
-│   ├── mujoco_311_simulation.py        # 1 drone connected to the ground
-│   ├── mujoco_311_simulation_real.py   # 311 simulation with physical rig parameters
-│   ├── mujoco_312_simulation.py        # 1 drone, 1 payload, 1 ground cable simulation
-│   ├── mujoco_312_simulation_real.py   # 312 simulation with physical rig parameters
-│   ├── mujoco_313_simulation.py        # 1 drone, 1 payload, 2 ground cables simulation
-│   └── mujoco_single_drone.py          # Single drone setup
+├── acts_simpler_cases/                  # Simplified simulation scripts
+│   ├── mujoco_311_simulation.py
+│   ├── mujoco_311_simulation_real.py   # Physical rig parameters
+│   ├── mujoco_312_simulation.py
+│   ├── mujoco_312_simulation_real.py   # Physical rig parameters
+│   ├── mujoco_313_simulation.py
+│   └── mujoco_single_drone.py
 │
-├── acts_simulator/              # Core simulator
+├── acts_simulator/                      # Core simulator module
 │   ├── acts.py                         # Main simulation entry point
-│   ├── params_acts.py                  # Geometric constraints, mass properties, and bounds
+│   ├── params_acts.py                  # Geometric constraints, mass properties & bounds
+│   ├── utils_configuration_selection.py# Architecture selector utilities
 │   ├── utils_control.py                # Drone control laws
-│   ├── utils_optimization.py           # Tension planner
-│   ├── utils_performance_indices.py    # Performance indices computation
-│   └── utils_visual.py                 # Graphs and toolbar
+│   ├── utils_optimization.py           # Tension optimization & linear programming
+│   ├── utils_performance_indices.py    # Performance indices & stability checks
+│   ├── utils_visual.py                 # Plotting & visualization utilities
+│   └── video_recorder.py               # Video capture tools
 │
-├──  mujoco/                      # MuJoCo simulation XML model definitions
-|   ├── acts_stewart.xml                # Complete integrated system model definition
-|   └── simpler_cases/                  # Individual XML definitions for the simpler configurations
-├──create_xml/
-|    ├── assets/                          # Static reference images only
-│    |   ├── 3_uav_config.png         
-│    |   └── 6_ugv_config.jpeg        
-│    |
-|    ├── database/                        # Generated coordinates and metadata               
-     │
-     ├── config_params.py                 
-     ├── tool_crop_finder.py              # Interactive tool to extract bounding box coordinates
-     ├── tool_annotation_marker.py        # Interactive tool to annotate absolute 3D node coordinates
-     └── xml_generator.py                 # Main file to create a customized
+├── collected_data/                      # Output logs, metrics, and video renders
+│   ├── indeces/                        # Plotted performance index & error graphs (.png)
+│   ├── videos/                         # Recorded simulation runs (.mp4)
+│   └── indices.xlsx                    # Tabulated performance metrics
+│
+├── create_xml/                          # Model generation & analytical screening toolkit
+│   ├── analytical_ground_screening.py  # Fast screening algorithm for candidate configurations
+│   ├── config_params.py                 # Configuration parameters for model creation
+│   ├── poses_to_analyze.csv            # Evaluation pose dataset
+│   ├── xml_config_builder.py           # Configuration builder
+│   │
+│   ├── database/                       # Configuration node & anchor databases
+│   │   ├── uav_configuration_database.json
+│   │   └── ugv_configuration_database.json
+│   │
+│   ├── images/                         # Reference architecture diagrams
+│   │   ├── 3_uav_config.png
+│   │   └── 6_ugv_config.jpeg
+│   │
+│   └── visual_interface/               # Interactive annotation & building UI
+│       ├── tool_annotation_marker.py   # Interactive node coordinate annotation tool
+│       ├── tool_crop_finder.py         # Interactive bounding box crop finder
+│       └── xml_generator.py            # XML generator interface
+│
+├── mujoco/                              # MuJoCo XML configuration models
+│   ├── acts_stewart.xml                # Stewart platform baseline model
+│   ├── hand_made/                      # Manually crafted XML candidate models
+│   ├── mujoco_outputs_1/               # Automated generator run output 1 (XMLs + screening CSV)
+│   ├── mujoco_outputs_2/               # Automated generator run output 2 (XMLs + screening CSV)
+│   ├── mujoco_outputs_3/               # Automated generator run output 3 (XMLs + screening CSV)
+│   └── simpler_cases/                  # Isolated system XML components (311, 312, 313 models)
+│
+├── simulation_run/                      # Automation & batch testing
+│   └── batch_run.py                    # Automated multi-configuration batch execution script
+│
+└── README.md
 ```
 
 ## Launch ACTS.py

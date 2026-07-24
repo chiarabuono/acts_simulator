@@ -2,12 +2,23 @@ import mujoco
 import mujoco.viewer
 import numpy as np
 import time
-from utils_optimization import *
-from params_acts import *
-from utils_visual import * 
 from time import strftime, localtime
-from utils_performance_indices import compute_rig_performance_indices, append_robot_data, pose_reached
-from video_recorder import VideoRecorder
+
+import sys
+from pathlib import Path
+
+# Automatically find repo root and add it to Python's search path
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+
+from acts_simulator.utils_optimization import *
+from acts_simulator.params_acts import *
+from acts_simulator.utils_visual import * 
+from acts_simulator.utils_performance_indices import compute_rig_performance_indices, append_robot_data, pose_reached
+from acts_simulator.video_recorder import VideoRecorder
+from acts_simulator.utils_control import max_thrust
 
 def set_cable_length(tendon_idx, max_len):
     if max_len < 0: 
@@ -100,28 +111,6 @@ def compute_Wp_star_geometric(p_payload, R_mat_payload, p_star, R_star):
     W_p_star = np.concatenate([F_p_star, M_p_star])
     return W_p_star
 
-# Create Qt Application context once
-app = QtWidgets.QApplication.instance()
-if app is None:
-    app = QtWidgets.QApplication(sys.argv)
-
-index_plot = LiveIndexPlot(max_points=500)
-error_plot = LiveErrorPlot(max_points=500)
-index_plot.show()
-error_plot.show()
-
-# Set up update decimation rates
-# If model.opt.timestep = 0.002s (500 Hz), updating every 16 steps gives ~30 FPS tracking plots
-ERROR_PLOT_FREQUENCY = 16  
-
-step_counter = 0
-iteration = 1
-
-p_star, q_star, R_star = read_desired_pose()
-set_desired_pose(p_star, q_star)
-p_drone_targets_warm = None
-
-is_paused = False
 
 def key_callback(keycode):
     global is_paused
@@ -129,121 +118,148 @@ def key_callback(keycode):
         is_paused = not is_paused
         print(f"Simulation {'PAUSED' if is_paused else 'RESUMED'}")
 
-recorder = VideoRecorder(model, fps=15, width=640, height=480)
+def main():
+    app = QtWidgets.QApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication(sys.argv)
 
-with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as viewer:
-    while viewer.is_running():
-        step_start = time.time()
-        viewer.sync()
+    index_plot = LiveIndexPlot(max_points=500)
+    error_plot = LiveErrorPlot(max_points=500)
+    index_plot.show()
+    error_plot.show()
 
-        # Keep Qt event loop alive without blocking physics
-        app.processEvents()
+    ERROR_PLOT_FREQUENCY = 16  
 
-        if is_paused:
+    step_counter = 0
+    iteration = 1
+
+    p_star, q_star, R_star = read_desired_pose()
+    set_desired_pose(p_star, q_star)
+    p_drone_targets_warm = None
+
+    is_paused = False
+    recorder = VideoRecorder(model, fps=15, width=640, height=480)
+    with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as viewer:
+        while viewer.is_running():
+            step_start = time.time()
+            viewer.sync()
+
+            # Keep Qt event loop alive without blocking physics
+            app.processEvents()
+
+            if is_paused:
+                time_until_next_step = model.opt.timestep - (time.time() - step_start)
+                if time_until_next_step > 0:
+                    time.sleep(time_until_next_step)
+                continue
+
+            p_star, q_star, R_star = read_desired_pose()
+            set_desired_pose(p_star, q_star)
+            
+            # 1. Capture current payload operational state 
+            p_payload = data.body("payload").xpos                
+            R_mat_payload = data.xmat[payload_id].reshape(3, 3).copy()   
+
+            # --- LOW FREQUENCY UPDATE: OPTIMIZATION & INDEX PLOTS ---
+            if step_counter % OPTIMIZATION_FREQUENCY == 0:
+                print(f"{iteration} Computing {strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))}")
+                
+                W_p_star = compute_Wp_star_geometric(p_payload, R_mat_payload, p_star, R_star)
+
+                app.processEvents()
+                p_drone_targets, optimal_tensions = optimize_drone_positions(
+                    p_payload, R_mat_payload, P_GROUND_ANCHORS, DRONE_MASSES,
+                    L_CABLES_DRONES, HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
+                    W_p_star, max_thrust,tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=G_ACCEL,
+                    x0_warm=p_drone_targets_warm
+                )
+                app.processEvents()
+                p_drone_targets_warm = p_drone_targets
+
+                tau = np.array([get_cable_tension(model, data, i) for i in range(1, 10)])
+                tau_drone_actual = np.array([get_cable_tension(model, data, i) for i in (1, 2, 3)])
+                tau_ground_actual = np.array([get_cable_tension(model, data, i) for i in (4, 5, 6, 7, 8, 9)])
+
+                anchors = list(p_drone_targets) + list(P_GROUND_ANCHORS)
+                all_offsets = list(HOOK_OFFSETS_DRONE) + list(HOOK_OFFSETS_GROUND)
+                Jp = compute_payload_jacobian(p_payload, R_mat_payload, anchors, all_offsets)
+                M_desired = W_p_star[3:]
+                M_actual = (Jp @ tau)[3:]
+                
+                indices = compute_rig_performance_indices(
+                    p_payload, R_mat_payload,
+                    p_drone_targets, P_GROUND_ANCHORS,
+                    HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
+                    tau_drone_actual, tau_ground_actual,
+                    W_p_star, PAYLOAD_MASS,
+                )
+                
+                index_plot.update(data.time, indices)
+
+                if iteration == ITERATION_COLLECTION: 
+                    pose_params = pose_reached(p_payload, R_mat_payload, p_star, R_star)
+                    append_robot_data("collected_data/indices.xlsx", FILENAME, p_star, q_star, indices, pose_params)
+                iteration += 1
+
+            a1_star, a2_star, a3_star = p_drone_targets[0], p_drone_targets[1], p_drone_targets[2]
+
+            from utils_optimization import check_ground_cable_rubbing
+
+            min_d, ok, pair_dists = check_ground_cable_rubbing(
+                p_payload, R_mat_payload, P_GROUND_ANCHORS, HOOK_OFFSETS_GROUND, d_safe=D_SAFE_CABLE
+            )
+            if not ok:
+                print(f"Ground cable rubbing! min distance = {min_d:.3f} < {D_SAFE_CABLE}")
+
+            for k in range(6):
+                anchor_id = GROUND_ANCHOR_IDS[k]
+                p_anchor_global = data.site_xpos[anchor_id] 
+                
+                b_k_global = p_star + R_star @ HOOK_OFFSETS_GROUND[k]
+                rho_star = np.linalg.norm(p_anchor_global - b_k_global)
+                
+                current_len = get_cable_length(k + 4) 
+                dt = model.opt.timestep
+
+                delta = rho_star - current_len
+                max_step = MAX_WINCH_SPEED * dt
+                step = np.clip(delta, -max_step, max_step)
+                new_len = current_len + step
+                set_cable_length(k + 4, new_len)
+
+            p_hook1 = p_payload + R_mat_payload @ HOOK_OFFSETS_DRONE[0]
+            p_hook2 = p_payload + R_mat_payload @ HOOK_OFFSETS_DRONE[1]
+            p_hook3 = p_payload + R_mat_payload @ HOOK_OFFSETS_DRONE[2]
+
+            drone1.set_cable_target(optimal_tensions[0], p_hook1)
+            drone2.set_cable_target(optimal_tensions[1], p_hook2)
+            drone3.set_cable_target(optimal_tensions[2], p_hook3)
+
+            drone1.apply_wrench(a1_star)
+            drone2.apply_wrench(a2_star)
+            drone3.apply_wrench(a3_star) 
+
+            mujoco.mj_step(model, data)
+            drone1.update_data(data)
+            drone2.update_data(data)
+            drone3.update_data(data)
+
+            # --- MEDIUM FREQUENCY UPDATE: ERROR PLOTS (e.g. 30 Hz / 30 FPS) ---
+            if step_counter % ERROR_PLOT_FREQUENCY == 0:
+                error_plot.update(data.time, p_payload, R_mat_payload, p_star, q_star)
+
+            step_counter += 1
+
+            viewer.sync()
+            recorder.capture_frame(data)
+
             time_until_next_step = model.opt.timestep - (time.time() - step_start)
             if time_until_next_step > 0:
                 time.sleep(time_until_next_step)
-            continue
-
-        p_star, q_star, R_star = read_desired_pose()
-        set_desired_pose(p_star, q_star)
-        
-        # 1. Capture current payload operational state 
-        p_payload = data.body("payload").xpos                
-        R_mat_payload = data.xmat[payload_id].reshape(3, 3).copy()   
-
-        # --- LOW FREQUENCY UPDATE: OPTIMIZATION & INDEX PLOTS ---
-        if step_counter % OPTIMIZATION_FREQUENCY == 0:
-            print(f"{iteration} Computing {strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))}")
             
-            W_p_star = compute_Wp_star_geometric(p_payload, R_mat_payload, p_star, R_star)
+        recorder.save(f"{VIDEONAME}")
+        index_plot.export_image(f"{GRAPHNAME}_indices.png")
+        error_plot.export_image(f"{GRAPHNAME}_errors.png")
 
-            app.processEvents()
-            p_drone_targets, optimal_tensions = optimize_drone_positions(
-                p_payload, R_mat_payload, P_GROUND_ANCHORS, DRONE_MASSES,
-                L_CABLES_DRONES, HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
-                W_p_star, tau_min=TAU_MIN, tau_max=TAU_MAX, d_safe=D_SAFE_DRONE, g=G_ACCEL,
-                x0_warm=p_drone_targets_warm
-            )
-            app.processEvents()
-            p_drone_targets_warm = p_drone_targets
-
-            tau = np.array([get_cable_tension(model, data, i) for i in range(1, 10)])
-            tau_drone_actual = np.array([get_cable_tension(model, data, i) for i in (1, 2, 3)])
-            tau_ground_actual = np.array([get_cable_tension(model, data, i) for i in (4, 5, 6, 7, 8, 9)])
-
-            anchors = list(p_drone_targets) + list(P_GROUND_ANCHORS)
-            all_offsets = list(HOOK_OFFSETS_DRONE) + list(HOOK_OFFSETS_GROUND)
-            Jp = compute_payload_jacobian(p_payload, R_mat_payload, anchors, all_offsets)
-            M_desired = W_p_star[3:]
-            M_actual = (Jp @ tau)[3:]
-            
-            indices = compute_rig_performance_indices(
-                p_payload, R_mat_payload,
-                p_drone_targets, P_GROUND_ANCHORS,
-                HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
-                tau_drone_actual, tau_ground_actual,
-                W_p_star, PAYLOAD_MASS,
-            )
-            
-            # UPDATED: Low-Frequency Index Plot
-            index_plot.update(data.time, indices)
-
-            if iteration == ITERATION_COLLECTION: 
-                pose_params = pose_reached(p_payload, R_mat_payload, p_star, R_star)
-                append_robot_data("indices.xlsx", FILENAME, p_star, q_star, indices, pose_params)
-            iteration += 1
-
-        a1_star, a2_star, a3_star = p_drone_targets[0], p_drone_targets[1], p_drone_targets[2]
-
-        for k in range(6):
-            anchor_id = GROUND_ANCHOR_IDS[k]
-            p_anchor_global = data.site_xpos[anchor_id] 
-            
-            b_k_global = p_star + R_star @ HOOK_OFFSETS_GROUND[k]
-            rho_star = np.linalg.norm(p_anchor_global - b_k_global)
-            
-            current_len = get_cable_length(k + 4) 
-
-            MAX_WINCH_SPEED = 1.50  # m/s
-            dt = model.opt.timestep
-
-            delta = rho_star - current_len
-            max_step = MAX_WINCH_SPEED * dt
-            step = np.clip(delta, -max_step, max_step)
-            new_len = current_len + step
-            set_cable_length(k + 4, new_len)
-
-        p_hook1 = p_payload + R_mat_payload @ HOOK_OFFSETS_DRONE[0]
-        p_hook2 = p_payload + R_mat_payload @ HOOK_OFFSETS_DRONE[1]
-        p_hook3 = p_payload + R_mat_payload @ HOOK_OFFSETS_DRONE[2]
-
-        drone1.set_cable_target(optimal_tensions[0], p_hook1)
-        drone2.set_cable_target(optimal_tensions[1], p_hook2)
-        drone3.set_cable_target(optimal_tensions[2], p_hook3)
-
-        drone1.apply_wrench(a1_star)
-        drone2.apply_wrench(a2_star)
-        drone3.apply_wrench(a3_star) 
-
-        mujoco.mj_step(model, data)
-        drone1.update_data(data)
-        drone2.update_data(data)
-        drone3.update_data(data)
-
-        # --- MEDIUM FREQUENCY UPDATE: ERROR PLOTS (e.g. 30 Hz / 30 FPS) ---
-        if step_counter % ERROR_PLOT_FREQUENCY == 0:
-            error_plot.update(data.time, p_payload, R_mat_payload, p_star, q_star)
-
-        step_counter += 1
-
-        viewer.sync()
-        recorder.capture_frame(data)
-
-        time_until_next_step = model.opt.timestep - (time.time() - step_start)
-        if time_until_next_step > 0:
-            time.sleep(time_until_next_step)
-        
-    recorder.save(f"{VIDEONAME}")
-    index_plot.export_image(f"{GRAPHNAME}_indices.png")
-    error_plot.export_image(f"{GRAPHNAME}_errors.png")
+if __name__ == "__main__":
+    main()

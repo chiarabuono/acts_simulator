@@ -1,6 +1,7 @@
 import itertools
 import os
 import glob
+import shutil
 from collections import Counter
 
 import numpy as np
@@ -28,7 +29,10 @@ ENABLE_WFC = True
 GROUND_TAU_MIN = TAU_MIN
 GROUND_TAU_MAX = TAU_MAX
 DRONE_THRUST_MIN = 1.0
-DRONE_THRUST_MAX = 44.0            # ~= 4 * kt * MAX_ROTOR_VELOCITY**2
+MAX_ROTOR_VELOCITY = 1666.0
+kt = 5.5e-6
+kd = 3.299e-7
+DRONE_THRUST_MAX = 4 * kt * MAX_ROTOR_VELOCITY**2 
 
 PAYLOAD_MASS = 1.0                 # [kg] -> default gravity-compensation target wrench
 G_ACCEL = 9.81
@@ -47,6 +51,10 @@ WFC_VERIFY_MAX_ITER = 100
 # --- Interference-Free Condition (IFC) ---
 ENABLE_IFC = True
 D_SAFE = D_SAFE_CABLE
+
+CHECK_EXIT_ANGLE = False
+MIN_EXIT_ANGLE_DEG = 15.0
+FACE_NORMAL_LOCAL = np.array([0.0, 0.0, -1.0])
 
 
 # ---------------------------------------------------------------------------
@@ -346,7 +354,35 @@ def segment_segment_distance(p1, p2, q1, q2):
     return float(np.linalg.norm(c1 - c2))
 
 
-def check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R, d_safe):
+def check_cable_exit_angle(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R,
+                            min_exit_angle_deg=15.0, face_normal_local=None):
+    if face_normal_local is None:
+        face_normal_local = np.array([0.0, 0.0, -1.0])
+    world_normal = payload_R @ face_normal_local
+    min_sin = np.sin(np.radians(min_exit_angle_deg))
+
+    worst_margin = None
+    for p_node, g_node in routing:
+        bi = np.array(ugv_db[pay_layout][p_node]["coords"], dtype=float)
+        ai = np.array(ugv_db[gnd_layout][g_node]["coords"], dtype=float)
+        ai = ai.copy()
+        ai[2] = 0.0
+        ri = payload_pos + payload_R @ bi
+        direction = ai - ri
+        norm = np.linalg.norm(direction)
+        if norm < 1e-9:
+            continue
+        u = direction / norm
+        sin_angle = np.dot(u, world_normal)
+        margin = sin_angle - min_sin
+        worst_margin = margin if worst_margin is None else min(worst_margin, margin)
+
+    ok = (worst_margin is None) or (worst_margin >= 0.0)
+    return {"exit_angle_ok": ok, "min_exit_angle_margin": worst_margin}
+
+
+def check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R, d_safe,
+              check_exit_angle=False, min_exit_angle_deg=15.0, face_normal_local=None):
 
     segments = []
     for p_node, g_node in routing:
@@ -367,11 +403,27 @@ def check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R, d
         d = segment_segment_distance(r1, a1, r2, a2)
         min_cc = d if min_cc is None else min(min_cc, d)
 
-    ok = (min_cc is None) or (min_cc >= d_safe)
+    cable_cable_ok = (min_cc is None) or (min_cc >= d_safe)
+
+    if check_exit_angle:
+        angle_result = check_cable_exit_angle(routing, ugv_db, pay_layout, gnd_layout,
+                                               payload_pos, payload_R,
+                                               min_exit_angle_deg=min_exit_angle_deg,
+                                               face_normal_local=face_normal_local)
+        exit_angle_ok = angle_result["exit_angle_ok"]
+        min_exit_angle_margin = angle_result["min_exit_angle_margin"]
+    else:
+        exit_angle_ok = True   # not checked -> does not gate the routing
+        min_exit_angle_margin = None
+
+    ok = cable_cable_ok and exit_angle_ok
 
     return {
         "ifc_ok": ok,
+        "cable_cable_ok": cable_cable_ok,
+        "exit_angle_ok": exit_angle_ok,
         "min_cable_cable_dist": min_cc,
+        "min_exit_angle_margin": min_exit_angle_margin,
         "n_pairs_skipped_shared_anchor": n_skipped,
     }
 
@@ -388,6 +440,7 @@ def score_routing_across_poses(routing, ugv_db, pay_layout, gnd_layout, poses,
                                 wfc_force_tol=None, wfc_moment_tol=None,
                                 wfc_gate=True,
                                 enable_ifc=True, d_safe=D_SAFE_CABLE,
+                                check_exit_angle=False, min_exit_angle_deg=15.0, face_normal_local=None,
                                 stats=None):
     """
     Scores one routing at every (position, R) in `poses` and returns the
@@ -413,10 +466,16 @@ def score_routing_across_poses(routing, ugv_db, pay_layout, gnd_layout, poses,
             return None  # fails WCC
 
         if enable_ifc:
-            ifc = check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R, d_safe)
+            ifc = check_ifc(routing, ugv_db, pay_layout, gnd_layout, payload_pos, payload_R, d_safe,
+                             check_exit_angle=check_exit_angle,
+                             min_exit_angle_deg=min_exit_angle_deg, face_normal_local=face_normal_local)
             if not ifc["ifc_ok"]:
                 if stats is not None:
                     stats["ifc_fail"] = stats.get("ifc_fail", 0) + 1
+                    if not ifc["cable_cable_ok"]:
+                        stats["ifc_fail_cable_cable"] = stats.get("ifc_fail_cable_cable", 0) + 1
+                    if check_exit_angle and not ifc["exit_angle_ok"]:
+                        stats["ifc_fail_exit_angle"] = stats.get("ifc_fail_exit_angle", 0) + 1
                 return None  # fails IFC
             per_pose_ifc.append(ifc)
 
@@ -466,6 +525,9 @@ def score_routing_across_poses(routing, ugv_db, pay_layout, gnd_layout, poses,
         cc_vals = [d["min_cable_cable_dist"] for d in per_pose_ifc if d["min_cable_cable_dist"] is not None]
         result["ifc_ok"] = True
         result["min_cable_cable_dist"] = min(cc_vals) if cc_vals else None
+        if check_exit_angle:
+            angle_vals = [d["min_exit_angle_margin"] for d in per_pose_ifc if d["min_exit_angle_margin"] is not None]
+            result["min_exit_angle_margin"] = min(angle_vals) if angle_vals else None
 
     return result
 
@@ -476,10 +538,11 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
                          drone_thrust_min=1.0, drone_thrust_max=44.0, wfc_residual_tol=1.0,
                          wfc_force_tol=None, wfc_moment_tol=None,
                          wfc_verify_top_k=0, wfc_verify_max_iter=100,
-                         enable_ifc=True, d_safe=D_SAFE_CABLE):
+                         enable_ifc=True, d_safe=D_SAFE_CABLE,
+                         check_exit_angle=False, min_exit_angle_deg=15.0, face_normal_local=None):
     """
     Picks the routing with the best worst-case manipulability across all
-    poses, among routings the ones that pass
+    poses, among routings that pass WCC (always) and, if enabled, WFC/IFC.
 
     wfc_verify_top_k=0: strict mode - a WFC failure discards the routing
     immediately (same behavior/cost as before this feature existed).
@@ -519,6 +582,8 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
             wfc_residual_tol=wfc_residual_tol, wfc_force_tol=wfc_force_tol, wfc_moment_tol=wfc_moment_tol,
             wfc_gate=not use_two_phase,
             enable_ifc=enable_ifc, d_safe=d_safe,
+            check_exit_angle=check_exit_angle, min_exit_angle_deg=min_exit_angle_deg,
+            face_normal_local=face_normal_local,
             stats=stats,
         )
         if score is None:
@@ -580,6 +645,8 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
             "pay_layout": pay_layout, "gnd_layout": gnd_layout,
             "n_routings_checked": len(routings), "n_poses_checked": len(poses), "feasible": False,
             "n_wcc_fail": stats["wcc_fail"], "n_wfc_fail": stats["wfc_fail"], "n_ifc_fail": stats["ifc_fail"],
+            "n_ifc_fail_cable_cable": stats.get("ifc_fail_cable_cable", 0),
+            "n_ifc_fail_exit_angle": stats.get("ifc_fail_exit_angle", 0),
             **wfc_residual_summary,
         }
 
@@ -587,6 +654,8 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
         "pay_layout": pay_layout, "gnd_layout": gnd_layout,
         "n_routings_checked": len(routings), "feasible": True,
         "n_wcc_fail": stats["wcc_fail"], "n_wfc_fail": stats["wfc_fail"], "n_ifc_fail": stats["ifc_fail"],
+        "n_ifc_fail_cable_cable": stats.get("ifc_fail_cable_cable", 0),
+        "n_ifc_fail_exit_angle": stats.get("ifc_fail_exit_angle", 0),
         **wfc_residual_summary,
         **{k: v for k, v in best.items() if k != "routing"},
         "best_routing": "|".join(f"{p}-{g}" for p, g in best["routing"]),
@@ -599,7 +668,8 @@ def screen_all(poses, max_enumerate=20000,
                 drone_thrust_min=1.0, drone_thrust_max=44.0, wfc_residual_tol=1.0,
                 wfc_force_tol=None, wfc_moment_tol=None,
                 wfc_verify_top_k=0, wfc_verify_max_iter=100,
-                enable_ifc=True, d_safe=D_SAFE_CABLE):
+                enable_ifc=True, d_safe=D_SAFE_CABLE,
+                check_exit_angle=False, min_exit_angle_deg=15.0, face_normal_local=None):
     ugv_db = _load_json_db(UGV_DB_PATH)
     ugv_db.pop("rectangle-same", None)  # known unstable in simulation; excluded from re-screening
 
@@ -628,6 +698,8 @@ def screen_all(poses, max_enumerate=20000,
             wfc_residual_tol=wfc_residual_tol, wfc_force_tol=wfc_force_tol, wfc_moment_tol=wfc_moment_tol,
             wfc_verify_top_k=wfc_verify_top_k, wfc_verify_max_iter=wfc_verify_max_iter,
             enable_ifc=enable_ifc, d_safe=d_safe,
+            check_exit_angle=check_exit_angle, min_exit_angle_deg=min_exit_angle_deg,
+            face_normal_local=face_normal_local,
         )
         if result is None:
             print("no valid pairs (fewer nodes than 6 cables need)")
@@ -651,18 +723,25 @@ def build_poses_from_csv(path):
     return poses
 
 
-def print_infeasibility_report(df):
+def print_infeasibility_report(df, wfc_residual_tol, d_safe, check_exit_angle, min_exit_angle_deg):
     """Prints a diagnostic breakdown when every architecture came back infeasible."""
     n_wcc = int(df["n_wcc_fail"].sum()) if "n_wcc_fail" in df.columns else None
     n_wfc = int(df["n_wfc_fail"].sum()) if "n_wfc_fail" in df.columns else None
     n_ifc = int(df["n_ifc_fail"].sum()) if "n_ifc_fail" in df.columns else None
+    n_ifc_cc = int(df["n_ifc_fail_cable_cable"].sum()) if "n_ifc_fail_cable_cable" in df.columns else None
+    n_ifc_angle = int(df["n_ifc_fail_exit_angle"].sum()) if "n_ifc_fail_exit_angle" in df.columns else None
 
     print("\n" + "=" * 80)
     print("[NO FEASIBLE ARCHITECTURES] Every (pay_layout, gnd_layout) pair had")
     print("zero routings survive. Rejection counts across ALL architectures checked:")
     print(f"    failed WCC (rank-deficient / degenerate)                                   : {n_wcc}")
     print(f"    failed WFC (residual mismatch > tolerance, joint 9-cable solve)             : {n_wfc}")
-    print(f"    failed IFC (cable-cable clearance < d_safe)                                : {n_ifc}")
+    if check_exit_angle:
+        print(f"    failed IFC (cable-cable clearance or exit angle)                            : {n_ifc}")
+        print(f"        - of which, cable-cable clearance specifically                         : {n_ifc_cc}")
+        print(f"        - of which, exit angle specifically                                     : {n_ifc_angle}")
+    else:
+        print(f"    failed IFC (cable-cable clearance < d_safe; exit-angle check is OFF)        : {n_ifc}")
 
     if n_wfc and "wfc_fail_residual_median" in df.columns:
         med_vals = df["wfc_fail_residual_median"].dropna()
@@ -689,6 +768,21 @@ def print_infeasibility_report(df):
                       "contribute lateral force. If lateral dominates, tightening a force "
                       "tolerance won't fix it - drones need to be REPOSITIONED (see "
                       "optimize_drone_positions_for_wfc).")
+
+    if check_exit_angle:
+        print(f"If IFC dominates: check whether it's d_safe (cable-cable, currently {d_safe} m) "
+              f"or the exit-angle threshold (currently {min_exit_angle_deg} deg) - try disabling "
+              "IFC (or just CHECK_EXIT_ANGLE) to isolate the cause, then relax whichever is too "
+              "strict for your geometry.")
+    else:
+        print(f"If IFC dominates: check whether d_safe (currently {d_safe} m, cable-cable "
+              "clearance only - exit-angle check is OFF) is too strict for your geometry - try "
+              "disabling IFC to confirm it's the cause, then relax d_safe if needed.")
+    print(f"If WFC dominates: the residual tolerance (currently {wfc_residual_tol}) is a "
+          "placeholder - try loosening it, or check cable length and drone thrust bounds are "
+          "realistic; also verify get_uav_hook_offsets' schema assumption matches your "
+          "uav_configuration_database.json.")
+    print("=" * 80 + "\n")
 
 
 def generate_top_xml_configs(df, target_output_dir, chosen_uav_layout="triangle"):
@@ -727,6 +821,20 @@ def generate_top_xml_configs(df, target_output_dir, chosen_uav_layout="triangle"
         except Exception as e:
             print(f"  [ERROR Top {idx+1}] Failed generation: {e}")
 
+def copy_file_to_folder(source_file_path, destination_folder_path):
+    if not os.path.exists(source_file_path):
+        raise FileNotFoundError(f"Source file not found: {source_file_path}")
+        
+    os.makedirs(destination_folder_path, exist_ok=True)
+    
+    try:
+        shutil.copy2(source_file_path, destination_folder_path)
+        
+        file_name = os.path.basename(source_file_path)
+        print(f"Successfully copied '{file_name}' to '{destination_folder_path}'")
+        
+    except IOError as e:
+        print(f"Failed to copy file due to error: {e}")
 
 def main():
     if POSES_CSV:
@@ -755,6 +863,8 @@ def main():
         wfc_residual_tol=WFC_RESIDUAL_TOL, wfc_force_tol=WFC_FORCE_TOL, wfc_moment_tol=WFC_MOMENT_TOL,
         wfc_verify_top_k=WFC_VERIFY_TOP_K, wfc_verify_max_iter=WFC_VERIFY_MAX_ITER,
         enable_ifc=ENABLE_IFC, d_safe=D_SAFE,
+        check_exit_angle=CHECK_EXIT_ANGLE, min_exit_angle_deg=MIN_EXIT_ANGLE_DEG,
+        face_normal_local=FACE_NORMAL_LOCAL,
     )
 
     if df.empty:
@@ -762,7 +872,7 @@ def main():
         return
 
     if "conditioning_index" not in df.columns or not df["feasible"].any():
-        print_infeasibility_report(df)
+        print_infeasibility_report(df, WFC_RESIDUAL_TOL, D_SAFE, CHECK_EXIT_ANGLE, MIN_EXIT_ANGLE_DEG)
         return
 
     df = df.sort_values(by=["conditioning_index", "manipulability"], ascending=[False, False]).reset_index(drop=True)
@@ -800,8 +910,8 @@ def main():
     print("\nTop 5 architectures by worst-case conditioning index (each already using its best routing):")
     print(df.head(5).to_string(index=False))
 
-    generate_top_xml_configs(df, target_output_dir, chosen_uav_layout="triangle")
-
+    generate_top_xml_configs(df, target_output_dir, chosen_uav_layout="triangle")    
+    copy_file_to_folder(DEFAULT_POSES_CSV, f"mujoco_outputs_{counter}")
 
 if __name__ == "__main__":
     main()
