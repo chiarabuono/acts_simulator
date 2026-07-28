@@ -3,6 +3,17 @@ import sys
 import json
 import tkinter as tk
 from tkinter import messagebox, ttk
+import numpy as np
+
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))               
+_SIMULATOR_PKG = os.path.dirname(_SCRIPT_DIR)                          
+_SRC_DIR = os.path.dirname(_SIMULATOR_PKG)                             
+
+for p in [_SIMULATOR_PKG, _SRC_DIR]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
+from acts_simulator import TAU_MIN, TAU_MAX, D_SAFE_CABLE
 
 
 # --- PATH CONFIGURATIONS ---
@@ -11,6 +22,49 @@ IMAGE_PATH_UAV = "create_xml/images/3_uav_config.png"
 
 UGV_DB_PATH = "create_xml/database/ugv_configuration_database.json"
 UAV_DB_PATH = "create_xml/database/uav_configuration_database.json"
+
+EPS_RANK = 1e-6
+OUT_PATH = None
+
+# Fallback single pose, used only if no poses CSV is found
+PX, PY, PZ = 0.5, -0.5, 2.0
+QUAT_WXYZ = (1.0, 0.0, 0.0, 0.0)
+
+POSES_CSV = None                   # override path; None -> default below
+DEFAULT_POSES_CSV = "create_xml/poses_to_analyze.csv"
+
+MAX_ENUMERATE = 20000              # per-architecture routing cap before capping/sampling
+MAX_GND_SHARE = 2                  # no ground node may take this many cables or more (was a post-filter)
+
+# --- Wrench Feasible Condition (WFC) ---
+ENABLE_WFC = True
+GROUND_TAU_MIN = TAU_MIN
+GROUND_TAU_MAX = TAU_MAX
+DRONE_THRUST_MIN = 1.0
+
+PAYLOAD_MASS = 1.0                 # [kg] -> default gravity-compensation target wrench
+G_ACCEL = 9.81
+WFC_WRENCH = None                  # None -> [0, 0, payload_mass * g_accel, 0, 0, 0]
+
+UAV_LAYOUT = "triangle"
+UAV_CABLE_LENGTH = 1.5             # [m] nominal drone cable length
+
+WFC_RESIDUAL_TOL = 1.0             # combined force+moment tolerance (coarse, backward-compatible)
+WFC_FORCE_TOL = None               # separate force-only tolerance [N]
+WFC_MOMENT_TOL = None              # separate moment-only tolerance [N*m]
+
+WFC_VERIFY_TOP_K = 10              # 0 = strict/cheap-only mode
+WFC_VERIFY_MAX_ITER = 100
+
+# --- Interference-Free Condition (IFC) ---
+ENABLE_IFC = True
+
+CHECK_EXIT_ANGLE = False
+MIN_EXIT_ANGLE_DEG = 5.0
+FACE_NORMAL_LOCAL = np.array([0.0, 0.0, -1.0])
+
+# --- Parallelism ---
+N_WORKERS = os.cpu_count() or 1    # architectures are independent -> process pool across them
 
 # --- UGV BOUNDING CROP BOXES ---
 GRID_MAPPING_UGV = {

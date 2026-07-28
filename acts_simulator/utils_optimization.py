@@ -6,7 +6,7 @@ import sys
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
-from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, MODE, max_thrust
+from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, MODE, THRUST_MAX, THRUST_MIN
 
 # -----------------------------------------------------------------------
 # Geometric helpers for the Interference-Free Condition (Eq. 2.19)
@@ -136,8 +136,8 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
         else:
             # Solve for tensions: J_p @ tau = W_p_star -> bounded least squares
             bounds = (
-                [1.0] * n_a + [tau_min] * n_g,
-                [max_thrust] * n_a + [tau_max] * n_g
+                [THRUST_MIN] * n_a + [tau_min] * n_g,
+                [THRUST_MAX] * n_a + [tau_max] * n_g
             )
             res_tau = lsq_linear(J_p, W_p_star, bounds=bounds, method='bvls')
             tau = res_tau.x

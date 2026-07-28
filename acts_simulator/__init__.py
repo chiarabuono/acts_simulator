@@ -1,4 +1,5 @@
 import numpy as np
+# ------ Ground cables ---------------------------------
 TAU_MIN = 5.5
 TAU_MAX = 150.0  
 
@@ -13,9 +14,18 @@ ITERATION_COLLECTION = 30  # Iteration at which indices are collected
 
 CHECK_RUB_FREQUENCY = 500
 
-MAX_WINCH_SPEED = 1.00  # m/s
+MAX_WINCH_SPEED = 1.50  # m/s
 
+# ------------- Drones --------------------
 MAX_ROTOR_VELOCITY = 1666.0
 kt = 5.5e-6
 kd = 3.299e-7
-max_thrust = 4 * kt * MAX_ROTOR_VELOCITY**2 
+THRUST_MAX = 4 * kt * MAX_ROTOR_VELOCITY**2 
+THRUST_MIN = 1.0
+
+# Gains
+kp = 28.0
+kr_xy = 4.0
+
+POS_TOLERANCE = 0.1              # Target position error threshold (in meters)
+ROT_TOLERANCE = np.deg2rad(3.0)              # Target orientation error threshold (in radians or norm)

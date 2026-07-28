@@ -8,6 +8,8 @@ from utils_visual import QtWidgets, LiveIndexPlot, LiveErrorPlot, run_tuning_gui
 from time import strftime, localtime
 from utils_performance_indices import compute_rig_performance_indices, append_robot_data, pose_reached
 from video_recorder import VideoRecorder
+from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, CHECK_RUB_FREQUENCY, OPTIMIZATION_FREQUENCY, MAX_WINCH_SPEED
+from acts_simulator import THRUST_MAX, THRUST_MIN
 
 import tkinter as tk
 import threading
@@ -161,7 +163,8 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
         # --- LOW FREQUENCY UPDATE: OPTIMIZATION & INDEX PLOTS ---
         if step_counter % OPTIMIZATION_FREQUENCY == 0:
             print(f"{iteration} Computing {strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))}")
-            
+
+            # W_p_star = compute_Wp_star(p_payload, p_star, q_star)
             W_p_star = compute_Wp_star_geometric(p_payload, R_mat_payload, p_star, R_star)
 
             app.processEvents()
@@ -190,6 +193,11 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
                 HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
                 tau_drone_actual, tau_ground_actual,
                 W_p_star, PAYLOAD_MASS,
+                tau_min_drone=THRUST_MIN,          
+                tau_max_drone=THRUST_MAX,   
+                w_min_ground=TAU_MIN,       
+                w_max_ground=TAU_MAX,       
+                g=G_ACCEL,
             )
             
             # UPDATED: Low-Frequency Index Plot
@@ -217,8 +225,6 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
             rho_star = np.linalg.norm(p_anchor_global - b_k_global)
             
             current_len = get_cable_length(k + 4) 
-
-            MAX_WINCH_SPEED = 1.50  # m/s
             dt = model.opt.timestep
 
             delta = rho_star - current_len

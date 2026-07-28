@@ -1,9 +1,11 @@
 import numpy as np
-from itertools import combinations
+from itertools import combinations, product
 from scipy.spatial import ConvexHull
-from acts_simulator.utils_optimization import compute_payload_jacobian
 import os
 import pandas as pd
+
+from acts_simulator.utils_optimization import compute_payload_jacobian
+from acts_simulator import POS_TOLERANCE, ROT_TOLERANCE
 
 
 def compute_aws_vertices(Jp_t: np.ndarray, tau_min: np.ndarray, tau_max: np.ndarray) -> np.ndarray:
@@ -28,7 +30,7 @@ def capacity_margin(Jp_t: np.ndarray, tau_min: np.ndarray, tau_max: np.ndarray,
     for w_e in task_wrenches:
         for l in range(len(b)):
             al, bl = a[l], b[l]
-            gamma = min(gamma, (bl - w_e @ al) / (np.linalg.norm(al) ** 2))
+            gamma = min(gamma, (bl - w_e @ al) / np.linalg.norm(al))
     return gamma
 
 
@@ -45,7 +47,7 @@ def manipulability(Jp_t: np.ndarray) -> float:
     return float(np.sqrt(max(np.linalg.det(Jp_t.T @ Jp_t), 0.0)))
 
 
-def radius_available_wrench(cable_unit_vecs: np.ndarray, tau_min: np.ndarray, tau_max: np.ndarray,
+def radius_available_force(cable_unit_vecs: np.ndarray, tau_min: np.ndarray, tau_max: np.ndarray,
                              m_payload: float, g: float = 9.81) -> float:
     m = cable_unit_vecs.shape[0]
     g_vec = np.array([0.0, 0.0, g])
@@ -82,10 +84,80 @@ def radius_available_wrench(cable_unit_vecs: np.ndarray, tau_min: np.ndarray, ta
 
     return rAW
 
+def radius_available_moment(cable_unit_vecs: np.ndarray, moment_arms: np.ndarray, 
+                            tau_min: np.ndarray, tau_max: np.ndarray, tol: float = 1e-9,) -> float:
 
-def composite_score(gamma, rAW, zeta, w1=1/3, w2=1/3, w3=1/3,
-                     gamma_ref=1.0, rAW_ref=1.0, zeta_ref=1.0) -> float:
-    return w1 * (gamma / gamma_ref) + w2 * (rAW / rAW_ref) + w3 * (zeta / zeta_ref)
+    n = cable_unit_vecs.shape[0]
+    U = cable_unit_vecs.T                    # (3, n)
+    M = moment_arms.T                         # (3, n)
+
+    # We need U @ tau = 0.
+    if np.linalg.matrix_rank(U, tol) < 3:
+        return 0.0
+
+    vertices_tau = []
+    for free_idx in combinations(range(n), 3):
+
+        free_idx = list(free_idx)
+        fixed_idx = [i for i in range(n) if i not in free_idx]
+
+        for fixed_values in product([0, 1], repeat=len(fixed_idx)):
+
+            tau = np.zeros(n)
+
+            for i, value in zip(fixed_idx, fixed_values):
+                tau[i] = tau_max[i] if value else tau_min[i]
+            U_free = U[:, free_idx]
+            rhs = -U[:, fixed_idx] @ tau[fixed_idx]
+
+            if np.linalg.matrix_rank(U_free, tol) < 3:
+                continue
+
+            try:
+                tau_free = np.linalg.solve(U_free, rhs)
+            except np.linalg.LinAlgError:
+                continue
+
+            tau[free_idx] = tau_free
+
+            if np.all(tau >= tau_min - tol) and np.all(tau <= tau_max + tol):
+                # Check zero net force
+                if np.linalg.norm(U @ tau) <= 1e-7:
+                    vertices_tau.append(tau)
+
+    if len(vertices_tau) < 4:
+        return 0.0
+
+    vertices_tau = np.unique(np.round(vertices_tau, decimals=10), axis=0)
+
+    moments = vertices_tau @ M.T
+    if np.max(np.linalg.norm(moments, axis=1)) < tol:
+        return 0.0
+
+    try:
+        hull = ConvexHull(moments)
+    except Exception:
+        return 0.0
+
+    distances = -hull.equations[:, 3] / np.linalg.norm(
+        hull.equations[:, :3], axis=1
+    )
+
+    if np.any(distances < -tol):
+        return 0.0
+
+    return float(max(0.0, np.min(distances)))
+
+
+def composite_score(gamma, rAW_force, rAW_moment, zeta, 
+                    w_gamma=0.20, w_force=0.35, w_moment=0.30, w_zeta=0.15, 
+                    gamma_ref=1.0, rAW_force_ref=1.0, rAW_moment_ref=1.0, zeta_ref=1.0):
+    return (
+        w_gamma * gamma / gamma_ref
+        + w_force * rAW_force / rAW_force_ref
+        + w_moment * rAW_moment / rAW_moment_ref
+        + w_zeta * zeta / zeta_ref
+    )
 
 def pose_error(p_payload: np.ndarray, R_mat_payload: np.ndarray,
                p_star: np.ndarray, R_star: np.ndarray) -> tuple[float, float]:
@@ -107,7 +179,7 @@ def pose_error(p_payload: np.ndarray, R_mat_payload: np.ndarray,
 
 def pose_reached(p_payload: np.ndarray, R_mat_payload: np.ndarray,
                   p_star: np.ndarray, R_star: np.ndarray,
-                  pos_tol: float = 1e-1, rot_tol: float = np.deg2rad(3.0)
+                  pos_tol: float = POS_TOLERANCE, rot_tol: float = ROT_TOLERANCE
                   ) -> dict:
     """
     pos_tol: meters, rot_tol: radians.
@@ -129,8 +201,8 @@ def compute_rig_performance_indices(p_payload, R_mat_payload,
                                      p_drone_targets, P_GROUND_ANCHORS,
                                      HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
                                      optimal_tensions, tau_ground, W_p_star, PAYLOAD_MASS,
-                                     tau_min_drone=5.5, tau_max_drone=40.0,
-                                     w_min_ground=5.0, w_max_ground=40.0,
+                                     tau_min_drone, tau_max_drone,
+                                     w_min_ground, w_max_ground,
                                      g=9.81):
     
     n_a = len(p_drone_targets)
@@ -154,9 +226,18 @@ def compute_rig_performance_indices(p_payload, R_mat_payload,
 
     tau_optimal = np.concatenate([np.asarray(optimal_tensions), tau_ground])
 
+    moment_arms = np.zeros((n_a + n_g, 3))
+
+    for i in range(n_a + n_g):
+        moment_arms[i] = R_mat_payload @ all_offsets[i]
+
+
+
     nu = conditioning_index(Jp_t)
     w = manipulability(Jp_t)
-    rAW = radius_available_wrench(cable_unit_vecs, tau_min, tau_max, PAYLOAD_MASS, g=g)
+    rAW_force = radius_available_force(cable_unit_vecs, tau_min, tau_max, PAYLOAD_MASS, g=g)
+    rAW_moment = radius_available_moment(cable_unit_vecs, moment_arms, tau_min, tau_max
+    )
     zeta = worst_case_capacity_margin(tau_optimal, tau_max)
 
     try:
@@ -164,13 +245,14 @@ def compute_rig_performance_indices(p_payload, R_mat_payload,
     except RuntimeError:
         gamma = np.nan
 
-    N = composite_score(gamma, rAW, zeta) if np.isfinite(gamma) else np.nan
+    N = composite_score(gamma, rAW_force, rAW_moment, zeta) if np.isfinite(gamma) else np.nan
 
 
     return {
         "conditioning_index": nu,
         "manipulability": w,
-        "radius_available_wrench": rAW,
+        "radius_available_force": rAW_force,
+        "radius_available_moment": rAW_moment,
         "capacity_margin": gamma,
         "worst_case_capacity_margin": zeta,
         "composite_score": N,
@@ -192,7 +274,7 @@ def append_robot_data(filename, config, pos, quat, indices, pose_params):
         "quat_z": quat[3],
         "conditioning_index": indices["conditioning_index"],
         "manipulability": indices["manipulability"],
-        "radius_available_wrench": indices["radius_available_wrench"],
+        "radius_available_force": indices["radius_available_force"],
         "capacity_margin": indices["capacity_margin"],
         "worst_case_capacity_margin": indices["worst_case_capacity_margin"],
         "composite_score": indices["composite_score"],

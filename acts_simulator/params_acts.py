@@ -8,7 +8,7 @@ import os, sys
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
-from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, CHECK_RUB_FREQUENCY
+from acts_simulator import kr_xy, kp
 
 
 FILENAME, xml_model = select_and_load_xml()
@@ -50,7 +50,6 @@ P_GROUND_ANCHORS = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_
 GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground_anchor_{i}") for i in range(4, 10)]
 
 # ------ Optimization parameters  ------------------------------------------------------------
-OPTIMIZATION_FREQUENCY = 500
 RENDER_EVERY_N_STEPS = 50
 ITERATION_COLLECTION = 35  # Iteration at which indices are collected
 
@@ -60,17 +59,14 @@ i_xx, i_yy, i_zz = model.body_inertia[payload_id]
 # 3. Calculate gains using extracted values
 inertia_ratio = i_zz / i_xx
 
-kp = 28.0
-kr_xy = 11.0
 kr_z = kr_xy * inertia_ratio
-
 ctrl_params = {
-    'px': 0.0, 'py': 0.0, 'pz': 5.5,
+    'px': 2.17, 'py': -2.71, 'pz': 4.90,
     'Kp_pos': kp, 
     'Kd_pos': 2 * (kp)**0.5,
     'Kr': np.array([kr_xy, kr_xy, kr_z]),
     'Kw': np.array([2 * (kr_xy)**0.5, 2 * (kr_xy)**0.5, 2 * (kr_z)**0.5]),
-    'quat_w': 1.0, 'quat_x': 0.0, 'quat_y': 0.0, 'quat_z': 0.0
+    'quat_w': 1.0, 'quat_x': 0.1, 'quat_y': -0.1, 'quat_z': 0.05
 }
 
 from acts_simulator import MODE
