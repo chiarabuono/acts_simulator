@@ -4,7 +4,7 @@ from scipy.spatial import ConvexHull
 import os
 import pandas as pd
 
-from acts_simulator.utils_optimization import compute_payload_jacobian
+from acts_simulator.utils_optimization import compute_payload_jacobian_transpose
 from acts_simulator import POS_TOLERANCE, ROT_TOLERANCE
 
 
@@ -201,25 +201,28 @@ def compute_rig_performance_indices(p_payload, R_mat_payload,
                                      p_drone_targets, P_GROUND_ANCHORS,
                                      HOOK_OFFSETS_DRONE, HOOK_OFFSETS_GROUND,
                                      optimal_tensions, tau_ground, W_p_star, PAYLOAD_MASS,
-                                     tau_min_drone, tau_max_drone,
-                                     w_min_ground, w_max_ground,
+                                     tau_min_drone, tau_max_drone,      # no defaults (call site must pass real bounds)
+                                     w_min_ground, w_max_ground,        # no defaults
                                      g=9.81):
-    
+
     n_a = len(p_drone_targets)
     n_g = len(P_GROUND_ANCHORS)
 
     all_anchors = list(p_drone_targets) + list(P_GROUND_ANCHORS)
     all_offsets = list(HOOK_OFFSETS_DRONE) + list(HOOK_OFFSETS_GROUND)
 
-    Jp = compute_payload_jacobian(p_payload, R_mat_payload, all_anchors, all_offsets)
-    Jp_t = Jp.T 
-
+    Jp_transpose = compute_payload_jacobian_transpose(
+        p_payload, R_mat_payload, all_anchors, all_offsets
+    )
+    Jp = Jp_transpose.T
     cable_unit_vecs = np.zeros((n_a + n_g, 3))
+    b_global = np.zeros((n_a + n_g, 3))   
     for i in range(n_a + n_g):
         b_i_global = R_mat_payload @ all_offsets[i]
         r_i = p_payload + b_i_global
         l_vec = all_anchors[i] - r_i
         cable_unit_vecs[i] = l_vec / np.linalg.norm(l_vec)
+        b_global[i] = b_i_global
 
     tau_min = np.concatenate([np.full(n_a, tau_min_drone), np.full(n_g, w_min_ground)])
     tau_max = np.concatenate([np.full(n_a, tau_max_drone), np.full(n_g, w_max_ground)])
@@ -227,26 +230,30 @@ def compute_rig_performance_indices(p_payload, R_mat_payload,
     tau_optimal = np.concatenate([np.asarray(optimal_tensions), tau_ground])
 
     moment_arms = np.zeros((n_a + n_g, 3))
-
     for i in range(n_a + n_g):
-        moment_arms[i] = R_mat_payload @ all_offsets[i]
+        moment_arms[i] = np.cross(b_global[i], cable_unit_vecs[i])
 
-
-
-    nu = conditioning_index(Jp_t)
-    w = manipulability(Jp_t)
+    nu = conditioning_index(Jp)
+    w = manipulability(Jp)
     rAW_force = radius_available_force(cable_unit_vecs, tau_min, tau_max, PAYLOAD_MASS, g=g)
-    rAW_moment = radius_available_moment(cable_unit_vecs, moment_arms, tau_min, tau_max
-    )
+    rAW_moment = radius_available_moment(cable_unit_vecs, moment_arms, tau_min, tau_max)
     zeta = worst_case_capacity_margin(tau_optimal, tau_max)
 
+    r_char = np.sqrt(np.mean(np.sum(b_global**2, axis=1)))
+    rAW_moment_scaled = rAW_moment / r_char 
+
+    Jp_scaled = Jp.copy()
+    Jp_scaled[:, 3:6] /= r_char
+
+    W_p_star_scaled = np.concatenate([W_p_star[:3], W_p_star[3:] / r_char])
+
     try:
-        gamma = capacity_margin(Jp_t, tau_min, tau_max, task_wrenches=np.array([W_p_star]))
+        gamma = capacity_margin(Jp_scaled, tau_min, tau_max,
+                                 task_wrenches=np.array([W_p_star_scaled]))
     except RuntimeError:
         gamma = np.nan
 
-    N = composite_score(gamma, rAW_force, rAW_moment, zeta) if np.isfinite(gamma) else np.nan
-
+    N = composite_score(gamma, rAW_force, rAW_moment_scaled, zeta) if np.isfinite(gamma) else np.nan
 
     return {
         "conditioning_index": nu,

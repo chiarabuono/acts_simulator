@@ -103,7 +103,7 @@ class LiveIndexPlot(QtWidgets.QMainWindow):
 
     def export_image(self, filepath: str = "index_plot.png"):
         """Saves high-res snapshot of the dashboard without needing to right-click."""
-        filepath = f"index/{filepath}"
+        filepath = f"collected_data/indices/{filepath}"
         exporter = pg.exporters.ImageExporter(self.win.ci)  # Targets central layout item
         exporter.export(filepath)
         print(f"Exported Index Plot to {filepath}")
@@ -117,7 +117,7 @@ class LiveErrorPlot(QtWidgets.QMainWindow):
         self.resize(700, 500)
 
         self.max_points = max_points
-        self.t = deque(maxlen=max_points)
+        self.t = []
         self.series = {}
         self.lines = {}
 
@@ -146,7 +146,8 @@ class LiveErrorPlot(QtWidgets.QMainWindow):
         self._add_line(self.ax_rot, "yaw", '#e377c2')
 
     def _add_line(self, ax, key: str, color_hex: str):
-        self.series[key] = deque(maxlen=self.max_points)
+        self.series[key] = []
+        # self.series[key] = deque(maxlen=self.max_points)
         self.lines[key] = ax.plot(pen=pg.mkPen(color=color_hex, width=3), name=f"e_{key}")
 
     def update(self, t: float, p_payload: np.ndarray, R_mat_payload: np.ndarray, target_pos: np.ndarray, target_quat: np.ndarray):
@@ -176,7 +177,7 @@ class LiveErrorPlot(QtWidgets.QMainWindow):
 
     def export_image(self, filepath: str = "error_plot.png"):
         """Saves high-res snapshot of the dashboard without needing to right-click."""
-        filepath = f"index/{filepath}"
+        filepath = f"collected_data/indices/{filepath}"
         exporter = pg.exporters.ImageExporter(self.win.ci)  # Targets central layout item
         exporter.export(filepath)
         print(f"Exported Error Plot to {filepath}")

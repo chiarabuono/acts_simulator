@@ -40,7 +40,6 @@ MAX_GND_SHARE = 2                  # no ground node may take this many cables or
 ENABLE_WFC = True
 GROUND_TAU_MIN = TAU_MIN
 GROUND_TAU_MAX = TAU_MAX
-DRONE_THRUST_MIN = 1.0
 
 PAYLOAD_MASS = 1.0                 # [kg] -> default gravity-compensation target wrench
 G_ACCEL = 9.81
@@ -49,18 +48,18 @@ WFC_WRENCH = None                  # None -> [0, 0, payload_mass * g_accel, 0, 0
 UAV_LAYOUT = "triangle"
 UAV_CABLE_LENGTH = 1.5             # [m] nominal drone cable length
 
-WFC_RESIDUAL_TOL = 1.0             # combined force+moment tolerance (coarse, backward-compatible)
-WFC_FORCE_TOL = None               # separate force-only tolerance [N]
-WFC_MOMENT_TOL = None              # separate moment-only tolerance [N*m]
+WFC_RESIDUAL_TOL = 5.0             # combined force+moment tolerance (coarse, backward-compatible)
+WFC_FORCE_TOL = 3.0               # separate force-only tolerance [N]
+WFC_MOMENT_TOL = 1.5             # separate moment-only tolerance [N*m]
 
-WFC_VERIFY_TOP_K = 10              # 0 = strict/cheap-only mode
+WFC_VERIFY_TOP_K = 20              # 0 = strict/cheap-only mode
 WFC_VERIFY_MAX_ITER = 100
 
 # --- Interference-Free Condition (IFC) ---
 ENABLE_IFC = True
 
 CHECK_EXIT_ANGLE = False
-MIN_EXIT_ANGLE_DEG = 5.0
+MIN_EXIT_ANGLE_DEG = 1.0
 FACE_NORMAL_LOCAL = np.array([0.0, 0.0, -1.0])
 
 # --- Parallelism ---

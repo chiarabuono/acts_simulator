@@ -51,7 +51,7 @@ GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground
 
 # ------ Optimization parameters  ------------------------------------------------------------
 RENDER_EVERY_N_STEPS = 50
-ITERATION_COLLECTION = 35  # Iteration at which indices are collected
+ITERATION_COLLECTION = 50  # Iteration at which indices are collected
 
 payload_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "payload")
 i_xx, i_yy, i_zz = model.body_inertia[payload_id]
@@ -61,12 +61,12 @@ inertia_ratio = i_zz / i_xx
 
 kr_z = kr_xy * inertia_ratio
 ctrl_params = {
-    'px': 2.17, 'py': -2.71, 'pz': 4.90,
+    'px': 0.5, 'py': -0.5, 'pz': 2.0,
     'Kp_pos': kp, 
     'Kd_pos': 2 * (kp)**0.5,
     'Kr': np.array([kr_xy, kr_xy, kr_z]),
     'Kw': np.array([2 * (kr_xy)**0.5, 2 * (kr_xy)**0.5, 2 * (kr_z)**0.5]),
-    'quat_w': 1.0, 'quat_x': 0.1, 'quat_y': -0.1, 'quat_z': 0.05
+    'quat_w': 1.0, 'quat_x': 0.0, 'quat_y': 0.0, 'quat_z': 0.0
 }
 
 from acts_simulator import MODE

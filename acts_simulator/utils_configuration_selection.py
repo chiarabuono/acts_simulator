@@ -98,10 +98,10 @@ def select_and_load_xml():
     return state["filename"], state["content"]
 
 
-def select_and_load_folder():
+def select_and_load_folder(target_dir):
     # Track state in a dictionary so inner callback functions can modify them
     state = {
-        "target_dir": "mujoco",
+        "target_dir": target_dir,
         "selected_folder_path": None,
         "selected_folder_name": None
     }

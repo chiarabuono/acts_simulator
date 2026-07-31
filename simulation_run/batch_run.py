@@ -19,12 +19,13 @@ for p in [_SIMULATOR_PKG, _SRC_DIR]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from acts_simulator import max_thrust
+from acts_simulator import THRUST_MAX, THRUST_MIN
 from acts_simulator.utils_control import ACTScontrolDrone
 from acts_simulator.utils_optimization import optimize_drone_positions, check_ground_cable_rubbing
 from acts_simulator.utils_performance_indices import compute_rig_performance_indices, append_robot_data, pose_reached
-from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, OPTIMIZATION_FREQUENCY, MAX_WINCH_SPEED, CHECK_RUB_FREQUENCY
+from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, OPTIMIZATION_FREQUENCY, MAX_WINCH_SPEED, CHECK_RUB_FREQUENCY, POS_TOLERANCE, ROT_TOLERANCE
 from acts_simulator.utils_configuration_selection import select_and_load_folder
+from acts_simulator import kr_xy, kp
 
 import os, sys
 
@@ -35,15 +36,41 @@ if _PROJECT_ROOT not in sys.path:
 # -----------------------------------------------------------------------
 # Configuration Parameters
 # -----------------------------------------------------------------------
-FOLDER_NAME, FOLDER_PATH = select_and_load_folder()
+
+# OUTPUT_EXCEL = "simulation_run/results.xlsx"
+
+if len(sys.argv) > 1:
+    # Passed directly via terminal argument (e.g. "mujoco/hand_made/config_set_1")
+    FOLDER_PATH = sys.argv[1]
+    FOLDER_NAME = os.path.basename(os.path.normpath(FOLDER_PATH))
+else:
+    # Interactive GUI fallback if run without arguments
+    FOLDER_NAME, FOLDER_PATH = select_and_load_folder("mujoco")
+
+# MODELS_FOLDER = os.path.abspath(FOLDER_PATH)
 MODELS_FOLDER = os.path.join(_PROJECT_ROOT, FOLDER_PATH)
 POSES_EXCEL = os.path.join(_PROJECT_ROOT, "simulation_run/batch_run.xlsx")
-OUTPUT_EXCEL = "simulation_run/results.xlsx"
+
+# Create output folder inside simulation_run with the same name as FOLDER_NAME
+OUTPUT_DIR = os.path.join(_PROJECT_ROOT, "simulation_run", FOLDER_NAME)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# Update output paths to point inside the new folder
+OUTPUT_EXCEL = os.path.join(OUTPUT_DIR, "results.xlsx")
+RUBBING_LOG_CSV = os.path.join(OUTPUT_DIR, "ground_cable_rubbing_log.csv")
+RUBBING_LOG_EXCEL = os.path.join(OUTPUT_DIR, "ground_cable_rubbing_log.xlsx")
 
 
-MAX_ITERATIONS = 50               # Max limit changed from 30 to 50
-POS_TOLERANCE = 0.1              # Target position error threshold (in meters)
-ROT_TOLERANCE = np.deg2rad(3.0)              # Target orientation error threshold (in radians or norm)
+MAX_ITERATIONS = 60               
+
+# Create output folder inside simulation_run with the same name as FOLDER_NAME
+OUTPUT_DIR = os.path.join(_PROJECT_ROOT, "simulation_run", FOLDER_NAME)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# Update output paths to point inside the new folder
+OUTPUT_EXCEL = os.path.join(OUTPUT_DIR, "results.xlsx")
+RUBBING_LOG_CSV = os.path.join(OUTPUT_DIR, "ground_cable_rubbing_log.csv")
+RUBBING_LOG_EXCEL = os.path.join(OUTPUT_DIR, "ground_cable_rubbing_log.xlsx")
 
 
 # Global container to track rubbing events across all poses
@@ -104,6 +131,21 @@ def get_cable_tension(model, data, cable_idx):
         actuator_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, f"cable_{cable_idx}_winch")
         return -data.actuator_force[actuator_id]
 
+def append_rubbing_event_to_excel(excel_path, rubbing_event_dict):
+    """Appends a single rubbing event to the Excel file progressively."""
+    df_new = pd.DataFrame([rubbing_event_dict])
+    
+    if not os.path.exists(excel_path):
+        # Create new Excel file
+        df_new.to_excel(excel_path, sheet_name="Cable_Rubbing_Events", index=False)
+    else:
+        # Append to existing Excel file using openpyxl
+        with pd.ExcelWriter(excel_path, engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
+            # Read existing sheet to find the next empty row
+            existing_df = pd.read_excel(excel_path, sheet_name="Cable_Rubbing_Events")
+            start_row = len(existing_df) + 1  # Header counts as row 0
+            df_new.to_excel(writer, sheet_name="Cable_Rubbing_Events", index=False, header=False, startrow=start_row)
+
 
 def run_simulation_for_pose(xml_path, pose_row, pose_idx):
     filename = os.path.splitext(os.path.basename(xml_path))[0]
@@ -141,8 +183,6 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
     # Controller Gains
     i_xx, _, i_zz = model.body_inertia[payload_id]
     inertia_ratio = i_zz / i_xx
-    kp = 28.0
-    kr_xy = 8.0
     kr_z = kr_xy * inertia_ratio
 
     ctrl_params = {
@@ -210,6 +250,11 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
                     hook_offsets_drone, hook_offsets_ground,
                     tau_drone_actual, tau_ground_actual,
                     W_p_star, payload_mass,
+                    tau_min_drone=THRUST_MIN,          
+                    tau_max_drone=THRUST_MAX,
+                    w_min_ground=TAU_MIN,     
+                    w_max_ground=TAU_MAX,     
+                    g=g_accel,
                 )
                 
                 # --- ADD ITERATION & REASON TO EXCEL OUTPUT ---
@@ -230,7 +275,7 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
             )
             if not ok:
                 print(f"[Model: {filename} | Iteration: {iteration}] Cable Rubbing! min_d = {min_d:.3f} < {D_SAFE_CABLE}")
-                rubbing_events.append({
+                event_data ={
                     "model_xml": filename,
                     "pose_index": pose_idx,
                     "target_pos_x": p_star[0],
@@ -242,8 +287,12 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
                     "min_distance_m": min_d,
                     "d_safe_threshold_m": D_SAFE_CABLE,
                     "violation_margin_m": min_d - D_SAFE_CABLE,
-                    "status": "RUBBING_DETECTED"
-                })
+                    "status": "RUBBING_DETECTED",
+                    "time": strftime('%H:%M:%S', localtime())
+                }
+
+                rubbing_events.append(event_data)
+                append_rubbing_event_to_excel(RUBBING_LOG_EXCEL, event_data)
 
         a1_star, a2_star, a3_star = p_drone_targets[0], p_drone_targets[1], p_drone_targets[2]
 
@@ -283,6 +332,9 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
 # -----------------------------------------------------------------------
 # Execution Block
 # -----------------------------------------------------------------------
+# -----------------------------------------------------------------------
+# Execution Block
+# -----------------------------------------------------------------------
 if __name__ == "__main__":
     poses_df = pd.read_excel(POSES_EXCEL)
     poses_df.columns = poses_df.columns.str.strip()  # Clean whitespace from Excel headers
@@ -291,6 +343,7 @@ if __name__ == "__main__":
 
     print(f"Found {len(xml_files)} XML configuration files.")
     print(f"Loaded {len(poses_df)} target poses from Excel.")
+    print(f"Results will be saved to: {OUTPUT_DIR}\n")
 
     for xml_path in xml_files:
         xml_name = os.path.basename(xml_path)
@@ -304,12 +357,11 @@ if __name__ == "__main__":
 
     print("\n All batch jobs successfully processed!")
 
-    # Save cable rubbing events
+    # Save cable rubbing events into the designated folder
+    print("\n All batch jobs successfully processed!")
+
     if rubbing_events:
-        df_rubbing = pd.DataFrame(rubbing_events)
-        df_rubbing.to_csv("ground_cable_rubbing_log.csv", index=False)
-        with pd.ExcelWriter("ground_cable_rubbing_log.xlsx", engine="openpyxl") as writer:
-            df_rubbing.to_excel(writer, sheet_name="Cable_Rubbing_Events", index=False)
-        print(f"\n Logged {len(df_rubbing)} cable rubbing events to 'ground_cable_rubbing_log.xlsx' and '.csv'")
+        print(f"\n Recorded {len(rubbing_events)} cable rubbing events progressively to:")
+        print(f" - {RUBBING_LOG_EXCEL}")
     else:
         print("\n No ground cable rubbing detected across all batch runs.")

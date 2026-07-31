@@ -72,7 +72,7 @@ def point_segment_distance(p, a, b):
     return np.linalg.norm(p - closest)
 
 
-def compute_payload_jacobian(p_payload, R_mat_payload, p_anchors, hook_offsets):
+def compute_payload_jacobian_transpose(p_payload, R_mat_payload, p_anchors, hook_offsets):
     m = len(p_anchors)
     J_p = np.zeros((6, m))
 
@@ -81,7 +81,12 @@ def compute_payload_jacobian(p_payload, R_mat_payload, p_anchors, hook_offsets):
         r_i = p_payload + b_i_global
 
         l_vector = p_anchors[i] - r_i
-        u_i = l_vector / np.linalg.norm(l_vector)
+        norm = np.linalg.norm(l_vector)
+
+        if norm < 1e-9:
+            u_i = np.array([0.0, 0.0, 1.0])
+        else:
+            u_i = l_vector / norm
 
         J_p[0:3, i] = u_i
         J_p[3:6, i] = np.cross(b_i_global, u_i)
@@ -129,7 +134,7 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
         all_offsets = list(hook_offsets_drone) + list(hook_offsets_ground)
 
         # Compute the system's geometric allocation matrix (once, cached)
-        J_p = compute_payload_jacobian(p_payload, R_mat_payload, all_anchors, all_offsets)
+        J_p = compute_payload_jacobian_transpose(p_payload, R_mat_payload, all_anchors, all_offsets)
 
         if MODE == "tau_min":
             tau = np.full(n_a + n_g, tau_min)

@@ -12,7 +12,7 @@ from scipy.optimize import linprog, lsq_linear, minimize
 from xml_config_builder import build_xml, save_xml, RoutingValidationError, UGVUAVConfig
 from config_params import _load_json_db
 from config_params import *
-from acts_simulator import THRUST_MAX
+from acts_simulator import THRUST_MAX, THRUST_MIN
 
 # ---------------------------------------------------------------------------
 # Geometry helpers
@@ -1058,10 +1058,10 @@ def main():
         poses, max_enumerate=MAX_ENUMERATE,
         enable_wfc=ENABLE_WFC, tau_min=GROUND_TAU_MIN, tau_max=GROUND_TAU_MAX, wfc_wrench=wfc_wrench,
         uav_layout=UAV_LAYOUT, uav_cable_length=UAV_CABLE_LENGTH,
-        drone_thrust_min=DRONE_THRUST_MIN, drone_thrust_max=THRUST_MAX,
+        drone_thrust_min=THRUST_MIN, drone_thrust_max=THRUST_MAX,
         wfc_residual_tol=WFC_RESIDUAL_TOL, wfc_force_tol=WFC_FORCE_TOL, wfc_moment_tol=WFC_MOMENT_TOL,
         wfc_verify_top_k=WFC_VERIFY_TOP_K, wfc_verify_max_iter=WFC_VERIFY_MAX_ITER,
-        enable_ifc=ENABLE_IFC, d_safe=D_SAFE,
+        enable_ifc=ENABLE_IFC, d_safe=D_SAFE_CABLE,
         check_exit_angle=CHECK_EXIT_ANGLE, min_exit_angle_deg=MIN_EXIT_ANGLE_DEG,
         face_normal_local=FACE_NORMAL_LOCAL,
         max_gnd_share=MAX_GND_SHARE, n_workers=N_WORKERS,
@@ -1072,7 +1072,7 @@ def main():
         return
 
     if "conditioning_index" not in df.columns or not df["feasible"].any():
-        print_infeasibility_report(df, WFC_RESIDUAL_TOL, D_SAFE, CHECK_EXIT_ANGLE, MIN_EXIT_ANGLE_DEG)
+        print_infeasibility_report(df, WFC_RESIDUAL_TOL, D_SAFE_CABLE, CHECK_EXIT_ANGLE, MIN_EXIT_ANGLE_DEG)
         return
 
     df = df.sort_values(by=["conditioning_index", "manipulability"], ascending=[False, False]).reset_index(drop=True)

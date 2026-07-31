@@ -10,7 +10,7 @@ from scipy.optimize import linprog, lsq_linear, minimize
 from xml_config_builder import build_xml, save_xml, RoutingValidationError, UGVUAVConfig
 from config_params import _load_json_db
 from config_params import *
-from acts_simulator import THRUST_MAX
+from acts_simulator import THRUST_MAX, THRUST_MIN
 
 # ---------------------------------------------------------------------------
 # Geometry helpers
@@ -253,7 +253,9 @@ def optimize_drone_positions_for_wfc(uav_hook_offsets, payload_pos, payload_R, u
                                W_target=W_target, residual_tol=0.0)
         return wfc["residual"]
 
-    x0 = np.zeros(2 * n_drone)  # theta=0 for all -> starts exactly at nominal_drone_positions
+    #x0 = np.zeros(2 * n_drone)  # theta=0 for all -> starts exactly at nominal_drone_positions
+    x0 = np.random.uniform(-0.3, 0.3, 2 * n_drone)
+    # x0 = np.tile([0.3, 0.0], n_drone)
     res = minimize(objective, x0, method="Nelder-Mead",
                     options={"xatol": 1e-3, "fatol": 1e-3, "maxiter": max_iter})
 
@@ -492,7 +494,7 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
                          uav_hook_offsets=None, uav_cable_length=1.5,
                          drone_thrust_min=1.0, drone_thrust_max=44.0, wfc_residual_tol=1.0,
                          wfc_force_tol=None, wfc_moment_tol=None,
-                         wfc_verify_top_k=0, wfc_verify_max_iter=100,
+                         wfc_verify_top_k=0, wfc_verify_max_iter=500,
                          enable_ifc=True, d_safe=D_SAFE_CABLE,
                          check_exit_angle=False, min_exit_angle_deg=15.0, face_normal_local=None):
     """
@@ -575,8 +577,13 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
                     break
             if all_poses_pass:
                 n_wfc_verify_rescued += 1
-                best = {**score, "routing": routing, "wfc_ok": True, "wfc_rescued_by_reposition": True}
-                break  # sorted by manipulability descending - first success is best available
+                best = {
+                    **score, "routing": routing, "wfc_ok": True, "wfc_rescued_by_reposition": True,
+                    "max_wfc_residual": residual,
+                    "max_wfc_residual_force": wfc_result["residual_force"],
+                    "max_wfc_residual_moment": wfc_result["residual_moment"],
+                }
+                break
 
     wfc_residuals = stats.get("wfc_fail_residuals", [])
     wfc_force_residuals = stats.get("wfc_fail_residual_force", [])
@@ -737,6 +744,10 @@ def print_infeasibility_report(df, wfc_residual_tol, d_safe, check_exit_angle, m
           "placeholder - try loosening it, or check cable length and drone thrust bounds are "
           "realistic; also verify get_uav_hook_offsets' schema assumption matches your "
           "uav_configuration_database.json.")
+
+    if "n_wfc_verify_attempted" in df.columns:
+        print(f"    WFC rescue attempts: {int(df['n_wfc_verify_attempted'].sum())}, "
+          f"rescued: {int(df['n_wfc_verify_rescued'].sum())}")
     print("=" * 80 + "\n")
 
 
@@ -814,10 +825,10 @@ def main():
         poses, max_enumerate=MAX_ENUMERATE,
         enable_wfc=ENABLE_WFC, tau_min=GROUND_TAU_MIN, tau_max=GROUND_TAU_MAX, wfc_wrench=wfc_wrench,
         uav_layout=UAV_LAYOUT, uav_cable_length=UAV_CABLE_LENGTH,
-        drone_thrust_min=DRONE_THRUST_MIN, drone_thrust_max=THRUST_MAX,
+        drone_thrust_min=THRUST_MIN, drone_thrust_max=THRUST_MAX,
         wfc_residual_tol=WFC_RESIDUAL_TOL, wfc_force_tol=WFC_FORCE_TOL, wfc_moment_tol=WFC_MOMENT_TOL,
         wfc_verify_top_k=WFC_VERIFY_TOP_K, wfc_verify_max_iter=WFC_VERIFY_MAX_ITER,
-        enable_ifc=ENABLE_IFC, d_safe=D_SAFE,
+        enable_ifc=ENABLE_IFC, d_safe=D_SAFE_CABLE,
         check_exit_angle=CHECK_EXIT_ANGLE, min_exit_angle_deg=MIN_EXIT_ANGLE_DEG,
         face_normal_local=FACE_NORMAL_LOCAL,
     )
