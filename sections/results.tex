@@ -1,0 +1,367 @@
+\chapter{Simulation results}
+\label{chap:results}
+
+%% Experimental objectives
+The objective of this chapter is to evaluate how the architectural design of an ACTS influences its ability to accurately and robustly manipulate a payload. The focus is on how different cable routing strategies, UAV attachment configurations, and ground hook placements influence the overall system performance.
+
+In fact, a configuration is considered successful if the desired payload is reached with sufficiently small position and orientation errors, all cables remain under positive tension throughout the maneuver, and the payload converges to an equilibrium without persistent oscillations.
+
+%% Why did you choose Stewart as the reference?
+First, the classical Stewart configuration is analyzed and used as a reference architecture due to its geometric symmetry and extensive use in the literature. In fact, if even Stewart-like performs poorly, the problem is likely the controller rather than the architecture. 
+
+%% Scenario A and B
+Two desired payload poses are taken in considerations. In the first scenario, the desired payload orientation coincides with the world reference frame; while in the other scenario a non-zero desired orientation is imposed. This allows to analyze separately the rotational motions from the translation tracking.
+
+The remaining experiments then investigate how modifications to the ground cable routing, UAV attachment geometry, and hook placement affect both the theoretical performance indices and the closed-loop behavior of the system. This progressive analysis makes it possible to identify which geometric features have the greatest influence on payload manipulation performance.
+
+\section{Stewart platform baseline}
+The Stewart platform configuration is used as a baseline for evaluating the proposed ACTS architectures. Its symmetric arrangement of the six ground cables provides a well-defined reference configuration against which alternative cable routings can be compared. The baseline is first examined using the static performance indices introduced in Section \ref{sec:performanceIndices}. 
+
+In particular, the conditioning index, manipulability, radius of available wrench, capacity margin, and composite score are evaluated at the prescribed payload pose. These quantities provide a reference for assessing the wrench-generation capability and isotropy of the ground-cable arrangement. The complete ACTS configuration is then evaluated by incorporating the aerial cables and their actuation constraints. Finally, the resulting configuration is simulated in MuJoCo to verify the dynamic payload tracking behavior.
+
+\subsection{Numerical Verification of the Baseline Configuration}
+This section verifies that the implemented optimization and control algorithms correctly reproduce the mathematical model derived in Chapters \ref{chap:design_modeling}. For one representative Stewart-platform configuration, each stage of the computation is independently reconstructed from the governing equations: cable directions are computed from the geometry, the resulting Jacobian is assembled, cable tensions are substituted to recover the payload wrench, and the required UAV thrust is recomputed from the static equilibrium equations. Agreement between these hand calculations and the implementation provides confidence that subsequent comparisons between ACTS architectures reflect architectural differences rather than implementation errors.
+
+\subsubsection{Configuration}
+Payload dimensions: $2.0 \times 2.0 \times 0.2$~m \\
+Desired pose: $p^*= [0.5, -0.5, 2.0]^\top$~m \\
+Desired orientation: $R^* = \mathbb{I}$ \\
+Desired payload wrench: $W_p^* = [0, 0, 9.81, 0, 0, 0]^\top$
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lccc}
+        attachment        &    & hook points & \\ \hline
+        $A_4 \equiv A_5$ &  $[0.0, 1.1, 0.0]^\top$         &   $B_4 \equiv B_9$ &  $[0.5, 0.05, 1.9]^\top$          \\
+        $A_6 \equiv A_7$ &  $[-0.9526, -0.55, 0.0]^\top$   &   $B_5 \equiv B_6$ &  $[-0.0237, -0.775, 1.9]^\top$    \\
+        $A_8 \equiv A_9$ &  $[0.9526, -0.55, 0.0]^\top$    &   $B_7 \equiv B_8$ &  $[0.9763, -0.775, 1.9]^\top$     \\
+    \end{tabular}
+    \caption{Ground anchor and hook attachment points for the Stewart baseline.}
+    \label{tab:groundAttachments}
+\end{table}
+
+\noindent Using Equation~\ref{eq:cableVector}b, the ground cable directions $u_i$ are:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{cc}
+        $u_4 = [-0.2245,\ 0.4713,\ -0.8529]^\top$ & $u_7 = [-0.7100,\ 0.0828,\ -0.6993]^\top$ \\
+        $u_5 = [-0.0089,\ 0.7024,\ -0.7117]^\top$ & $u_8 = [-0.0124,\ 0.1176,\ -0.9930]^\top$ \\
+        $u_6 = [-0.4545,\ 0.1047,\ -0.8846]^\top$ & $u_9 = [0.2215,\ -0.2937,\ -0.9299]^\top$ \\
+    \end{tabular}
+    \caption{Ground cable unit directions.}
+\end{table}
+
+\begin{equation}
+J_{p,\text{ground}} =
+\begin{bmatrix}
+-0.22445 & 0.47135 & -0.85291 & -0.42197 & 0.02245 & 0.12345 \\
+-0.00888 & 0.70238 & -0.71175 & 0.26597 & -0.33812 & 0.33656 \\
+-0.45452 & 0.10475 & -0.88456 & 0.25373 & -0.37586 & 0.29632 \\
+-0.70998 & 0.08282 & -0.69934 & 0.20060 & 0.40409 & -0.52834 \\
+-0.01239 & 0.11759 & -0.99298 & 0.28483 & 0.47420 & -0.47636 \\
+0.22151 & -0.29365 & -0.92989 & -0.54081 & -0.02215 & -0.12183
+\end{bmatrix}
+\end{equation}
+
+\subsubsection{Drone Attachment Geometry}
+Unlike the ground anchors, the drone attachment points $a_1, a_2, a_3$ are not fixed geometry — they are the output of the layout optimization of Section~\ref{sec:tensionPlanner}. The corresponding cable directions $u_1, u_2, u_3$ are therefore extracted from a converged simulation run for this configuration rather than computed from known attachment coordinates:
+\begin{equation}
+a_1 = [1.1020, -0.2692, 3.5972]^\top, \quad
+a_2 = [0.1802, -0.7553, 3.4976]^\top, \quad
+a_3 = [0.9397, -1.2760, 3.5192]^\top.
+\end{equation}
+With $r_i = p^* + R^*\,{}^p b_i$ and the drone hook offsets ${}^p b_i$, the resulting drone cable
+directions are
+\begin{equation}
+u_1 = [0.0837, -0.0294, 0.9961]^\top, \quad
+u_2 = [0.1042, -0.3528, 0.9299]^\top, \quad
+u_3 = [0.2926, -0.1504, 0.9443]^\top,
+\end{equation}
+with $\lVert a_i - r_i \rVert \approx 1.503$~m for all three, consistent with the nominal drone
+cable length of $1.5$~m and confirming the optimizer converged to a geometrically taut solution.
+The corresponding drone Jacobian is
+\begin{equation}
+J_{p,\text{drones}} =
+\begin{bmatrix}
+0.0837 & 0.1042 & 0.2926 \\
+-0.0294 & -0.3528 & -0.1504 \\
+0.9961 & 0.9299 & 0.9443 \\
+0.2769 & 0.2910 & -0.5043 \\
+-0.4661 & 0.4533 & 0.0293 \\
+-0.0370 & 0.1394 & 0.1609
+\end{bmatrix}.
+\end{equation}
+
+\subsubsection{Cable Tensions}
+For this configuration, the optimizer returns
+\begin{equation}
+\tau_{\text{UAV}} = [13.6970,\ 11.1548,\ 14.4154]^\top~\text{N}, \qquad
+\tau_{\text{ground}} = [5.4903,\ 5.4740,\ 5.4901,\ 5.4784,\ 5.4860,\ 5.4708]^\top~\text{N}.
+\end{equation}
+All six ground tensions lie close to $\tau_{\min}=5.5$~N. This behavior is physically expected. Because the desired wrench is almost entirely vertical, the UAVs provide most of the lifting force while the Stewart cables primarily stabilize the payload orientation and prevent lateral motion. Consequently, the optimizer drives the ground tensions toward their minimum admissible values, maintaining taut cables while minimizing unnecessary internal forces.
+
+\subsubsection{Payload Wrench Verification}
+Combining $J_{p,\text{drones}}$ and $J_{p,\text{ground}}$ into the full Jacobian $J_p$ and
+evaluating $W_p = J_p\,\tau$ with the tensions above:
+\begin{equation}
+W_p = J_p\,\tau =
+\begin{bmatrix} -0.0023 \\ 0.0018 \\ 9.8110 \\ -0.0003 \\ -0.0001 \\ -0.0009 \end{bmatrix},
+\qquad
+W_p^* =
+\begin{bmatrix} -0.0158 \\ 0.0180 \\ 9.7341 \\ -0.0022 \\ 0.0019 \\ -0.0151 \end{bmatrix}.
+\end{equation}
+All six components match to within $0.08$ in force units and $0.015$ in moment units. This
+residual is expected rather than an error: with \texttt{MODE = "tau\_optimal"}, tensions are found
+by a bounded least-squares solve (Eq.~\ref{eq:tension-planner}) that \emph{penalizes} wrench
+mismatch rather than enforcing $J_p^\top \tau = W_p^*$ as a hard equality constraint, so a small,
+non-zero residual is the expected outcome of the optimization rather than a sign of implementation
+error.
+
+\subsubsection{Required Drone Thrust}
+Under the steady-state assumption $p_d = p$, $\dot{p}_d = \dot{p} = 0$,
+Eq.~\ref{eq:drone-disposition} reduces to $F_{prop,i} = \tau_i u_i + m_i g\,e_3$, giving the
+hand-computed thrust magnitudes
+\begin{equation}
+T_1 = 33.29~\text{N}, \qquad T_2 = 30.27~\text{N}, \qquad T_3 = 33.57~\text{N}.
+\end{equation}
+The controller-computed thrust commands for the same converged pose are $33.2793$, $30.2683$, and
+$33.5657$~N respectively, matching the hand-computed values to within floating-point precision and
+confirming that \texttt{compute\_motor\_wrenches} correctly implements
+Eq.~\ref{eq:drone-disposition}.
+
+\subsubsection{Discussion}
+Both checks confirm the implementation is correct, at two different tolerances appropriate to what
+each is verifying. The thrust-command comparison, which involves no optimization step, matches to
+floating-point precision, confirming that the geometric force-to-thrust mapping in the drone
+controller (Eq.~\ref{eq:drone-disposition}) is implemented exactly as derived. The wrench-tracking
+comparison shows a small, non-zero residual, which is the expected signature of the tension
+planner's least-squares formulation (Eq.~\ref{eq:tension-planner}) rather than an error: the
+optimizer trades a small wrench-tracking residual for reduced drone propulsion effort, weighted by
+$K$ in the objective of Eq.~\ref{eq:tension-planner}. Together, these results validate both the
+geometric optimization and the low-level control implementation for this representative
+configuration, providing the basis for the comparative architecture study that follows.
+
+\subsection{Comparison between tension allocation strategies}
+As mentioned in Section \ref{sec:highlevelarchitecture}, we evaluate two distinct tension allocation strategies:
+\begin{itemize}
+    \item Minimal tension strategy, in which a minimum cable tension is imposed to each cable tension such that $\|\tau_i \| = \tau_{min}$.
+    \item Optimal tension strategy, in which cable tensions are determined by the quadratic optimization problem in Equation \ref{eq:tension-planner-relax}
+\end{itemize}
+
+The performance indices and tracking errors under both strategies across two operational scenarios are summarized in Table \ref{tab:stewart_comparative}.
+
+The minimal tension strategy has negative consequences on the system's robustness. By locking all cable tensions to their absolute lowest limit ($\tau_{\min}$), the range of available tension choices shrinks to a single point. As a result, the controller loses its ability to adjust forces, reducing the payload's Available Wrench Set (AWS) to just a single fixed outcome. \cite{yang_robust_2025}
+% Even though being faster, the minimal tension strategy has negative consequences on the system's robustness. Fixing the tension vector to its lower limit $\tau_{\min}$ collapses the tension space from an $N$-orthotope $[\tau_{\min}, \tau_{\max}]^N$ to a single point, which linearly maps through the wrench matrix $W$ to degenerate the Available Wrench Set (AWS) into a single point \cite{yang_robust_2025}. 
+As a result, any deviation of the desired payload wrench $W_p^*$ from this single point results in a negative capacity margin (as seen in Scenario A where $\gamma = -0.19343$). This indicates that the system is theoretically incapable of resisting external disturbances or maintaining equilibrium without violating the tension constraints.
+
+Switching to the optimal tension allocation, allows the cable tensions to vary dynamically between $\tau_{min}$ and $\tau_{max}$. As a result, the radius of the Available Wrench increases and the capacity margin takes on a positive value ($\gamma = 10.46403$). Thus, also the composite score increases. Differently, changing the tension allocation algorithm has no effect on the conditioning index or manipulability because they are kinematic metrics that only depend on the platform's geometric position.
+
+
+On the other hand, it is worth to notice that, since the objective function does not contain any state-tracking terms, this optimizer does not directly minimize the payload's real-time position or orientation tracking errors. 
+Because of this, a spatial configuration that yields globally minimal propulsion effort does not guarantee a minimum in tracking error.
+
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{\textbf{Scenario A}} & \multicolumn{2}{c}{\textbf{Scenario B}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+\textbf{Metric / Parameter} & $\tau_{\text{min}}$ & $\tau_{\text{opt}}$ & $\tau_{\text{min}}$ & $\tau_{\text{opt}}$ \\ 
+\midrule
+Desired Position & \multicolumn{2}{c}{$[0.5, -0.5, 2.0]^\top$} & \multicolumn{2}{c}{$[0.5, -0.5, 2.0]^\top$} \\
+Desired Orientation & \multicolumn{2}{c}{$[1.0, 0.0, 0.0, 0.0]^\top$} & \multicolumn{2}{c}{$[1.0, 0.1, -0.1, 0.1]^\top$} \\
+\midrule
+Conditioning Index & 0.10259 & 0.09617 & 0.07052 & 0.05550 \\
+Manipulability & 0.47775 & 0.43700 & 0.31471 & 0.24108 \\
+Radius Avail. Wrench & 49.29711 & 47.90399 & 52.21278 & 53.22707 \\
+Capacity Margin & -0.19343 & 10.46403 & -3.83256 & 2.65386 \\
+Worst-case CM & 0.90998 & 0.76401 & 0.90998 & 0.75072 \\
+Composite Score & 17.35180 & 20.62849 & 17.64446 & 19.42488 \\
+\midrule
+Position Error & 0.00201 & 0.00284 & 0.00187 & 0.00262 \\
+Orientation Error & 0.00121 & 0.00209 & 0.00379 & 0.00385 \\
+\bottomrule
+\end{tabular}
+\caption{Comparative performance indices and tracking errors for Stewart baseline configuration across Scenarios A and B.}
+\label{tab:stewart_comparative}
+\end{table}
+
+Although the Stewart configuration exhibits good overall performance and provides an excellent reference architecture, the proposed ACTS differs from a classical Stewart platform because the UAV cables can be connected to the payload in several different ways. Moreover, different ground cable routings may further improve specific performance aspects such as stability, wrench generation capability, or robustness. For these reasons, the Stewart configuration is adopted as a baseline against which all alternative architectures are compared. 
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/performanceIdxBTauOpt.png}
+        \caption{Performance indices}
+        \label{fig:performanceIdxATauOpt}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/acts_stewart_tau_optimal_0.5--0.5-2.0_1.0-0.1-0.1-0.1_errors.png}
+        \caption{Pose error}
+        \label{fig:errorTauOpt}
+    \end{subfigure}
+    \caption{Graphs}
+    \label{fig:tauopt}
+\end{figure}
+
+An ideal ACTS architecture should remain far from singular configurations, generate payload wrenches efficiently in every direction, and maintain sufficient redundancy to accommodate disturbances while respecting cable tension limits. Consequently, all the considered performance indices should be as big as possible.
+
+The considerations from now on will be done using the optimal tension strategy.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.65\linewidth]{images/6_ugv_config.jpeg}
+    \caption{Possible 6 UGVs connections}
+    \label{fig:6ugvsConnections}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.65\linewidth]{images/3_uav_config.png}
+    \caption{Possible 3 UAVs connection with one cable}
+    \label{fig:3uavsConnections}
+\end{figure}
+
+\section{Ground cable routing}
+
+\todo[inline]{We have already talken about it in the previous sections, how to do it?}
+
+Once the controller has been validated using the Stewart baseline, we can proceed to consider different ways to connect six ground cables to the platform (Figure \ref{fig:6ugvsConnections}) and the drone (Figure \ref{fig:3uavsConnections}). The same ground configuration hook-anchor can change the system's stability based on which hook is connected to which anchor point on the ground.
+%% Why we choose the triangle for the UAVs configuration?
+Therefore, we will start considering the drone attachment configuration as fixed to the triangular arrangement and vary only the routing of the six ground cables. This specific UAV configuration is chosen because it provides a symmetric distribution of the three drones around the payload. This approach allows one to isolate the influence of the ground cable routing and attribute differences in performance solely to the ground architecture. Finally, in Section \ref{sec:dronehook}, the impact of various UAV attachment geometries is examined independently.
+
+%% How the code work, how a given cable routing has been found
+Focusing on the ground cable routing, there are at most $6! = 720$ physically distinct valid ways to route the six ground cables. Scoring an architecture using only one arbitrarily chosen routing raise the question on how lucky the routing choice was and how good the architecture actually is.
+
+To eliminate this source of bias, an exhaustive routing search is performed for every pair of payload and ground layouts. All physically valid routings are enumerated while respecting the maximum cable capacity of each attachment point. For every routing, the corresponding payload Jacobian $J_p$ is constructed according to Equation \ref{eq:jp}, and the routing is evaluated over a representative set of payload poses. At each pose, the routing must satisfy the necessary conditions introduced in Section \ref{sec:performanceIndices}. Routings that fail any of these conditions are discarded. Among the surviving candidates, the routing is assigned its worst-case performance across all poses, and the architecture is finally characterized by the routing that maximizes the conditioning index. In this way, architectures are compared according to their best achievable routing rather than to an arbitrary cable assignment. Architectures are subsequently ranked against one another by worst-case conditioning index.
+
+\todo[inline]{Update with correct data}
+\begin{table}[htbp]
+\centering
+\small
+\resizebox{\linewidth}{!}{
+\begin{tabular}{llccccccccc}
+\toprule
+\textbf{Pay. Layout} & \textbf{Gnd. Layout} & \textbf{$N_{\text{rout}}$} & \textbf{$N_{\text{pos}}$} & \textbf{Feas.} & $\nu$ & $w$ & \textbf{$\sigma_{\min}$} & \textbf{$\sigma_{\max}$} & \textbf{Rank} & \textbf{Best Routing} \\
+\midrule
+2X3 & pentagon & 360 & 8 & \checkmark & 0.1402 & 0.3680 & 0.3275 & 2.3452 & \checkmark & A-E|B-A|C-D|D-C|E-B|F-E \\
+two-triangles & pentagon & 360 & 8 & \checkmark & 0.1383 & 0.2169 & 0.3241 & 2.3566 & \checkmark & A-E|B-A|C-C|D-D|E-B|F-E \\
+pentagon & 2X3 & 360 & 8 & \checkmark & 0.1354 & 0.3773 & 0.3169 & 2.3401 & \checkmark & A-A|B-F|C-E|D-B|E-C|E-D \\
+hexagon & pyramid & 720 & 8 & \checkmark & 0.1343 & 0.1664 & 0.3180 & 2.3794 & \checkmark & A-D|B-A|C-B|D-E|E-F|F-C \\
+pentagon & pentagon & 168 & 8 & \checkmark & 0.1316 & 0.2494 & 0.2899 & 2.3420 & \checkmark & A-E|B-C|C-B|D-E|E-A|E-D \\
+\bottomrule
+\end{tabular}
+}
+\caption{Ground Cable Routing and Layout Performance Analysis}
+\label{tab:ground_routing_performance}
+\end{table}
+
+% \begin{itemize}
+%     \item \textbf{Wrench Closure}, checked via the rank of $J_p$ (Section \ref{sec:performanceIndices});
+%     \item \textbf{Wrench Feasibility}, checked jointly over all nine cables (six ground cables and three drone cables), rather than on the ground cables alone. Since the live controller minimizes wrench mismatch rather than enforcing it exactly, feasibility here is likewise assessed as a bounded least-squares residual against a tolerance, instead of requiring exact equality. A two-stage verification is used: a routing is first checked against a cheap approximation that places each drone directly above its payload hook; if no routing passes this cheap check for a given architecture, the best candidates by manipulability that otherwise satisfy Wrench Closure and Interference-Freedom are re-evaluated with an explicit optimization over drone position, which can recover routings whose only shortcoming was a lateral-force or moment mismatch that a repositioned drone can resolve;
+%     \item \textbf{Interference-Freedom}, decomposed into two independent sub-conditions: pairwise cable-cable clearance (Equation \ref{eq:ifc}), and a minimum cable exit angle relative to the payload's attachment face, which replaces an earlier box-distance proxy for the same requirement.
+% \end{itemize}
+
+%% Why conditioning index and not composite score?
+The composite score N is not used for ranking routings during the exhaustive search because it requires information that is only available after solving the tension planner, such as the optimal cable tensions and the available wrench set. Computing its capacity-based terms is also computationally expensive and unreliable near singular configurations. Additionally, its weighting factors have not been experimentally validated, making it unsuitable for selecting the best routing. Instead, the search uses the conditioning index (with manipulability as a supporting metric), as it is a parameter-free, geometry-based measure that can be efficiently computed directly from the Jacobian. The composite score and capacity-based metrics are therefore evaluated later during closed-loop simulations, once a routing and tension solution are available.
+
+\begin{algorithm}[h]
+\caption{Cable Routing Optimization and Architecture Ranking}
+\label{alg:cable_optimization}
+\begin{algorithmic}[1]
+
+\ForAll{$(\text{payload\_layout}, \text{ground\_layout}) \text{ pairs}$}
+    \State Enumerate every valid 6-cable routing
+    
+    \ForAll{routing}
+        \ForAll{pose $\in$ test-pose set}
+            \State Build $J_p$  \Comment{Eq. \ref{eq:jp}}
+            \State Check Wrench Closure \Comment{$\text{rank}(J_p) = 6$}
+            \State Check Wrench Feasibility \Comment{$0\le \tau_{\text{min}} \le \tau \le \tau_{\text{max}}$}
+            \State Check Interference-Freedom \Comment{Eq. \ref{eq:IFCconstraint}}
+        \EndFor
+        \State Record this routing's \textbf{worst-case} score across all poses
+    \EndFor
+    \State Keep the \textbf{best} surviving routing for this architecture
+\EndFor
+
+\end{algorithmic}
+\end{algorithm}
+
+\todo[inline]{How can I see if a configuration is more inclined to singularity only by looking at it?}
+
+\todo[inline]{Line or diagonal results in not-feasible configurations, why? What does this mean? Geometric reasons?}
+
+The line and diagonal configurations approach kinematic or wrench singularities, where the cable arrangement cannot generate the desired six-dimensional wrench while maintaining positive tensions. Conversely, the Rectangle-Same configuration remains kinematically feasible but exhibits poor rotational stiffness due to its asymmetric cable pairing. As a result, although the Jacobian remains full rank, the payload develops a rocking motion that cannot be predicted by the geometric performance indices alone.
+
+%% How and why the results before simulation and after simulation differ?
+
+% The theoretical indices assume: static equilibrium, ideal cables, no inertia, no controller dynamics. The simulation includes: payload inertia, controller dynamics, coupling, transient motion, oscillations.
+
+The theoretical indices evaluate the geometric and static properties of a cable routing. They identify configurations that are close to kinematic or wrench singularities and rank architectures according to their ability to generate payload wrenches. However, they cannot predict the transient response of the closed-loop system. Dynamic effects such as payload inertia, controller gains and load redistribution are only captured by simulation. Consequently, while poor theoretical indices almost always indicate poor dynamic performance, the opposite is not necessarily true: a routing with good static indices may still exhibit oscillations or poor tracking.
+
+\todo[inline]{Insert table comparing the two}
+
+\todo[inline]{Rectangle-same really unstable configuration}
+
+The Jacobian is full rank and the static indices are acceptable, yet the payload rocks because of an uneven load distribution and poor torsional stiffness. That example provides strong evidence that the theoretical indices are necessary but not sufficient for predicting closed-loop behavior.
+
+
+\todo[inline]{Talk about triangle-triangle combination}
+
+\todo[inline]{Other combinations that give interesting results?}
+
+
+
+\section{Ground anchor placement}
+Increasing the spacing between the ground hooks enlarges the available wrench set and moves the system farther from wrench singularities, explaining the observed improvement in tracking performance.
+
+\section{Drone hook placement}
+\label{sec:dronehook}
+
+
+How to structure this chapter:
+\begin{enumerate}
+    \item Why did we choose to go for the method: controller and see if that pose is reachable? [DONE] 
+    \item Talk about Stewart configurations, 
+    \begin{itemize}
+        \item which are the indices values [DONE]
+        \item what these can tell us about everything [DONE]
+        \item How do I want each performance index? [DONE]
+        \item Show them in a graph
+    \end{itemize}
+    \item Given an UAV configuration (we chose triangle), analyze cable routing
+    \begin{itemize}
+        \item Why we choose the triangle for the UAVs configuration? [DONE]
+        \item How the code work, how a given cable routing has been found [DONE]
+        % \item How can I know a configuration is mure suscettibile to be singular? Something with a jacobian?
+        \item How the results before simulation and after simulation differ?
+        \item Why we need to test it dynamically and not just trust the results we obtain before? [DONE, add table]
+        \item Rectangle-same really unstable configuration
+        \item line or diagonal results in not-feasible configurations, why? What does this mean? Add geometric reasons
+    \end{itemize}
+    \item Given the results of the previous step, let's analyze the first 3/5 configurations with all 6 possible UAV configurations
+    \begin{itemize}
+        \item Expectation: triangle being the best one, if not, which one is best? Rerun step 2 and see how things change
+        \item How drone attachment influences reaching the goal? Show evolution graph
+    \end{itemize}
+    \item Can a more spread-out hook configuration on the ground better the performance, or it is irrelevant? 
+    \begin{itemize}
+        \item Does the answer change when the desired position is If so, it opens results to the moving hook point. Further away?
+        \item Show example on the top configuration and a terrible one.
+        \item Are there any papers/theorem that says so?
+        \item Show evolution graph
+    \end{itemize}  
+    \item How a configuration far away from the hook point on the ground performs?
+    \begin{enumerate}
+        \item What Stewart does and what top configuration does
+        \item The hook position should cover more space on the ground. Does this better the result Stewart vs top configuration?
+        \item Is there a geometric reason/ theory for that?
+    \end{enumerate} 
+\end{enumerate}

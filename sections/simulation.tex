@@ -1,0 +1,151 @@
+\chapter{Simulation Environment and Experimental Setup}
+\label{chap:simulation}
+\section{Role of Simulation in the Thesis}
+The development of the ACTS requires the interaction of several coupled mechanical and control components. A physics-based simulation environment is therefore used to evaluate the proposed architectures and control strategies before physical implementation.
+
+Simulation provides a controlled environment in which the system can be tested under repeatable conditions. It also enables the evaluation of the controller without the risks and practical constraints associated with experiments on a physical system.
+
+An additional advantage of using a physics engine is that the complete coupled equations of motion do not need to be explicitly derived and numerically integrated for each configuration. Instead, the mechanical bodies, joints, constraints, actuators, and contact properties are defined in the simulation model, while the physics engine performs the corresponding numerical integration. Nevertheless, the validity of the simulation remains dependent on the assumptions and simplifications made in the model.
+
+\section{Simulator Selection}
+
+Two simulation environments were investigated during the development of the thesis: Gazebo and MuJoCo. Gazebo was initially considered because of its integration with ROS2 and the availability of existing UAV models and visualization tools. However, difficulties were encountered when attempting to represent the closed cable-constrained structure of the ACTS. MuJoCo was therefore selected for the final simulation environment.
+
+\subsection{Gazebo Environment}
+Gazebo Harmonic \cite{gazebo_harmonic_getstarted} was initially selected as a potential simulation environment because of its established use in robotics and its integration with ROS2. However, the ACTS architecture presents a particular modeling challenge. Indeed, Gazebo assigns each physical element in the simulation a parent, generating a tree-like structure. While this does not constitute a problem for conventional articulated robot, ACTS contains ground cables constrained at both ends (resp. on the payload and on a point fixed on the ground), resulting in closed kinematic constraints. 
+
+Additionally, cables as soft body cannot be modelled in Gazebo, as it only manage rigid object. To go around the problem, they are modelled using multiple rigid links connected using universal joints. Although it solved the problem, implementing it resulted into an impracticable slow-down simulation.
+
+Several preliminary simulations were nevertheless successfully implemented in Gazebo, including a pulley mechanism, a UAV connected to the ground through a cable, and a UAV connected to a payload. While individual components of the system could be simulated, such as pulley mechanism and single drone-cable simulation, extending this approach to the complete ACTS resulted in a more complex and computationally demanding model.
+
+These experiments were useful for validating the initial modeling approach and identifying the main limitations before transitioning to another simulation environment.
+
+\todo[inline]{Add photos}
+
+Given the additional modeling effort required to represent the complete ACTS architecture and the limited time available for the thesis, continuing the Gazebo implementation was not considered the most effective approach for obtaining the required simulation results.
+
+\subsection{MuJoCo Environment}
+
+MuJoCo (Multi-Joint dynamics with Contact) was selected as the final simulation environment because it is well suited to the closed-loop structure of cable-driven robots. In particular, MuJoCo provides tendon elements that can be used to represent cable-like connections between bodies, including constraints associated with their geometric configuration \cite{mujoco_docs_237}.
+
+This capability significantly simplifies the representation of the ACTS compared with the rigid-link approximation investigated in Gazebo. The complete system can therefore be represented using the payload, UAVs, ground anchors, and cables while maintaining the closed-loop constraints required by the architecture.
+
+For the simulations presented in this thesis, the cables are modeled as ideal geometric constraints. Their stiffness and damping are neglected, such that the cables transmit tensile forces without introducing additional elastic dynamics. This simplification is consistent with the quasi-static and geometric analysis used for the architecture evaluation, while allowing the simulation to focus on the influence of cable configuration, attachment geometry, and actuator placement.
+
+\section{Software architecture (UML)}
+All implementation code\footnote{\url{https://github.com/chiarabuono/acts_simulator.git}} is available on
+GitHub~\cite{my_thesis_repo}. The repository is organized into three functional groupings:
+\begin{itemize}
+    \item a \texttt{create\_xml} package, an offline configuration and model-generation stage;
+    \item an \texttt{acts\_simulator} package, a runtime simulation stage;
+    \item a \texttt{simulation\_run} package, a mass-evaluation stage.
+\end{itemize}
+
+The \texttt{create\_xml} package handles architecture search and MuJoCo model generation offline, producing XML files that are loaded at startup. 
+
+A visual interface (\texttt{xml\_generator.py}) is also provided to build a custom XML model interactively, ready to be tested without going through the automated architecture search.
+
+The resulting models can be run by two independent codes: \texttt{acts.py}, a single-model, single-pose driver used for qualitative verification; and \texttt{batch\_run.py}, a headless driver that iterates over every candidate XML model and every target pose in a batch pose list. 
+
+Both codes are meaningful for different reasons.
+\texttt{acts.py} runs one simulation at a time with a live visual interface; this makes it slower, but well suited to the qualitative verification of the controller, which is what it was used for in the early stages of development. Each run saves a single indices row to \texttt{collected\_data}, together with a video recording and live plots of the tracking performance. \texttt{batch\_run.py} executes the same underlying pipeline without the visual interface, which makes it considerably faster over many configurations: it accumulates one results row per (model, pose) combination directly into \texttt{results.xlsx}. This is the driver used to collect performance data across architectures and poses, from which the conclusions of Chapter \ref{chap:results} are drawn. This overall process is summarized in Figure \ref{fig:architectureDiagram}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{images/diagrams/architecture_overview.png}
+    \caption{Architecture overview}
+    \label{fig:architectureDiagram}
+\end{figure}
+
+Figure \ref{fig:packageDiagram} details the internal organization of \texttt{acts\_simulator}. \texttt{acts.py} runs the simulation, calling into three modules at each control step: 
+
+\begin{itemize}
+    \item the control-law layer (\texttt{utils\_control.py}), which is described in Figure \ref{fig:classDiagram}
+    \item the kinematostatic/optimization layer (\texttt{utils\_optimization.py}), which solves for the drone positions and cable tensions that best realize the desired payload wrench
+    \item and the evaluation layer (\texttt{utils\_performance\_indices.py}), which compute the performance indices described in Section \ref{sec:performanceIndices} and saves them to file.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{images/diagrams/package_diagram.png}
+    \caption{Package Diagram}
+    \label{fig:packageDiagram}
+\end{figure}
+
+The drone control-law layer introduced above is implemented as a small class hierarchy, as shown in Figure \ref{fig:classDiagram}. In fact, a shared base class, \texttt{BaseDrone}, computes everything common to every configuration, such as the motor-mixing matrices, the attitude controller and the necessary rotor speeds. Each subclass replaces only \texttt{position\_controller()}, providing the force law appropriate to what that drone is physically attached to.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{images/diagrams/class_diagram.png}
+    \caption{Drone Controller Class Diagram}
+    \label{fig:classDiagram}
+\end{figure}
+
+The four subclasses correspond directly to the successive force-control cases developed in
+Chapter \ref{chap:control}, and to the order in which the controller was actually developed and tested:
+\begin{itemize}
+    \item \texttt{FreeFlightDrone} implements the unconstrained case and was the first to be tested, to verify that a single drone could reach a desired position with no cable constraint at all;
+    \item \texttt{CableTetheredDrone} extends this to a drone tethered directly to a fixed ground anchor by a cable described in Section \ref{sec:forceControl1droneToGround}
+    \item \texttt{PayloadControlDrone} extends the cable case further to include a payload described in Section \ref{sec:payload1drone1groundCable};
+    \item \texttt{ACTScontrolDrone} is the controller ultimately used in the full ACTS architecture, driven directly by \texttt{acts.py}.
+\end{itemize}
+
+This progressive structure allowed each force-control case to be validated in isolation before being combined into the final system, and it keeps \texttt{position\_controller()} as the single, well-defined extension point where a new case could be added without touching the shared attitude and motor-mixing logic.
+
+\newpage
+\section{Simulation setup}
+The simulations use the same payload, UAV model, cable properties, controller parameters, and numerical settings to ensure a fair comparison between different architectural configurations. These values are shown in Table \ref{tab:simulation_parameters}. Additionally, the simulation time is equal to 0.002 seconds.
+
+
+The architectural variables investigated in Chapter \ref{chap:results} are the ground-cable routing, ground-anchor placement, and UAV attachment geometry. At the start of the simulation, the payload is on the ground along with the drones, which are resting on its top surface.
+
+\begin{table}
+\centering
+\small
+\renewcommand{\arraystretch}{0.85}
+\begin{tabular}{ll}
+\toprule
+\textbf{Simulation parameter} & \textbf{Value} \\
+\midrule
+\multicolumn{2}{l}{\textbf{Payload and initial conditions}} \\
+\midrule
+Payload mass & $1~\mathrm{kg}$ \\
+Initial payload position & $[0.0,\,0.0,\,0.0]^\top~\mathrm{m}$ \\
+Initial payload orientation & $\mathbb{I}$ \\
+\midrule
+\multicolumn{2}{l}{\textbf{Cable and winch parameters}} \\
+\midrule
+Minimum cable tension $\tau_{\min}$ & $5.5~\mathrm{N}$ \\
+Maximum cable tension $\tau_{\max}$ & $150~\mathrm{N}$ \\
+Maximum winch speed $v_{\mathrm{winch,max}}$ & $1.5~\mathrm{m/s}$ \\
+\midrule
+\multicolumn{2}{l}{\textbf{UAV actuation parameters}} \\
+\midrule
+Maximum rotor velocity $\omega_{\max}$ & $1666~\mathrm{rad/s}$ \\
+Thrust coefficient $k_t$ & $5.5\times10^{-6}$ \\
+Drag coefficient $k_d$ & $3.299\times10^{-7}$ \\
+Minimum thrust $T_{\min}$ & $1.0~\mathrm{N}$ \\
+Maximum thrust $T_{\max}$ & $4k_t\omega_{\max}^2$ \\
+\midrule
+\multicolumn{2}{l}{\textbf{Safety constraints}} \\
+\midrule
+Minimum UAV--UAV distance & $0.4~\mathrm{m}$ \\
+Minimum cable--cable distance & $0.05~\mathrm{m}$ \\
+\midrule
+\multicolumn{2}{l}{\textbf{Evaluation parameters}} \\
+\midrule
+Position tolerance & $0.1~\mathrm{m}$ \\
+Orientation tolerance & $3^\circ$ \\
+\bottomrule
+\end{tabular}
+\caption{Fixed parameters used in the numerical experiments.}
+\label{tab:simulation_parameters}
+\end{table}
+
+\section{Simulation methodology and evaluation framework}
+
+The geometric and static performance indices provided during the model generation stage, describe the instantaneous ability of a given architecture to generate payload wrenches and identify configurations that are close to kinematic singularities. However, these indices are evaluated under static or quasi-static assumptions and therefore cannot fully characterize the behavior of the closed-loop system during motion. In the latter case, cable directions, tensions and payload dynamics continuously evolve. Consequently, a configuration that appears favorable according to static indices may still exhibit oscillations, poor tracking or instability. Closed-loop simulation is therefore necessary to verify whether the theoretical advantages translate into practical performance.
+
+The resulting analysis distinguishes between architectures that are favorable according to the analytical performance indices and those that provide favorable closed-loop behavior in simulation.
+
+
