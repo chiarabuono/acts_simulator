@@ -1,0 +1,200 @@
+================================================================================
+Loading data and parsing MuJoCo instability logs
+================================================================================
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from simulation_run/mujoco_outputs_LINE
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from /home/chiara/ros2_ws/src/acts_simulator/simulation_run/acts
+ -> Processing instability features using precalculated parallel errors table...
+
+================================================================================
+Checking configuration pose pairing
+================================================================================
+
+################################################################################
+# PRIMARY METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 4 primary metrics:
+  pose_reached                   binary      stat= 150.330 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_reached            binary      stat= 150.330 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  cable_rubbed                   binary      stat= 133.312 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  composite_score                continuous  stat=  21.210 raw_p=  0.00074 FDR_p=  0.00074 -> SIGNIFICANT
+
+--- composite_score (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value=  8.6194
+  acts_stewart                                                      value=  5.5706
+  ARROW-RECTANGLE-SAME-LINE                                         value=  5.2339
+  2X3-RECTANGLE-SAME-LINE                                           value=  4.2267
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  3.9568
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  3.7605
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE  (n=60): mean diff = +1.6138 | Wilcoxon p=0.0074 (Holm p=0.0369) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE  (n=60): mean diff = +1.8101 | Wilcoxon p=0.0100 (Holm p=0.0399) -> SIGNIFICANT
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE  (n=60): mean diff = +1.3438 | Wilcoxon p=0.0299 (Holm p=0.0896) -> not significant
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE  (n=60): mean diff = +0.3366 | Wilcoxon p=0.5315 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE  (n=60): mean diff = -3.0488 | Wilcoxon p=0.8252 (Holm p=1.0000) -> not significant
+
+--- pose_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  ARROW-RECTANGLE-SAME-LINE                                         value=  0.1000
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  0.0500
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  0.0333
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value=  0.0167
+  2X3-RECTANGLE-SAME-LINE                                           value=  0.0000
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+--- orientation_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  ARROW-RECTANGLE-SAME-LINE                                         value=  0.1000
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  0.0500
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  0.0333
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value=  0.0167
+  2X3-RECTANGLE-SAME-LINE                                           value=  0.0000
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+--- cable_rubbed (binary) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  1.0000
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value=  1.0000
+  2X3-RECTANGLE-SAME-LINE                                           value=  0.9833
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  0.8333
+  ARROW-RECTANGLE-SAME-LINE                                         value=  0.6000
+  acts_stewart                                                      value=  0.3167
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE: McNemar p=0.0046 (Holm-adjusted p=0.0046) -> SIGNIFICANT
+
+################################################################################
+# DIAGNOSTIC METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 8 diagnostic metrics:
+  position_error                 continuous  stat= 166.505 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  manipulability                 continuous  stat= 138.276 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_error              continuous  stat= 136.933 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  conditioning_index             continuous  stat=  80.400 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  capacity_margin                continuous  stat=  41.943 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  worst_case_capacity_margin     continuous  stat=  41.905 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  radius_available_force         continuous  stat=  13.095 raw_p=  0.02250 FDR_p=  0.02572 -> SIGNIFICANT
+  simulation_unstable            binary      stat=   6.024 raw_p=  0.30393 FDR_p=  0.30393 -> not significant
+
+--- conditioning_index (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value=  0.1280
+  2X3-RECTANGLE-SAME-LINE                                           value=  0.1223
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  0.1130
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  0.1050
+  ARROW-RECTANGLE-SAME-LINE                                         value=  0.0889
+  acts_stewart                                                      value=  0.0533
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE  (n=60): mean diff = -0.0691 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE  (n=60): mean diff = -0.0748 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE  (n=60): mean diff = -0.0356 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE  (n=60): mean diff = -0.0597 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE  (n=60): mean diff = -0.0518 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- manipulability (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value=  1.2408
+  2X3-RECTANGLE-SAME-LINE                                           value=  0.8881
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  0.6833
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  0.6483
+  ARROW-RECTANGLE-SAME-LINE                                         value=  0.3538
+  acts_stewart                                                      value=  0.1054
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE  (n=60): mean diff = -0.7827 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE  (n=60): mean diff = -1.1354 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE  (n=60): mean diff = -0.5429 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE  (n=60): mean diff = -0.5779 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE  (n=60): mean diff = -0.2484 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- radius_available_force (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value= 25.5407
+  2X3-RECTANGLE-SAME-LINE                                           value= 14.0758
+  acts_stewart                                                      value= 11.7301
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value= 11.3189
+  TWO-TRIANGLES-PENTAGON-LINE                                       value= 10.1968
+  ARROW-RECTANGLE-SAME-LINE                                         value=  9.8717
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE  (n=60): mean diff = +1.5333 | Wilcoxon p=0.0262 (Holm p=0.1310) -> not significant
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE  (n=60): mean diff = +1.8583 | Wilcoxon p=0.1313 (Holm p=0.5251) -> not significant
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE  (n=60): mean diff = +0.4112 | Wilcoxon p=0.1619 (Holm p=0.5251) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE  (n=60): mean diff = -13.8106 | Wilcoxon p=0.2448 (Holm p=0.5251) -> not significant
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE  (n=60): mean diff = -2.3457 | Wilcoxon p=0.9238 (Holm p=0.9238) -> not significant
+
+--- capacity_margin (continuous) ---
+  ARROW-RECTANGLE-SAME-LINE                                         value=  2.8460
+  acts_stewart                                                      value=  2.7714
+  TWO-TRIANGLES-PENTAGON-LINE                                       value= -1.6696
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value= -3.4354
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value= -4.2023
+  2X3-RECTANGLE-SAME-LINE                                           value= -5.4921
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE  (n=60): mean diff = +8.2635 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE  (n=60): mean diff = +6.2068 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE  (n=60): mean diff = +6.9737 | Wilcoxon p=0.0002 (Holm p=0.0006) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE  (n=60): mean diff = +4.4410 | Wilcoxon p=0.0003 (Holm p=0.0006) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE  (n=60): mean diff = -0.0746 | Wilcoxon p=0.9004 (Holm p=0.9004) -> not significant
+
+--- worst_case_capacity_margin (continuous) ---
+  acts_stewart                                                      value=  0.7337
+  ARROW-RECTANGLE-SAME-LINE                                         value=  0.5861
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  0.4857
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  0.2509
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value= -0.0719
+  2X3-RECTANGLE-SAME-LINE                                           value= -0.2952
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE  (n=60): mean diff = +0.4828 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE  (n=60): mean diff = +1.0289 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE  (n=60): mean diff = +0.2480 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE  (n=60): mean diff = +0.8056 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE  (n=60): mean diff = +0.1476 | Wilcoxon p=0.0216 (Holm p=0.0216) -> SIGNIFICANT
+
+--- position_error (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value=  3.0277
+  2X3-RECTANGLE-SAME-LINE                                           value=  2.0849
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  2.0287
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  1.9877
+  ARROW-RECTANGLE-SAME-LINE                                         value=  0.5130
+  acts_stewart                                                      value=  0.0592
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE  (n=60): mean diff = -1.9694 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE  (n=60): mean diff = -2.0257 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE  (n=60): mean diff = -2.9685 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE  (n=60): mean diff = -1.9285 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE  (n=60): mean diff = -0.4537 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- orientation_error (continuous) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  1.3895
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value=  1.3840
+  2X3-RECTANGLE-SAME-LINE                                           value=  1.2964
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  0.8962
+  ARROW-RECTANGLE-SAME-LINE                                         value=  0.5029
+  acts_stewart                                                      value=  0.1223
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs 2X3-RECTANGLE-SAME-LINE  (n=60): mean diff = -1.1740 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-LINE  (n=60): mean diff = -1.2672 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-LINE  (n=60): mean diff = -0.7739 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-LINE  (n=60): mean diff = -1.2617 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-LINE  (n=60): mean diff = -0.3806 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- simulation_unstable (binary) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-LINE                                 value=  0.1333
+  2X3-RECTANGLE-SAME-LINE                                           value=  0.0833
+  RECTANGLE-OPPOSITE-2X3-LINE                                       value=  0.0833
+  acts_stewart                                                      value=  0.0833
+  ARROW-RECTANGLE-SAME-LINE                                         value=  0.0333
+  TWO-TRIANGLES-PENTAGON-LINE                                       value=  0.0333
+
+================================================================================
+Report saved to: simulation_run/mujoco_outputs_LINE/statistical_analysis_report.txt
+================================================================================

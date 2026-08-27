@@ -1,0 +1,200 @@
+================================================================================
+Loading data and parsing MuJoCo instability logs
+================================================================================
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from simulation_run/mujoco_outputs_POINT
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from /home/chiara/ros2_ws/src/acts_simulator/simulation_run/acts
+ -> Processing instability features using precalculated parallel errors table...
+
+================================================================================
+Checking configuration pose pairing
+================================================================================
+
+################################################################################
+# PRIMARY METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 4 primary metrics:
+  pose_reached                   binary      stat= 185.498 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_reached            binary      stat= 181.176 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  cable_rubbed                   binary      stat= 119.320 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  composite_score                continuous  stat=  31.019 raw_p=  0.00001 FDR_p=  0.00001 -> SIGNIFICANT
+
+--- composite_score (continuous) ---
+  acts_stewart                                                      value=  5.5706
+  RHOMBUS-EXT-2X3-POINT                                             value=  5.0544
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  5.0534
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  4.4593
+  TWO-TRIANGLES-2X3-POINT                                           value=  2.9828
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  1.7512
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT  (n=60): mean diff = +3.8194 | Wilcoxon p=0.0009 (Holm p=0.0045) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT  (n=60): mean diff = +2.5877 | Wilcoxon p=0.0019 (Holm p=0.0076) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT  (n=60): mean diff = +1.1113 | Wilcoxon p=0.0204 (Holm p=0.0612) -> not significant
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT  (n=60): mean diff = +0.5172 | Wilcoxon p=0.1429 (Holm p=0.2859) -> not significant
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT  (n=60): mean diff = +0.5162 | Wilcoxon p=0.1951 (Holm p=0.2859) -> not significant
+
+--- pose_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  0.0167
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  0.0167
+  RHOMBUS-EXT-2X3-POINT                                             value=  0.0000
+  TWO-TRIANGLES-2X3-POINT                                           value=  0.0000
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  0.0000
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+--- orientation_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  0.0333
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  0.0167
+  RHOMBUS-EXT-2X3-POINT                                             value=  0.0000
+  TWO-TRIANGLES-2X3-POINT                                           value=  0.0000
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  0.0000
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+--- cable_rubbed (binary) ---
+  TWO-TRIANGLES-2X3-POINT                                           value=  1.0000
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  1.0000
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  0.9000
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  0.7833
+  RHOMBUS-EXT-2X3-POINT                                             value=  0.7667
+  acts_stewart                                                      value=  0.3167
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+################################################################################
+# DIAGNOSTIC METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 8 diagnostic metrics:
+  position_error                 continuous  stat= 131.819 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_error              continuous  stat= 129.476 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  manipulability                 continuous  stat= 100.657 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  conditioning_index             continuous  stat=  87.133 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  worst_case_capacity_margin     continuous  stat=  59.914 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  capacity_margin                continuous  stat=  39.295 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  radius_available_force         continuous  stat=  20.238 raw_p=  0.00113 FDR_p=  0.00129 -> SIGNIFICANT
+  simulation_unstable            binary      stat=   7.705 raw_p=  0.17327 FDR_p=  0.17327 -> not significant
+
+--- conditioning_index (continuous) ---
+  RHOMBUS-EXT-2X3-POINT                                             value=  0.1488
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  0.1454
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  0.1279
+  TWO-TRIANGLES-2X3-POINT                                           value=  0.1248
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  0.1054
+  acts_stewart                                                      value=  0.0533
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT  (n=60): mean diff = -0.0922 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT  (n=60): mean diff = -0.0955 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT  (n=60): mean diff = -0.0746 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT  (n=60): mean diff = -0.0715 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT  (n=60): mean diff = -0.0522 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- manipulability (continuous) ---
+  RHOMBUS-EXT-2X3-POINT                                             value=  1.2594
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  1.0357
+  TWO-TRIANGLES-2X3-POINT                                           value=  0.8800
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  0.8235
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  0.5491
+  acts_stewart                                                      value=  0.1054
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT  (n=60): mean diff = -1.1540 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT  (n=60): mean diff = -0.7181 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT  (n=60): mean diff = -0.9303 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT  (n=60): mean diff = -0.7745 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT  (n=60): mean diff = -0.4437 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- radius_available_force (continuous) ---
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value= 13.6485
+  TWO-TRIANGLES-2X3-POINT                                           value= 12.4516
+  acts_stewart                                                      value= 11.7301
+  TWO-TRIANGLES-PENTAGON-POINT                                      value= 11.0253
+  RHOMBUS-EXT-2X3-POINT                                             value=  9.9832
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  9.7853
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT  (n=60): mean diff = +1.9448 | Wilcoxon p=0.0316 (Holm p=0.1579) -> not significant
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT  (n=60): mean diff = +0.7048 | Wilcoxon p=0.0556 (Holm p=0.2225) -> not significant
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT  (n=60): mean diff = -0.7215 | Wilcoxon p=0.0736 (Holm p=0.2225) -> not significant
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT  (n=60): mean diff = +1.7469 | Wilcoxon p=0.1204 (Holm p=0.2407) -> not significant
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT  (n=60): mean diff = -1.9184 | Wilcoxon p=0.1779 (Holm p=0.2407) -> not significant
+
+--- capacity_margin (continuous) ---
+  acts_stewart                                                      value=  2.7714
+  RHOMBUS-EXT-2X3-POINT                                             value= -0.0824
+  TWO-TRIANGLES-PENTAGON-POINT                                      value= -2.6007
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value= -4.0811
+  TWO-TRIANGLES-2X3-POINT                                           value= -9.4867
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value= -9.6731
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT  (n=60): mean diff = +12.4445 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT  (n=60): mean diff = +12.2581 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT  (n=60): mean diff = +6.8525 | Wilcoxon p=0.0008 (Holm p=0.0024) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT  (n=60): mean diff = +5.3721 | Wilcoxon p=0.0023 (Holm p=0.0045) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT  (n=60): mean diff = +2.8538 | Wilcoxon p=0.0142 (Holm p=0.0142) -> SIGNIFICANT
+
+--- worst_case_capacity_margin (continuous) ---
+  acts_stewart                                                      value=  0.7337
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  0.3515
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  0.2692
+  RHOMBUS-EXT-2X3-POINT                                             value=  0.2626
+  TWO-TRIANGLES-2X3-POINT                                           value= -0.9989
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value= -1.9053
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT  (n=60): mean diff = +0.4711 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT  (n=60): mean diff = +1.7326 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT  (n=60): mean diff = +0.3822 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT  (n=60): mean diff = +2.6390 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT  (n=60): mean diff = +0.4645 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- position_error (continuous) ---
+  TWO-TRIANGLES-2X3-POINT                                           value=  2.8918
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  2.8700
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  2.8318
+  RHOMBUS-EXT-2X3-POINT                                             value=  2.6894
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  2.4764
+  acts_stewart                                                      value=  0.0592
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT  (n=60): mean diff = -2.8108 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT  (n=60): mean diff = -2.6302 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT  (n=60): mean diff = -2.8326 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT  (n=60): mean diff = -2.7726 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT  (n=60): mean diff = -2.4172 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- orientation_error (continuous) ---
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  1.4063
+  TWO-TRIANGLES-2X3-POINT                                           value=  1.0663
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  0.9154
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  0.7987
+  RHOMBUS-EXT-2X3-POINT                                             value=  0.6838
+  acts_stewart                                                      value=  0.1223
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-2X3-POINT  (n=60): mean diff = -0.9440 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT  (n=60): mean diff = -1.2839 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-INT-RECTANGLE-SAME-POINT  (n=60): mean diff = -0.6764 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-POINT  (n=60): mean diff = -0.7931 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-POINT  (n=60): mean diff = -0.5614 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- simulation_unstable (binary) ---
+  TWO-TRIANGLES-2X3-POINT                                           value=  0.1167
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-POINT                       value=  0.1000
+  RHOMBUS-EXT-2X3-POINT                                             value=  0.0833
+  acts_stewart                                                      value=  0.0833
+  TWO-TRIANGLES-PENTAGON-POINT                                      value=  0.0500
+  RHOMBUS-INT-RECTANGLE-SAME-POINT                                  value=  0.0000
+
+================================================================================
+Report saved to: simulation_run/mujoco_outputs_POINT/statistical_analysis_report.txt
+================================================================================

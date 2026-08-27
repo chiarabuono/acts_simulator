@@ -1,16 +1,21 @@
+"""
+Runs a MuJoCo batch simulation: for each XML model in a chosen configuration folder, 
+drives the payload rig through every target pose in batch_run.xlsx via geometric control + drone-position optimization,
+logging performance indices and cable-ground rubbing events to Excel.
+
+Adapt MAX_ITERATIONS (convergence budget per pose)
+"""
+
 import os
 import sys
 import glob
-import time
 import numpy as np
 import pandas as pd
 import mujoco
 from time import strftime, localtime
 from scipy.spatial.transform import Rotation as R
 
-# -----------------------------------------------------------------------
-# Path Configurations
-# -----------------------------------------------------------------------
+
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))               
 _SIMULATOR_PKG = os.path.dirname(_SCRIPT_DIR)                          
 _SRC_DIR = os.path.dirname(_SIMULATOR_PKG)                             
@@ -27,58 +32,28 @@ from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, OPTIMIZ
 from acts_simulator.utils_configuration_selection import select_and_load_folder
 from acts_simulator import kr_xy, kp
 
-import os, sys
-
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
 
-# -----------------------------------------------------------------------
-# Configuration Parameters
-# -----------------------------------------------------------------------
 
-# OUTPUT_EXCEL = "simulation_run/results.xlsx"
 
-if len(sys.argv) > 1:
-    # Passed directly via terminal argument (e.g. "mujoco/hand_made/config_set_1")
-    FOLDER_PATH = sys.argv[1]
-    FOLDER_NAME = os.path.basename(os.path.normpath(FOLDER_PATH))
-else:
-    # Interactive GUI fallback if run without arguments
-    FOLDER_NAME, FOLDER_PATH = select_and_load_folder("mujoco")
-
-# MODELS_FOLDER = os.path.abspath(FOLDER_PATH)
+FOLDER_NAME, FOLDER_PATH = select_and_load_folder("mujoco")
 MODELS_FOLDER = os.path.join(_PROJECT_ROOT, FOLDER_PATH)
 POSES_EXCEL = os.path.join(_PROJECT_ROOT, "simulation_run/batch_run.xlsx")
 
-# Create output folder inside simulation_run with the same name as FOLDER_NAME
 OUTPUT_DIR = os.path.join(_PROJECT_ROOT, "simulation_run", FOLDER_NAME)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Update output paths to point inside the new folder
 OUTPUT_EXCEL = os.path.join(OUTPUT_DIR, "results.xlsx")
 RUBBING_LOG_CSV = os.path.join(OUTPUT_DIR, "ground_cable_rubbing_log.csv")
 RUBBING_LOG_EXCEL = os.path.join(OUTPUT_DIR, "ground_cable_rubbing_log.xlsx")
-
 
 MAX_ITERATIONS = 60               
 
-# Create output folder inside simulation_run with the same name as FOLDER_NAME
-OUTPUT_DIR = os.path.join(_PROJECT_ROOT, "simulation_run", FOLDER_NAME)
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-# Update output paths to point inside the new folder
-OUTPUT_EXCEL = os.path.join(OUTPUT_DIR, "results.xlsx")
-RUBBING_LOG_CSV = os.path.join(OUTPUT_DIR, "ground_cable_rubbing_log.csv")
-RUBBING_LOG_EXCEL = os.path.join(OUTPUT_DIR, "ground_cable_rubbing_log.xlsx")
-
-
-# Global container to track rubbing events across all poses
 rubbing_events = []
 
-# -----------------------------------------------------------------------
-# Helper Functions
-# -----------------------------------------------------------------------
+
 def quaternion_multiply(q1, q2):
     w1, x1, y1, z1 = q1
     w2, x2, y2, z2 = q2
@@ -328,10 +303,6 @@ def run_simulation_for_pose(xml_path, pose_row, pose_idx):
 
         step_counter += 1
 
-
-# -----------------------------------------------------------------------
-# Execution Block
-# -----------------------------------------------------------------------
 # -----------------------------------------------------------------------
 # Execution Block
 # -----------------------------------------------------------------------
@@ -355,9 +326,6 @@ if __name__ == "__main__":
             print(f"--> [Pose {idx+1}/{len(poses_df)}] Target: [{pose_row['pos_x']}, {pose_row['pos_y']}, {pose_row['pos_z']}]")
             run_simulation_for_pose(xml_path, pose_row, pose_idx=idx + 1)
 
-    print("\n All batch jobs successfully processed!")
-
-    # Save cable rubbing events into the designated folder
     print("\n All batch jobs successfully processed!")
 
     if rubbing_events:

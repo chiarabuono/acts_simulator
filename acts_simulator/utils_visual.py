@@ -1,3 +1,7 @@
+"""
+Live visualization/tuning tools for interactive runs
+"""
+
 import sys
 import tkinter as tk
 import threading

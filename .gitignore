@@ -1,12 +1,11 @@
 # Ignore specific pycache folder
 acts_simulator/__pycache__/
 
-# Recommended: Ignore all python bytecode globally
 **/__pycache__/
 *.py[cod]
 *$py.class
-*.xml
-*.png
-*.mp4
-*.csv
-*.xlsx
+# *.xml
+# *.png
+# *.mp4
+# *.csv
+# *.xlsx

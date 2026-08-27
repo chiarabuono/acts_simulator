@@ -1,19 +1,23 @@
+"""
+`select_and_load_xml()` browses a folder (default "mujoco") and returns the (filename, file-content) of a chosen .xml model; 
+`select_and_load_folder(target_dir)` browses subfolders of a given parent directory and returns the (name, path) of a chosen one.
+"""
+
 import os
 import glob
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
-def select_and_load_xml():
-    # Keep track of state in a dictionary so inner callback functions can modify them
+def select_and_load_xml(target_dir="mujoco"):
     state = {
-        "target_dir": "mujoco",
+        "target_dir": target_dir,
         "content": None,
         "filename": None
     }
 
     ui = tk.Tk()
     ui.title("Select MuJoCo Configuration Target")
-    ui.geometry("550x400") # Slight boost to width/height to look cleaner with the extra UI elements
+    ui.geometry("550x400")
     
     # --- Top Frame for Controls ---
     top_frame = ttk.Frame(ui)

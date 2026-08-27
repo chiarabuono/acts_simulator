@@ -1,0 +1,139 @@
+<mujoco model="acts">
+    <compiler angle="radian" autolimits="true"/>
+    <option gravity="0 0 -9.81" timestep="0.002"/>
+
+    <visual>
+        <headlight ambient="0.4 0.4 0.4" diffuse="0.8 0.8 0.8"/>
+        <rgba haze="0.15 0.25 0.35 1"/>
+    </visual>
+
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1="0.4 0.6 0.8" rgb2="0.0 0.0 0.0" width="512" height="512"/>
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" rgb2=".2 .3 .4" width="300" height="300"/>
+        <material name="grid_mat" texture="grid" texrepeat="10 10"/>
+        <material name="payload_mat" rgba="0.6 0.4 0.2 1"/>
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 10" dir="0 0 -1"/>
+        <geom name="ground" type="plane" size="10 10 0.1" material="grid_mat" condim="3" friction="1 0.005 0.0001"/>
+        <body name="target_marker" mocap="true" pos="0.0 0 1.0" euler="0 0 0">
+            <site name="target_com" type="sphere" size="0.05" rgba="1 0 0 0.6" group="1"/>
+            <geom type="box" size="1.0 1.0 0.1" rgba="1 0.5 0 0.25" contype="0" conaffinity="0" group="1"/>
+        </body>
+        <body name="payload" pos="0 0 0.11">
+            <freejoint name="payload_joint"/>
+            <inertial pos="0 0 0" mass="1.0" diaginertia="0.3467 0.3467 0.6667"/>
+            <geom name="payload_geom" type="box" size="1.0 1.0 0.1" 
+                material="payload_mat" condim="3" friction="1 0.005 0.0001"
+                rgba="0.6 0.4 0.2 0.35" />
+            <site name="payload_com" pos="0 0 0" size="0.06" rgba="1 0 0 1" type="sphere"/>
+            <site name="hook_4" pos="0.8 0.0 -0.10" size="0.06" rgba="1 0.2 0.2 1"/>
+            <site name="hook_5" pos="-0.8 0.0 -0.10" size="0.06" rgba="1 0.2 0.2 1"/>
+            <site name="hook_6" pos="-0.8 0.0 -0.10" size="0.06" rgba="1 0.2 0.2 1"/>
+            <site name="hook_7" pos="0.0 0.0 -0.10" size="0.06" rgba="1 0.2 0.2 1"/>
+            <site name="hook_8" pos="0.0 0.0 -0.10" size="0.06" rgba="1 0.2 0.2 1"/>
+            <site name="hook_9" pos="0.8 0.0 -0.10" size="0.06" rgba="1 0.2 0.2 1"/>
+       <site name="hook_1" pos="-0.4763 0.275 0.10" size="0.04" rgba="1 1 0 1"/>
+       <site name="hook_2" pos="0.4763 0.275 0.10" size="0.04" rgba="1 1 0 1"/>
+       <site name="hook_3" pos="0.0 -0.55 0.10" size="0.04" rgba="1 1 0 1"/>
+        </body>
+        <body name="drone_1" pos="-0.276 0.475 0.600">
+            <freejoint name="drone_1_joint"/>
+            <inertial pos="0 0 0" mass="2.0" diaginertia="0.01 0.01 0.015"/>
+            <geom name="drone_1_geom" type="cylinder" size="0.15 0.05" rgba="0 0.7 0.9 1" mass="2.0" condim="3" friction="1 0.005 0.0001"/>
+            <site name="drone_1_com" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
+        </body>
+        <body name="drone_2" pos="0.676 0.475 0.600">
+            <freejoint name="drone_2_joint"/>
+            <inertial pos="0 0 0" mass="2.0" diaginertia="0.01 0.01 0.015"/>
+            <geom name="drone_2_geom" type="cylinder" size="0.15 0.05" rgba="0 0.7 0.9 1" mass="2.0" condim="3" friction="1 0.005 0.0001"/>
+            <site name="drone_2_com" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
+        </body>
+        <body name="drone_3" pos="0.200 -0.350 0.600">
+            <freejoint name="drone_3_joint"/>
+            <inertial pos="0 0 0" mass="2.0" diaginertia="0.01 0.01 0.015"/>
+            <geom name="drone_3_geom" type="cylinder" size="0.15 0.05" rgba="0 0.7 0.9 1" mass="2.0" condim="3" friction="1 0.005 0.0001"/>
+            <site name="drone_3_com" pos="0 0 0" size="0.02" rgba="1 1 0 1"/>
+        </body>
+
+        <site name="ground_anchor_4" pos="-0.88 0.16 0.0" size="0.07" rgba="1 0.2 0.2 1"/>
+        <site name="ground_anchor_5" pos="-0.54 -0.87 0.0" size="0.07" rgba="1 0.2 0.2 1"/>
+        <site name="ground_anchor_6" pos="0.55 -0.86 0.0" size="0.07" rgba="1 0.2 0.2 1"/>
+        <site name="ground_anchor_7" pos="0.88 0.17 0.0" size="0.07" rgba="1 0.2 0.2 1"/>
+        <site name="ground_anchor_8" pos="0.0 0.81 0.0" size="0.07" rgba="1 0.2 0.2 1"/>
+        <site name="ground_anchor_9" pos="0.0 0.81 0.0" size="0.07" rgba="1 0.2 0.2 1"/>
+    </worldbody>
+    <tendon>
+        <spatial name="cable_1" limited="true" range="0 1.5" width="0.015" rgba="0 0.8 0 1">
+            <site site="drone_1_com"/>
+            <site site="hook_1"/>
+        </spatial>
+        <spatial name="cable_2" limited="true" range="0 1.5" width="0.015" rgba="0 0.8 0 1">
+            <site site="drone_2_com"/>
+            <site site="hook_2"/>
+        </spatial>
+        <spatial name="cable_3" limited="true" range="0 1.5" width="0.015" rgba="0 0.8 0 1">
+            <site site="drone_3_com"/>
+            <site site="hook_3"/>
+        </spatial>
+
+        <spatial name="cable_4" limited="true" range="0 40.0" width="0.015" rgba="1 0.3 0.3 1">
+            <site site="ground_anchor_4"/>
+            <site site="hook_4"/>
+        </spatial>
+        <spatial name="cable_5" limited="true" range="0 40.0" width="0.015" rgba="1 0.3 0.3 1">
+            <site site="ground_anchor_5"/>
+            <site site="hook_5"/>
+        </spatial>
+        <spatial name="cable_6" limited="true" range="0 40.0" width="0.015" rgba="1 0.3 0.3 1">
+            <site site="ground_anchor_6"/>
+            <site site="hook_6"/>
+        </spatial>
+        <spatial name="cable_7" limited="true" range="0 40.0" width="0.015" rgba="1 0.3 0.3 1">
+            <site site="ground_anchor_7"/>
+            <site site="hook_7"/>
+        </spatial>
+        <spatial name="cable_8" limited="true" range="0 40.0" width="0.015" rgba="1 0.3 0.3 1">
+            <site site="ground_anchor_8"/>
+            <site site="hook_8"/>
+        </spatial>
+        <spatial name="cable_9" limited="true" range="0 40.0" width="0.015" rgba="1 0.3 0.3 1">
+            <site site="ground_anchor_9"/>
+            <site site="hook_9"/>
+        </spatial>
+    </tendon>
+    <actuator>
+      <motor name="drone_1_thrust" site="drone_1_com" gear="0 0 1 0 0 0"/>
+      <motor name="drone_1_roll"   site="drone_1_com" gear="0 0 0 1 0 0"/>
+      <motor name="drone_1_pitch"  site="drone_1_com" gear="0 0 0 0 1 0"/>
+      <motor name="drone_1_yaw"    site="drone_1_com" gear="0 0 0 0 0 1"/>
+      <motor name="drone_2_thrust" site="drone_2_com" gear="0 0 1 0 0 0"/>
+      <motor name="drone_2_roll"   site="drone_2_com" gear="0 0 0 1 0 0"/>
+      <motor name="drone_2_pitch"  site="drone_2_com" gear="0 0 0 0 1 0"/>
+      <motor name="drone_2_yaw"    site="drone_2_com" gear="0 0 0 0 0 1"/>
+      <motor name="drone_3_thrust" site="drone_3_com" gear="0 0 1 0 0 0"/>
+      <motor name="drone_3_roll"   site="drone_3_com" gear="0 0 0 1 0 0"/>
+      <motor name="drone_3_pitch"  site="drone_3_com" gear="0 0 0 0 1 0"/>
+      <motor name="drone_3_yaw"    site="drone_3_com" gear="0 0 0 0 0 1"/>
+
+      <position name="cable_4_winch" tendon="cable_4" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_5_winch" tendon="cable_5" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_6_winch" tendon="cable_6" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_7_winch" tendon="cable_7" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_8_winch" tendon="cable_8" kp="2000" kv="150" ctrlrange="0 40.0"/>
+      <position name="cable_9_winch" tendon="cable_9" kp="2000" kv="150" ctrlrange="0 40.0"/>
+    </actuator>
+    <sensor>
+    <tendonlimitfrc name="cable_1_tension" tendon="cable_1"/>
+    <tendonlimitfrc name="cable_2_tension" tendon="cable_2"/>
+    <tendonlimitfrc name="cable_3_tension" tendon="cable_3"/>
+
+    <tendonlimitfrc name="cable_4_tension" tendon="cable_4"/>
+    <tendonlimitfrc name="cable_5_tension" tendon="cable_5"/>
+    <tendonlimitfrc name="cable_6_tension" tendon="cable_6"/>
+    <tendonlimitfrc name="cable_7_tension" tendon="cable_7"/>
+    <tendonlimitfrc name="cable_8_tension" tendon="cable_8"/>
+    <tendonlimitfrc name="cable_9_tension" tendon="cable_9"/>
+    </sensor>
+</mujoco>

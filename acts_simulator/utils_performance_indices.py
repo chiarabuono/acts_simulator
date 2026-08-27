@@ -1,3 +1,17 @@
+"""
+Cable-driven-parallel-robot performance metrics: computes 
+    available wrench set (AWS), capacity margin, conditioning index, 
+    manipulability, radius of available force/moment, worst-case tension margin, 
+    weighted composite score 
+for a given payload pose/tension allocation; 
+and pose-error/pose-reached checks 
+
+Adapt: 
+    `composite_score`'s weights (w_gamma/w_force/w_moment/w_zeta) and 
+    reference values 
+to reweight the composite metric
+"""
+
 import numpy as np
 from itertools import combinations, product
 from scipy.spatial import ConvexHull
@@ -282,6 +296,7 @@ def append_robot_data(filename, config, pos, quat, indices, pose_params):
         "conditioning_index": indices["conditioning_index"],
         "manipulability": indices["manipulability"],
         "radius_available_force": indices["radius_available_force"],
+        "radius_available_moment": indices["radius_available_moment"],
         "capacity_margin": indices["capacity_margin"],
         "worst_case_capacity_margin": indices["worst_case_capacity_margin"],
         "composite_score": indices["composite_score"],

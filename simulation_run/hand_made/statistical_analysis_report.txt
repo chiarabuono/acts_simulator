@@ -1,0 +1,1262 @@
+================================================================================
+Loading data and parsing MuJoCo instability logs
+================================================================================
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from simulation_run/hand_made
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from /home/chiara/ros2_ws/src/acts_simulator/simulation_run/acts
+ -> Processing instability features using precalculated parallel errors table...
+
+================================================================================
+Checking configuration pose pairing
+================================================================================
+
+################################################################################
+# PRIMARY METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 4 primary metrics:
+  cable_rubbed                   binary      stat=1147.721 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  composite_score                continuous  stat= 958.791 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  pose_reached                   binary      stat= 823.057 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_reached            binary      stat= 820.500 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+
+--- composite_score (continuous) ---
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value= 10.5841
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  9.1356
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  8.5115
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  6.6252
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  6.5651
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  6.4080
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  6.3323
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  6.0694
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  5.8685
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  5.8171
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  5.5806
+  acts_stewart                                                      value=  5.5706
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  5.5498
+  CROSS-HEXAGON-TRIANGLE                                            value=  5.1718
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  4.7719
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  4.7285
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  4.5682
+  LINE-PENTAGON-TRIANGLE                                            value=  4.3748
+  3X2-3X2-TRIANGLE-3                                                value=  4.1774
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  4.1332
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  4.0943
+  CROSS-CROSS-TRIANGLE-2                                            value=  4.0340
+  3X2-2X3-TRIANGLE-2                                                value=  4.0163
+  3X2-2X3-TRIANGLE-3                                                value=  3.8721
+  TRIANGLE-ARROW-TRIANGLE                                           value=  3.8655
+  TRIANGLE-ARROW-DIAGONAL                                           value=  3.3319
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  3.2162
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  3.1370
+  TRIANGLE-LINE-TRIANGLE                                            value=  3.1146
+  TRIANGLE-TRIANGLE-POINT                                           value=  3.0754
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  2.8076
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  2.7008
+  3X2-2X3-TRIANGLE                                                  value=  2.6539
+  3X2-3X2-TRIANGLE-2                                                value=  2.6521
+  LINE-HEXAGON-TRIANGLE                                             value=  2.5417
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  2.4747
+  TRIANGLE-TRIANGLE-LINE                                            value=  2.3591
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  2.1268
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  1.9494
+  LINE-TRIANGLE-TRIANGLE                                            value=  1.8926
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  1.8800
+  HEXAGON-HEXAGON-POINT                                             value=  1.6682
+  LINE-LINE-TRIANGLE                                                value=  1.5408
+  small3X2-2X3-TRIANGLE-3                                           value=  1.4592
+  3X2-3X2-TRIANGLE                                                  value=  1.4403
+  small3X2-2X3-TRIANGLE-2                                           value=  1.3913
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  1.2762
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  1.2031
+  small3X2-2X3-TRIANGLE                                             value=  1.0413
+  LINE-LINE-POINT                                                   value= -3.0137
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs LINE-LINE-POINT  (n=60): mean diff = +8.5842 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE  (n=60): mean diff = +4.5293 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-3  (n=60): mean diff = +4.1114 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-2  (n=60): mean diff = +4.1792 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0  (n=60): mean diff = -5.0136 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE  (n=60): mean diff = +4.1302 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE  (n=60): mean diff = +3.6906 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2  (n=60): mean diff = +2.7630 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE  (n=60): mean diff = +3.6780 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED  (n=60): mean diff = +4.3674 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-HEXAGON-TRIANGLE  (n=60): mean diff = +3.0289 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-TRIANGLE  (n=60): mean diff = +4.0298 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL  (n=60): mean diff = +3.6212 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE-2  (n=60): mean diff = +2.9185 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE  (n=60): mean diff = +2.9167 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2  (n=60): mean diff = +3.4438 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE  (n=60): mean diff = +2.8698 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED  (n=60): mean diff = +4.2943 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE  (n=60): mean diff = +3.2115 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE  (n=60): mean diff = -3.5650 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-POINT  (n=60): mean diff = +3.9023 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE  (n=60): mean diff = +2.4559 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE  (n=60): mean diff = +3.0958 | Wilcoxon p=0.0000 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3  (n=60): mean diff = +2.3543 | Wilcoxon p=0.0000 (Holm p=0.0010) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE  (n=60): mean diff = +2.4336 | Wilcoxon p=0.0000 (Holm p=0.0011) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE-3  (n=60): mean diff = +1.6985 | Wilcoxon p=0.0001 (Holm p=0.0014) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL  (n=60): mean diff = +2.2386 | Wilcoxon p=0.0001 (Holm p=0.0016) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE  (n=60): mean diff = +1.7051 | Wilcoxon p=0.0001 (Holm p=0.0024) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +1.4762 | Wilcoxon p=0.0003 (Holm p=0.0067) -> SIGNIFICANT
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2  (n=60): mean diff = +1.5366 | Wilcoxon p=0.0006 (Holm p=0.0124) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE-2  (n=60): mean diff = +1.5543 | Wilcoxon p=0.0007 (Holm p=0.0135) -> SIGNIFICANT
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE  (n=60): mean diff = -2.9409 | Wilcoxon p=0.0019 (Holm p=0.0349) -> SIGNIFICANT
+  acts_stewart vs LINE-PENTAGON-TRIANGLE  (n=60): mean diff = +1.1958 | Wilcoxon p=0.0019 (Holm p=0.0349) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT  (n=60): mean diff = +2.4952 | Wilcoxon p=0.0025 (Holm p=0.0397) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE-3  (n=60): mean diff = +1.3932 | Wilcoxon p=0.0100 (Holm p=0.1497) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  (n=60): mean diff = -1.0546 | Wilcoxon p=0.0104 (Holm p=0.1497) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = +0.8421 | Wilcoxon p=0.0154 (Holm p=0.2007) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2  (n=60): mean diff = +1.4373 | Wilcoxon p=0.0189 (Holm p=0.2263) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.9945 | Wilcoxon p=0.0366 (Holm p=0.4021) -> not significant
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +1.0024 | Wilcoxon p=0.0494 (Holm p=0.4935) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0  (n=60): mean diff = -0.7617 | Wilcoxon p=0.1827 (Holm p=1.0000) -> not significant
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE  (n=60): mean diff = +0.3987 | Wilcoxon p=0.2002 (Holm p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE  (n=60): mean diff = +0.7986 | Wilcoxon p=0.2330 (Holm p=1.0000) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.2980 | Wilcoxon p=0.3770 (Holm p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -0.0101 | Wilcoxon p=0.6271 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE  (n=60): mean diff = +0.0207 | Wilcoxon p=0.8424 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE  (n=60): mean diff = -0.2466 | Wilcoxon p=0.8946 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2  (n=60): mean diff = -0.8374 | Wilcoxon p=0.9296 (Holm p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.4989 | Wilcoxon p=0.9472 (Holm p=1.0000) -> not significant
+
+--- pose_reached (binary) ---
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  0.8500
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  0.8333
+  3X2-2X3-TRIANGLE-2                                                value=  0.8167
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  0.7833
+  3X2-2X3-TRIANGLE-3                                                value=  0.7667
+  LINE-HEXAGON-TRIANGLE                                             value=  0.7667
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  0.7167
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  0.7167
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  0.7000
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.6833
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  0.6833
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  0.6667
+  3X2-2X3-TRIANGLE                                                  value=  0.6667
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  0.6667
+  TRIANGLE-LINE-TRIANGLE                                            value=  0.6500
+  acts_stewart                                                      value=  0.6500
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  0.6167
+  small3X2-2X3-TRIANGLE-3                                           value=  0.6000
+  3X2-3X2-TRIANGLE                                                  value=  0.5833
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  0.5667
+  small3X2-2X3-TRIANGLE-2                                           value=  0.5667
+  LINE-PENTAGON-TRIANGLE                                            value=  0.5667
+  3X2-3X2-TRIANGLE-2                                                value=  0.5333
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.5333
+  CROSS-HEXAGON-TRIANGLE                                            value=  0.5167
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  0.5167
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  0.5167
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  0.5000
+  TRIANGLE-ARROW-TRIANGLE                                           value=  0.4833
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.4500
+  small3X2-2X3-TRIANGLE                                             value=  0.4500
+  3X2-3X2-TRIANGLE-3                                                value=  0.4167
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  0.4000
+  LINE-LINE-TRIANGLE                                                value=  0.4000
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.3833
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  0.3500
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  0.3333
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.3333
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.3333
+  CROSS-CROSS-TRIANGLE-2                                            value=  0.3167
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  0.2500
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  0.2500
+  TRIANGLE-ARROW-DIAGONAL                                           value=  0.1500
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  0.1167
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  0.1167
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  0.0333
+  TRIANGLE-TRIANGLE-LINE                                            value=  0.0167
+  TRIANGLE-TRIANGLE-POINT                                           value=  0.0000
+  HEXAGON-HEXAGON-POINT                                             value=  0.0000
+  LINE-LINE-POINT                                                   value=  0.0000
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs HEXAGON-HEXAGON-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0003) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0008) -> SIGNIFICANT
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2: McNemar p=0.0005 (Holm-adjusted p=0.0209) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2: McNemar p=0.0005 (Holm-adjusted p=0.0209) -> SIGNIFICANT
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE: McNemar p=0.0009 (Holm-adjusted p=0.0325) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE: McNemar p=0.0014 (Holm-adjusted p=0.0515) -> not significant
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE: McNemar p=0.0019 (Holm-adjusted p=0.0657) -> not significant
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE: McNemar p=0.0025 (Holm-adjusted p=0.0848) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-3: McNemar p=0.0026 (Holm-adjusted p=0.0850) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3: McNemar p=0.0059 (Holm-adjusted p=0.1896) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0: McNemar p=0.0118 (Holm-adjusted p=0.3664) -> not significant
+  acts_stewart vs LINE-LINE-TRIANGLE: McNemar p=0.0135 (Holm-adjusted p=0.4059) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE: McNemar p=0.0227 (Holm-adjusted p=0.6570) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE: McNemar p=0.0309 (Holm-adjusted p=0.8647) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.0347 (Holm-adjusted p=0.9366) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-2: McNemar p=0.0414 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0: McNemar p=0.0428 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3: McNemar p=0.0963 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE: McNemar p=0.1221 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE: McNemar p=0.1338 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE: McNemar p=0.1516 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2: McNemar p=0.1849 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-3: McNemar p=0.1892 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs LINE-HEXAGON-TRIANGLE: McNemar p=0.2100 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE: McNemar p=0.2295 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-2: McNemar p=0.2478 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-2: McNemar p=0.3833 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs LINE-PENTAGON-TRIANGLE: McNemar p=0.4049 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2: McNemar p=0.4244 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE: McNemar p=0.5235 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.5235 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2: McNemar p=0.5413 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE: McNemar p=0.6636 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-3: McNemar p=0.6900 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE: McNemar p=0.8145 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.8388 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE: McNemar p=0.8450 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+
+--- orientation_reached (binary) ---
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  0.8500
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  0.8333
+  3X2-2X3-TRIANGLE-2                                                value=  0.8167
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  0.7833
+  3X2-2X3-TRIANGLE-3                                                value=  0.7667
+  LINE-HEXAGON-TRIANGLE                                             value=  0.7667
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  0.7167
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  0.7167
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  0.7000
+  3X2-2X3-TRIANGLE                                                  value=  0.6833
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.6833
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  0.6833
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  0.6667
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  0.6667
+  TRIANGLE-LINE-TRIANGLE                                            value=  0.6500
+  acts_stewart                                                      value=  0.6500
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  0.6167
+  small3X2-2X3-TRIANGLE-3                                           value=  0.6000
+  3X2-3X2-TRIANGLE                                                  value=  0.5833
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  0.5667
+  small3X2-2X3-TRIANGLE-2                                           value=  0.5667
+  LINE-PENTAGON-TRIANGLE                                            value=  0.5667
+  3X2-3X2-TRIANGLE-2                                                value=  0.5333
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.5333
+  CROSS-HEXAGON-TRIANGLE                                            value=  0.5167
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  0.5167
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  0.5167
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  0.5000
+  TRIANGLE-ARROW-TRIANGLE                                           value=  0.4833
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.4500
+  small3X2-2X3-TRIANGLE                                             value=  0.4500
+  3X2-3X2-TRIANGLE-3                                                value=  0.4167
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  0.4000
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.4000
+  LINE-LINE-TRIANGLE                                                value=  0.4000
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  0.3500
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  0.3500
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.3500
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.3333
+  CROSS-CROSS-TRIANGLE-2                                            value=  0.3167
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  0.2500
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  0.2500
+  TRIANGLE-ARROW-DIAGONAL                                           value=  0.1500
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  0.1167
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  0.1167
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  0.0333
+  TRIANGLE-TRIANGLE-LINE                                            value=  0.0167
+  TRIANGLE-TRIANGLE-POINT                                           value=  0.0000
+  HEXAGON-HEXAGON-POINT                                             value=  0.0000
+  LINE-LINE-POINT                                                   value=  0.0000
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs HEXAGON-HEXAGON-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0003) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0008) -> SIGNIFICANT
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2: McNemar p=0.0005 (Holm-adjusted p=0.0209) -> SIGNIFICANT
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE: McNemar p=0.0009 (Holm-adjusted p=0.0334) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2: McNemar p=0.0009 (Holm-adjusted p=0.0338) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE: McNemar p=0.0014 (Holm-adjusted p=0.0515) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-3: McNemar p=0.0026 (Holm-adjusted p=0.0902) -> not significant
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE: McNemar p=0.0029 (Holm-adjusted p=0.0998) -> not significant
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE: McNemar p=0.0059 (Holm-adjusted p=0.1955) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3: McNemar p=0.0059 (Holm-adjusted p=0.1955) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0: McNemar p=0.0118 (Holm-adjusted p=0.3664) -> not significant
+  acts_stewart vs LINE-LINE-TRIANGLE: McNemar p=0.0135 (Holm-adjusted p=0.4059) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE: McNemar p=0.0227 (Holm-adjusted p=0.6570) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE: McNemar p=0.0309 (Holm-adjusted p=0.8647) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.0347 (Holm-adjusted p=0.9366) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-2: McNemar p=0.0414 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0: McNemar p=0.0428 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3: McNemar p=0.0963 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE: McNemar p=0.1221 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE: McNemar p=0.1338 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE: McNemar p=0.1516 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2: McNemar p=0.1849 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-3: McNemar p=0.1892 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs LINE-HEXAGON-TRIANGLE: McNemar p=0.2100 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE: McNemar p=0.2295 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-2: McNemar p=0.2478 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-2: McNemar p=0.3833 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs LINE-PENTAGON-TRIANGLE: McNemar p=0.4049 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2: McNemar p=0.4244 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE: McNemar p=0.5235 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.5235 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2: McNemar p=0.5413 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE: McNemar p=0.6636 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-3: McNemar p=0.6900 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE: McNemar p=0.8145 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE: McNemar p=0.8318 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.8388 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE: McNemar p=0.8450 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+
+--- cable_rubbed (binary) ---
+  LINE-PENTAGON-TRIANGLE                                            value=  1.0000
+  CROSS-HEXAGON-TRIANGLE                                            value=  1.0000
+  3X2-2X3-TRIANGLE-2                                                value=  1.0000
+  LINE-LINE-TRIANGLE                                                value=  1.0000
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  1.0000
+  LINE-LINE-POINT                                                   value=  1.0000
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  1.0000
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  1.0000
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  1.0000
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  1.0000
+  TRIANGLE-ARROW-DIAGONAL                                           value=  1.0000
+  TRIANGLE-ARROW-TRIANGLE                                           value=  1.0000
+  TRIANGLE-LINE-TRIANGLE                                            value=  1.0000
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  1.0000
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  1.0000
+  3X2-3X2-TRIANGLE                                                  value=  1.0000
+  CROSS-CROSS-TRIANGLE-2                                            value=  1.0000
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  1.0000
+  small3X2-2X3-TRIANGLE-2                                           value=  1.0000
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  1.0000
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  0.9833
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.9833
+  small3X2-2X3-TRIANGLE-3                                           value=  0.9833
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  0.9500
+  HEXAGON-HEXAGON-POINT                                             value=  0.9333
+  3X2-3X2-TRIANGLE-3                                                value=  0.9333
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.9333
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.9000
+  3X2-2X3-TRIANGLE-3                                                value=  0.8833
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  0.8833
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  0.8667
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  0.8500
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.8500
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  0.8500
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  0.8333
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  0.8333
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  0.8333
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  0.8000
+  TRIANGLE-TRIANGLE-LINE                                            value=  0.7833
+  TRIANGLE-TRIANGLE-POINT                                           value=  0.7667
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.6833
+  small3X2-2X3-TRIANGLE                                             value=  0.6333
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.6167
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  0.5500
+  3X2-3X2-TRIANGLE-2                                                value=  0.4000
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  0.4000
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  0.3667
+  acts_stewart                                                      value=  0.3167
+  LINE-HEXAGON-TRIANGLE                                             value=  0.2667
+  3X2-2X3-TRIANGLE                                                  value=  0.2167
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs 3X2-2X3-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-PENTAGON-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-3: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE-3: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE-3: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0001) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE: McNemar p=0.0009 (Holm-adjusted p=0.0070) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE: McNemar p=0.0021 (Holm-adjusted p=0.0147) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2: McNemar p=0.0043 (Holm-adjusted p=0.0261) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE: McNemar p=0.2379 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-2: McNemar p=0.3593 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3: McNemar p=0.3833 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs LINE-HEXAGON-TRIANGLE: McNemar p=0.6476 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.6900 (Holm-adjusted p=1.0000) -> not significant
+
+################################################################################
+# DIAGNOSTIC METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 8 diagnostic metrics:
+  manipulability                 continuous  stat=1779.629 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  conditioning_index             continuous  stat=1318.976 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  capacity_margin                continuous  stat=1007.846 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  position_error                 continuous  stat= 984.135 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  worst_case_capacity_margin     continuous  stat= 921.718 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_error              continuous  stat= 880.087 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  radius_available_force         continuous  stat= 804.861 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  simulation_unstable            binary      stat= 408.292 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+
+--- conditioning_index (continuous) ---
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  0.1226
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  0.1160
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  0.1126
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  0.1096
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  0.1077
+  HEXAGON-HEXAGON-POINT                                             value=  0.0986
+  TRIANGLE-TRIANGLE-POINT                                           value=  0.0827
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  0.0797
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  0.0675
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  0.0655
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  0.0647
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  0.0645
+  TRIANGLE-TRIANGLE-LINE                                            value=  0.0633
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  0.0620
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.0619
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  0.0600
+  3X2-2X3-TRIANGLE-2                                                value=  0.0570
+  TRIANGLE-ARROW-DIAGONAL                                           value=  0.0561
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.0558
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  0.0538
+  acts_stewart                                                      value=  0.0533
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  0.0524
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  0.0515
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  0.0498
+  3X2-2X3-TRIANGLE-3                                                value=  0.0496
+  CROSS-HEXAGON-TRIANGLE                                            value=  0.0496
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  0.0495
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.0482
+  3X2-3X2-TRIANGLE                                                  value=  0.0478
+  TRIANGLE-ARROW-TRIANGLE                                           value=  0.0469
+  3X2-2X3-TRIANGLE                                                  value=  0.0456
+  3X2-3X2-TRIANGLE-3                                                value=  0.0451
+  LINE-PENTAGON-TRIANGLE                                            value=  0.0447
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  0.0447
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  0.0441
+  TRIANGLE-LINE-TRIANGLE                                            value=  0.0421
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  0.0410
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  0.0409
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  0.0405
+  CROSS-CROSS-TRIANGLE-2                                            value=  0.0398
+  3X2-3X2-TRIANGLE-2                                                value=  0.0390
+  LINE-HEXAGON-TRIANGLE                                             value=  0.0376
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.0361
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.0352
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.0316
+  small3X2-2X3-TRIANGLE-3                                           value=  0.0308
+  small3X2-2X3-TRIANGLE                                             value=  0.0308
+  small3X2-2X3-TRIANGLE-2                                           value=  0.0307
+  LINE-LINE-TRIANGLE                                                value=  0.0266
+  LINE-LINE-POINT                                                   value=  0.0129
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs LINE-LINE-POINT  (n=60): mean diff = +0.0404 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE  (n=60): mean diff = -0.0693 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0  (n=60): mean diff = -0.0564 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE  (n=60): mean diff = -0.0544 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE  (n=60): mean diff = -0.0628 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-2  (n=60): mean diff = +0.0226 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-TRIANGLE  (n=60): mean diff = +0.0266 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2  (n=60): mean diff = -0.0593 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-POINT  (n=60): mean diff = -0.0453 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-3  (n=60): mean diff = +0.0225 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0217 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE  (n=60): mean diff = +0.0225 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0172 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2  (n=60): mean diff = -0.0142 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0181 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE-2  (n=60): mean diff = +0.0143 | Wilcoxon p=0.0000 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.0264 | Wilcoxon p=0.0000 (Holm p=0.0004) -> SIGNIFICANT
+  acts_stewart vs LINE-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0156 | Wilcoxon p=0.0000 (Holm p=0.0004) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE  (n=60): mean diff = +0.0127 | Wilcoxon p=0.0001 (Holm p=0.0033) -> SIGNIFICANT
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2  (n=60): mean diff = +0.0135 | Wilcoxon p=0.0001 (Holm p=0.0042) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE  (n=60): mean diff = +0.0112 | Wilcoxon p=0.0003 (Holm p=0.0090) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0124 | Wilcoxon p=0.0005 (Holm p=0.0139) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT  (n=60): mean diff = -0.0294 | Wilcoxon p=0.0005 (Holm p=0.0139) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0123 | Wilcoxon p=0.0009 (Holm p=0.0247) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.0112 | Wilcoxon p=0.0018 (Holm p=0.0461) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  (n=60): mean diff = -0.0114 | Wilcoxon p=0.0019 (Holm p=0.0466) -> SIGNIFICANT
+  acts_stewart vs LINE-PENTAGON-TRIANGLE  (n=60): mean diff = +0.0085 | Wilcoxon p=0.0027 (Holm p=0.0629) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE  (n=60): mean diff = +0.0063 | Wilcoxon p=0.0049 (Holm p=0.1083) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.0122 | Wilcoxon p=0.0054 (Holm p=0.1132) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE  (n=60): mean diff = +0.0077 | Wilcoxon p=0.0058 (Holm p=0.1154) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-3  (n=60): mean diff = +0.0081 | Wilcoxon p=0.0100 (Holm p=0.1896) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3  (n=60): mean diff = -0.0088 | Wilcoxon p=0.0178 (Holm p=0.3198) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2  (n=60): mean diff = +0.0091 | Wilcoxon p=0.0310 (Holm p=0.5272) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL  (n=60): mean diff = +0.0086 | Wilcoxon p=0.0334 (Holm p=0.5341) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE  (n=60): mean diff = -0.0025 | Wilcoxon p=0.0529 (Holm p=0.7928) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2  (n=60): mean diff = +0.0017 | Wilcoxon p=0.1370 (Holm p=1.0000) -> not significant
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0037 | Wilcoxon p=0.1390 (Holm p=1.0000) -> not significant
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0035 | Wilcoxon p=0.1575 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE  (n=60): mean diff = +0.0050 | Wilcoxon p=0.1664 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED  (n=60): mean diff = +0.0009 | Wilcoxon p=0.2028 (Holm p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = +0.0038 | Wilcoxon p=0.2189 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-2  (n=60): mean diff = -0.0037 | Wilcoxon p=0.2632 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-3  (n=60): mean diff = +0.0036 | Wilcoxon p=0.2959 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE  (n=60): mean diff = -0.0101 | Wilcoxon p=0.2959 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE  (n=60): mean diff = +0.0055 | Wilcoxon p=0.3613 (Holm p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -0.0006 | Wilcoxon p=0.5076 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL  (n=60): mean diff = -0.0028 | Wilcoxon p=0.7684 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED  (n=60): mean diff = -0.0068 | Wilcoxon p=0.9179 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0  (n=60): mean diff = -0.0086 | Wilcoxon p=0.9413 (Holm p=1.0000) -> not significant
+
+--- manipulability (continuous) ---
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  1.2692
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  1.0240
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  1.0197
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  1.0037
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  0.4725
+  HEXAGON-HEXAGON-POINT                                             value=  0.4483
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  0.3647
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  0.2891
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  0.2882
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  0.2794
+  TRIANGLE-TRIANGLE-POINT                                           value=  0.2549
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  0.2493
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  0.2312
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.2286
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  0.2193
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.2185
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  0.2166
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  0.1748
+  TRIANGLE-TRIANGLE-LINE                                            value=  0.1704
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  0.1601
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  0.1548
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  0.1512
+  CROSS-HEXAGON-TRIANGLE                                            value=  0.1490
+  3X2-2X3-TRIANGLE-3                                                value=  0.1341
+  3X2-2X3-TRIANGLE-2                                                value=  0.1297
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  0.1290
+  TRIANGLE-ARROW-DIAGONAL                                           value=  0.1280
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  0.1260
+  3X2-3X2-TRIANGLE-2                                                value=  0.1189
+  CROSS-CROSS-TRIANGLE-2                                            value=  0.1092
+  3X2-2X3-TRIANGLE                                                  value=  0.1086
+  acts_stewart                                                      value=  0.1054
+  3X2-3X2-TRIANGLE-3                                                value=  0.1001
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.0854
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  0.0851
+  3X2-3X2-TRIANGLE                                                  value=  0.0849
+  TRIANGLE-ARROW-TRIANGLE                                           value=  0.0844
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  0.0724
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  0.0603
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.0556
+  TRIANGLE-LINE-TRIANGLE                                            value=  0.0496
+  LINE-PENTAGON-TRIANGLE                                            value=  0.0473
+  LINE-HEXAGON-TRIANGLE                                             value=  0.0429
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.0395
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.0353
+  small3X2-2X3-TRIANGLE                                             value=  0.0301
+  LINE-LINE-TRIANGLE                                                value=  0.0194
+  small3X2-2X3-TRIANGLE-3                                           value=  0.0178
+  small3X2-2X3-TRIANGLE-2                                           value=  0.0170
+  LINE-LINE-POINT                                                   value=  0.0115
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE  (n=60): mean diff = -0.9186 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE  (n=60): mean diff = -1.1638 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2  (n=60): mean diff = -0.8982 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE  (n=60): mean diff = -0.9142 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0  (n=60): mean diff = -0.3671 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-TRIANGLE  (n=60): mean diff = +0.0860 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-POINT  (n=60): mean diff = +0.0940 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-3  (n=60): mean diff = +0.0876 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-2  (n=60): mean diff = +0.0885 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.1828 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.2593 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE  (n=60): mean diff = +0.0558 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-PENTAGON-TRIANGLE  (n=60): mean diff = +0.0582 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0701 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  (n=60): mean diff = -0.1139 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0625 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0659 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -0.1439 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.1258 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-POINT  (n=60): mean diff = -0.3428 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3  (n=60): mean diff = -0.1836 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE  (n=60): mean diff = +0.0753 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2  (n=60): mean diff = -0.0458 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0498 | Wilcoxon p=0.0000 (Holm p=0.0003) -> SIGNIFICANT
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -0.0547 | Wilcoxon p=0.0000 (Holm p=0.0005) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT  (n=60): mean diff = -0.1495 | Wilcoxon p=0.0000 (Holm p=0.0008) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE  (n=60): mean diff = -0.0032 | Wilcoxon p=0.0001 (Holm p=0.0013) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0330 | Wilcoxon p=0.0001 (Holm p=0.0024) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE-2  (n=60): mean diff = -0.0134 | Wilcoxon p=0.0005 (Holm p=0.0113) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE  (n=60): mean diff = +0.0211 | Wilcoxon p=0.0009 (Holm p=0.0190) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL  (n=60): mean diff = +0.0451 | Wilcoxon p=0.0015 (Holm p=0.0294) -> SIGNIFICANT
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE  (n=60): mean diff = -0.0436 | Wilcoxon p=0.0030 (Holm p=0.0542) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0  (n=60): mean diff = -0.1131 | Wilcoxon p=0.0102 (Holm p=0.1733) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2  (n=60): mean diff = -0.1740 | Wilcoxon p=0.0148 (Holm p=0.2372) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-2  (n=60): mean diff = -0.0242 | Wilcoxon p=0.0174 (Holm p=0.2612) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-3  (n=60): mean diff = +0.0053 | Wilcoxon p=0.0393 (Holm p=0.5499) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE  (n=60): mean diff = -0.1232 | Wilcoxon p=0.0575 (Holm p=0.7478) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0203 | Wilcoxon p=0.0605 (Holm p=0.7478) -> not significant
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE  (n=60): mean diff = +0.0200 | Wilcoxon p=0.0605 (Holm p=0.7478) -> not significant
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.1112 | Wilcoxon p=0.1204 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED  (n=60): mean diff = -0.0206 | Wilcoxon p=0.1664 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE  (n=60): mean diff = +0.0205 | Wilcoxon p=0.1779 (Holm p=1.0000) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE  (n=60): mean diff = -0.0236 | Wilcoxon p=0.3850 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE  (n=60): mean diff = -0.0650 | Wilcoxon p=0.4013 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED  (n=60): mean diff = -0.0693 | Wilcoxon p=0.4055 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-3  (n=60): mean diff = -0.0287 | Wilcoxon p=0.5559 (Holm p=1.0000) -> not significant
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2  (n=60): mean diff = -0.0038 | Wilcoxon p=0.6323 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL  (n=60): mean diff = -0.0226 | Wilcoxon p=0.7572 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2  (n=60): mean diff = -0.0493 | Wilcoxon p=0.9883 (Holm p=1.0000) -> not significant
+
+--- radius_available_force (continuous) ---
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value= 22.1093
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value= 20.0785
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value= 16.6102
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value= 16.3521
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value= 16.0618
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value= 15.5866
+  TRIANGLE-PENTAGON-TRIANGLE                                        value= 15.2986
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value= 14.9317
+  TRIANGLE-TRIANGLE-POINT                                           value= 14.3340
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value= 13.2259
+  CROSS-HEXAGON-TRIANGLE                                            value= 13.0575
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value= 12.8474
+  PENTAGON-TRIANGLE-TRIANGLE                                        value= 12.2842
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value= 11.9709
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value= 11.9613
+  acts_stewart                                                      value= 11.7301
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value= 11.4471
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value= 11.1391
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value= 10.9053
+  LINE-PENTAGON-TRIANGLE                                            value= 10.4944
+  3X2-3X2-TRIANGLE-3                                                value= 10.1250
+  CROSS-CROSS-TRIANGLE-2                                            value=  9.9558
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  9.4919
+  3X2-2X3-TRIANGLE-3                                                value=  9.0138
+  TRIANGLE-ARROW-TRIANGLE                                           value=  8.6662
+  TRIANGLE-ARROW-DIAGONAL                                           value=  8.5994
+  3X2-2X3-TRIANGLE-2                                                value=  8.1852
+  3X2-3X2-TRIANGLE-2                                                value=  7.7339
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  7.7127
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  7.4499
+  TRIANGLE-TRIANGLE-LINE                                            value=  7.1959
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  6.8199
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  6.4786
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  6.3565
+  TRIANGLE-LINE-TRIANGLE                                            value=  6.2073
+  3X2-2X3-TRIANGLE                                                  value=  5.9188
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  5.7832
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  5.7188
+  LINE-HEXAGON-TRIANGLE                                             value=  5.5478
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  5.5200
+  LINE-TRIANGLE-TRIANGLE                                            value=  4.9349
+  HEXAGON-HEXAGON-POINT                                             value=  4.8964
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  4.5156
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  4.2078
+  LINE-LINE-TRIANGLE                                                value=  4.1410
+  small3X2-2X3-TRIANGLE-3                                           value=  3.6326
+  small3X2-2X3-TRIANGLE-2                                           value=  3.4411
+  3X2-3X2-TRIANGLE                                                  value=  2.8953
+  small3X2-2X3-TRIANGLE                                             value=  2.8206
+  LINE-LINE-POINT                                                   value=  2.0606
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs small3X2-2X3-TRIANGLE  (n=60): mean diff = +8.9095 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-HEXAGON-TRIANGLE  (n=60): mean diff = +6.1823 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-2  (n=60): mean diff = +8.2890 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0  (n=60): mean diff = -8.3484 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2  (n=60): mean diff = +7.5223 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-3  (n=60): mean diff = +8.0975 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE  (n=60): mean diff = +8.8348 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE  (n=60): mean diff = +7.2144 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-POINT  (n=60): mean diff = +9.6694 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-TRIANGLE  (n=60): mean diff = +7.5891 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE  (n=60): mean diff = +6.7952 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE  (n=60): mean diff = +5.8113 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE  (n=60): mean diff = -10.3792 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED  (n=60): mean diff = +5.3736 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL  (n=60): mean diff = +6.2101 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE-2  (n=60): mean diff = +3.9962 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-POINT  (n=60): mean diff = +6.8337 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2  (n=60): mean diff = +5.9469 | Wilcoxon p=0.0000 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE  (n=60): mean diff = +5.5228 | Wilcoxon p=0.0000 (Holm p=0.0003) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE  (n=60): mean diff = +4.5342 | Wilcoxon p=0.0000 (Holm p=0.0003) -> SIGNIFICANT
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE  (n=60): mean diff = +4.9102 | Wilcoxon p=0.0000 (Holm p=0.0005) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED  (n=60): mean diff = +6.0113 | Wilcoxon p=0.0000 (Holm p=0.0005) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0  (n=60): mean diff = -4.8801 | Wilcoxon p=0.0001 (Holm p=0.0037) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE  (n=60): mean diff = +4.0174 | Wilcoxon p=0.0001 (Holm p=0.0039) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE  (n=60): mean diff = +5.2515 | Wilcoxon p=0.0002 (Holm p=0.0041) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  (n=60): mean diff = -3.8565 | Wilcoxon p=0.0005 (Holm p=0.0116) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE-2  (n=60): mean diff = +3.5449 | Wilcoxon p=0.0007 (Holm p=0.0150) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3  (n=60): mean diff = +4.2801 | Wilcoxon p=0.0007 (Holm p=0.0150) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE  (n=60): mean diff = +3.0639 | Wilcoxon p=0.0007 (Holm p=0.0153) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE-3  (n=60): mean diff = +2.7163 | Wilcoxon p=0.0008 (Holm p=0.0158) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE  (n=60): mean diff = -3.5685 | Wilcoxon p=0.0014 (Holm p=0.0259) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL  (n=60): mean diff = +3.1307 | Wilcoxon p=0.0025 (Holm p=0.0458) -> SIGNIFICANT
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -3.2016 | Wilcoxon p=0.0055 (Holm p=0.0937) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +2.2382 | Wilcoxon p=0.0098 (Holm p=0.1563) -> not significant
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE  (n=60): mean diff = -4.6220 | Wilcoxon p=0.0243 (Holm p=0.3642) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2  (n=60): mean diff = -4.3317 | Wilcoxon p=0.0810 (Holm p=1.0000) -> not significant
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2  (n=60): mean diff = +1.7742 | Wilcoxon p=0.0823 (Holm p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = +0.8248 | Wilcoxon p=0.0836 (Holm p=1.0000) -> not significant
+  acts_stewart vs LINE-PENTAGON-TRIANGLE  (n=60): mean diff = +1.2357 | Wilcoxon p=0.1491 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-3  (n=60): mean diff = +1.6051 | Wilcoxon p=0.1686 (Holm p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = +0.2830 | Wilcoxon p=0.1732 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE  (n=60): mean diff = +0.5910 | Wilcoxon p=0.1827 (Holm p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -1.4958 | Wilcoxon p=0.2081 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT  (n=60): mean diff = -2.6039 | Wilcoxon p=0.2273 (Holm p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE  (n=60): mean diff = -0.2408 | Wilcoxon p=0.2792 (Holm p=1.0000) -> not significant
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE  (n=60): mean diff = -1.3275 | Wilcoxon p=0.3652 (Holm p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -1.1174 | Wilcoxon p=0.5559 (Holm p=1.0000) -> not significant
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.5542 | Wilcoxon p=0.8598 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2  (n=60): mean diff = -0.2312 | Wilcoxon p=0.9355 (Holm p=1.0000) -> not significant
+
+--- capacity_margin (continuous) ---
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  6.2758
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  4.3494
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  3.7999
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  3.6195
+  acts_stewart                                                      value=  2.7714
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  2.3856
+  3X2-2X3-TRIANGLE-2                                                value=  2.3210
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  2.3074
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  2.1298
+  TRIANGLE-LINE-TRIANGLE                                            value=  1.9776
+  TRIANGLE-ARROW-TRIANGLE                                           value=  1.9611
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  1.9381
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  1.7215
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  1.5868
+  LINE-PENTAGON-TRIANGLE                                            value=  1.4355
+  LINE-HEXAGON-TRIANGLE                                             value=  1.3133
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  1.2872
+  3X2-2X3-TRIANGLE-3                                                value=  1.2219
+  CROSS-HEXAGON-TRIANGLE                                            value=  1.2056
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  1.1809
+  CROSS-CROSS-TRIANGLE-2                                            value=  1.1573
+  3X2-3X2-TRIANGLE-3                                                value=  1.1101
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.9807
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  0.7642
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  0.7197
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.6844
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.5887
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.4868
+  3X2-3X2-TRIANGLE                                                  value=  0.4866
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.4632
+  3X2-2X3-TRIANGLE                                                  value=  0.4620
+  TRIANGLE-ARROW-DIAGONAL                                           value=  0.3028
+  small3X2-2X3-TRIANGLE-3                                           value=  0.1546
+  small3X2-2X3-TRIANGLE-2                                           value=  0.0614
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.0123
+  TRIANGLE-HEXAGON-TRIANGLE                                         value= -0.0254
+  LINE-LINE-TRIANGLE                                                value= -0.0721
+  PENTAGON-TRIANGLE-TRIANGLE                                        value= -0.1273
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value= -0.1650
+  small3X2-2X3-TRIANGLE                                             value= -0.3446
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value= -0.6309
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value= -0.7416
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value= -0.8424
+  3X2-3X2-TRIANGLE-2                                                value= -1.0918
+  TRIANGLE-TRIANGLE-LINE                                            value= -1.4517
+  HEXAGON-HEXAGON-POINT                                             value= -4.1235
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value= -5.1184
+  TRIANGLE-TRIANGLE-ALIGNED                                         value= -5.4468
+  TRIANGLE-TRIANGLE-POINT                                           value=-10.5709
+  LINE-LINE-POINT                                                   value=-18.5888
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs LINE-LINE-POINT  (n=60): mean diff = +21.3602 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT  (n=60): mean diff = +13.3423 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED  (n=60): mean diff = +7.8898 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE  (n=60): mean diff = +3.1159 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-3  (n=60): mean diff = +2.6168 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED  (n=60): mean diff = +8.2182 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL  (n=60): mean diff = +3.4023 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE-2  (n=60): mean diff = +3.8632 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-2  (n=60): mean diff = +2.7100 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE  (n=60): mean diff = +4.2230 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2  (n=60): mean diff = +3.6138 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE  (n=60): mean diff = +2.3082 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-TRIANGLE  (n=60): mean diff = +2.8435 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2  (n=60): mean diff = +3.5130 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE  (n=60): mean diff = +2.2845 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE  (n=60): mean diff = +2.7591 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0  (n=60): mean diff = -3.5044 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE  (n=60): mean diff = +2.7967 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE  (n=60): mean diff = +2.0072 | Wilcoxon p=0.0000 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +2.8986 | Wilcoxon p=0.0000 (Holm p=0.0003) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE  (n=60): mean diff = +2.3094 | Wilcoxon p=0.0000 (Holm p=0.0010) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE  (n=60): mean diff = +2.2848 | Wilcoxon p=0.0001 (Holm p=0.0040) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL  (n=60): mean diff = +2.4686 | Wilcoxon p=0.0003 (Holm p=0.0088) -> SIGNIFICANT
+  acts_stewart vs LINE-PENTAGON-TRIANGLE  (n=60): mean diff = +1.3359 | Wilcoxon p=0.0007 (Holm p=0.0179) -> SIGNIFICANT
+  acts_stewart vs LINE-HEXAGON-TRIANGLE  (n=60): mean diff = +1.4581 | Wilcoxon p=0.0008 (Holm p=0.0208) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE-3  (n=60): mean diff = +1.6613 | Wilcoxon p=0.0009 (Holm p=0.0228) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE  (n=60): mean diff = +1.7907 | Wilcoxon p=0.0012 (Holm p=0.0269) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3  (n=60): mean diff = +1.4841 | Wilcoxon p=0.0012 (Holm p=0.0269) -> SIGNIFICANT
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2  (n=60): mean diff = +1.6141 | Wilcoxon p=0.0012 (Holm p=0.0269) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE-3  (n=60): mean diff = +1.5495 | Wilcoxon p=0.0015 (Holm p=0.0294) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -1.5780 | Wilcoxon p=0.0015 (Holm p=0.0294) -> SIGNIFICANT
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE  (n=60): mean diff = +1.5658 | Wilcoxon p=0.0016 (Holm p=0.0294) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0  (n=60): mean diff = +2.0870 | Wilcoxon p=0.0033 (Holm p=0.0563) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = +1.5904 | Wilcoxon p=0.0036 (Holm p=0.0582) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE  (n=60): mean diff = +2.1827 | Wilcoxon p=0.0045 (Holm p=0.0673) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +1.0499 | Wilcoxon p=0.0100 (Holm p=0.1397) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-POINT  (n=60): mean diff = +6.8949 | Wilcoxon p=0.0142 (Holm p=0.1850) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -1.0285 | Wilcoxon p=0.0272 (Holm p=0.3265) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2  (n=60): mean diff = +2.9364 | Wilcoxon p=0.0328 (Holm p=0.3605) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE  (n=60): mean diff = +0.8103 | Wilcoxon p=0.0340 (Holm p=0.3605) -> not significant
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE  (n=60): mean diff = +0.7938 | Wilcoxon p=0.0340 (Holm p=0.3605) -> not significant
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE  (n=60): mean diff = -0.8481 | Wilcoxon p=0.0414 (Holm p=0.3605) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = +1.1846 | Wilcoxon p=0.1351 (Holm p=0.9455) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  (n=60): mean diff = +0.4640 | Wilcoxon p=0.1575 (Holm p=0.9455) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = +0.6415 | Wilcoxon p=0.2135 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE  (n=60): mean diff = +2.0517 | Wilcoxon p=0.2162 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-2  (n=60): mean diff = +0.4504 | Wilcoxon p=0.2389 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2  (n=60): mean diff = +0.3858 | Wilcoxon p=0.3652 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE  (n=60): mean diff = +0.8333 | Wilcoxon p=0.4309 (Holm p=1.0000) -> not significant
+
+--- worst_case_capacity_margin (continuous) ---
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  0.7413
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  0.7394
+  acts_stewart                                                      value=  0.7337
+  TRIANGLE-ARROW-TRIANGLE                                           value=  0.7314
+  TRIANGLE-LINE-TRIANGLE                                            value=  0.7309
+  3X2-3X2-TRIANGLE                                                  value=  0.7305
+  3X2-2X3-TRIANGLE-2                                                value=  0.7220
+  LINE-PENTAGON-TRIANGLE                                            value=  0.7216
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.7207
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.7181
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  0.7159
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  0.7154
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  0.7149
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  0.7143
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  0.7134
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  0.7127
+  CROSS-HEXAGON-TRIANGLE                                            value=  0.7125
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  0.7076
+  CROSS-CROSS-TRIANGLE-2                                            value=  0.7071
+  LINE-LINE-TRIANGLE                                                value=  0.7056
+  small3X2-2X3-TRIANGLE-3                                           value=  0.7026
+  small3X2-2X3-TRIANGLE-2                                           value=  0.7011
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.7010
+  LINE-HEXAGON-TRIANGLE                                             value=  0.6997
+  3X2-3X2-TRIANGLE-3                                                value=  0.6997
+  TRIANGLE-ARROW-DIAGONAL                                           value=  0.6924
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.6923
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.6837
+  3X2-2X3-TRIANGLE                                                  value=  0.6805
+  small3X2-2X3-TRIANGLE                                             value=  0.6704
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  0.6610
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  0.6603
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  0.6603
+  3X2-2X3-TRIANGLE-3                                                value=  0.6585
+  3X2-3X2-TRIANGLE-2                                                value=  0.6577
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  0.6561
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  0.6403
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  0.6260
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  0.6166
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  0.5720
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.5672
+  TRIANGLE-TRIANGLE-LINE                                            value=  0.5548
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  0.5500
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  0.5457
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  0.5074
+  HEXAGON-HEXAGON-POINT                                             value=  0.4814
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  0.4710
+  TRIANGLE-TRIANGLE-POINT                                           value=  0.3551
+  LINE-LINE-POINT                                                   value= -0.1142
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value= -2.2669
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED  (n=60): mean diff = +0.2262 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3  (n=60): mean diff = +0.1171 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE  (n=60): mean diff = +3.0006 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-POINT  (n=60): mean diff = +0.8478 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED  (n=60): mean diff = +0.2627 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2  (n=60): mean diff = +0.1616 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE  (n=60): mean diff = +0.1077 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT  (n=60): mean diff = +0.3786 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE  (n=60): mean diff = +0.1789 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE  (n=60): mean diff = +0.0633 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-POINT  (n=60): mean diff = +0.2523 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE  (n=60): mean diff = +0.0532 | Wilcoxon p=0.0000 (Holm p=0.0003) -> SIGNIFICANT
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -0.0076 | Wilcoxon p=0.0000 (Holm p=0.0004) -> SIGNIFICANT
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2  (n=60): mean diff = +0.0266 | Wilcoxon p=0.0001 (Holm p=0.0022) -> SIGNIFICANT
+  acts_stewart vs LINE-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0339 | Wilcoxon p=0.0001 (Holm p=0.0022) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL  (n=60): mean diff = +0.0933 | Wilcoxon p=0.0001 (Holm p=0.0023) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-2  (n=60): mean diff = +0.0325 | Wilcoxon p=0.0001 (Holm p=0.0028) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE-3  (n=60): mean diff = +0.0311 | Wilcoxon p=0.0011 (Holm p=0.0337) -> SIGNIFICANT
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0212 | Wilcoxon p=0.0014 (Holm p=0.0423) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0  (n=60): mean diff = +0.0130 | Wilcoxon p=0.0020 (Holm p=0.0612) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = +0.0188 | Wilcoxon p=0.0060 (Holm p=0.1750) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = +0.0182 | Wilcoxon p=0.0171 (Holm p=0.4780) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  (n=60): mean diff = +0.0194 | Wilcoxon p=0.0252 (Holm p=0.6811) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = +0.0210 | Wilcoxon p=0.0257 (Holm p=0.6811) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE  (n=60): mean diff = +0.0326 | Wilcoxon p=0.0277 (Holm p=0.6932) -> not significant
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0414 | Wilcoxon p=0.0346 (Holm p=0.8309) -> not significant
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0261 | Wilcoxon p=0.0359 (Holm p=0.8309) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-2  (n=60): mean diff = +0.0759 | Wilcoxon p=0.0386 (Holm p=0.8488) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0203 | Wilcoxon p=0.0575 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE  (n=60): mean diff = +0.0028 | Wilcoxon p=0.0748 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0  (n=60): mean diff = -0.0057 | Wilcoxon p=0.0798 (Holm p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = +0.1836 | Wilcoxon p=0.0836 (Holm p=1.0000) -> not significant
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0499 | Wilcoxon p=0.1135 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-3  (n=60): mean diff = +0.0340 | Wilcoxon p=0.1351 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-3  (n=60): mean diff = +0.0752 | Wilcoxon p=0.1450 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE  (n=60): mean diff = +0.0032 | Wilcoxon p=0.1756 (Holm p=1.0000) -> not significant
+  acts_stewart vs LINE-PENTAGON-TRIANGLE  (n=60): mean diff = +0.0121 | Wilcoxon p=0.2002 (Holm p=1.0000) -> not significant
+  acts_stewart vs LINE-LINE-TRIANGLE  (n=60): mean diff = +0.0281 | Wilcoxon p=0.2189 (Holm p=1.0000) -> not significant
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE  (n=60): mean diff = +0.0727 | Wilcoxon p=0.2448 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-2  (n=60): mean diff = +0.0116 | Wilcoxon p=0.2538 (Holm p=1.0000) -> not significant
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = +0.0734 | Wilcoxon p=0.2727 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2  (n=60): mean diff = +0.0178 | Wilcoxon p=0.4223 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL  (n=60): mean diff = +0.0413 | Wilcoxon p=0.4395 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2  (n=60): mean diff = +0.1880 | Wilcoxon p=0.4527 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE  (n=60): mean diff = +0.0156 | Wilcoxon p=0.4706 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE  (n=60): mean diff = +0.0023 | Wilcoxon p=0.4936 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE  (n=60): mean diff = +0.0733 | Wilcoxon p=0.5171 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2  (n=60): mean diff = +0.0776 | Wilcoxon p=0.6012 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE  (n=60): mean diff = +0.1665 | Wilcoxon p=0.7628 (Holm p=1.0000) -> not significant
+
+--- position_error (continuous) ---
+  LINE-LINE-POINT                                                   value=  3.9412
+  TRIANGLE-TRIANGLE-POINT                                           value=  3.6137
+  HEXAGON-HEXAGON-POINT                                             value=  2.6082
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  2.2828
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  1.3402
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  1.3208
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  1.2124
+  TRIANGLE-TRIANGLE-LINE                                            value=  1.1456
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  1.0025
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  0.9418
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  0.8680
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  0.7892
+  3X2-3X2-TRIANGLE-2                                                value=  0.7402
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  0.6882
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  0.6475
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  0.6205
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.6032
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.5903
+  small3X2-2X3-TRIANGLE                                             value=  0.5764
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.4142
+  TRIANGLE-ARROW-DIAGONAL                                           value=  0.4060
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  0.3817
+  3X2-3X2-TRIANGLE                                                  value=  0.3720
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  0.3530
+  3X2-2X3-TRIANGLE                                                  value=  0.3382
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  0.3347
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.3342
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  0.3312
+  3X2-2X3-TRIANGLE-3                                                value=  0.3294
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.3252
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  0.2983
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  0.2825
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  0.2394
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  0.2336
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  0.2225
+  LINE-PENTAGON-TRIANGLE                                            value=  0.2016
+  LINE-HEXAGON-TRIANGLE                                             value=  0.2014
+  small3X2-2X3-TRIANGLE-2                                           value=  0.1853
+  3X2-3X2-TRIANGLE-3                                                value=  0.1812
+  small3X2-2X3-TRIANGLE-3                                           value=  0.1776
+  LINE-LINE-TRIANGLE                                                value=  0.1313
+  CROSS-CROSS-TRIANGLE-2                                            value=  0.1268
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.0891
+  3X2-2X3-TRIANGLE-2                                                value=  0.0833
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  0.0825
+  CROSS-HEXAGON-TRIANGLE                                            value=  0.0802
+  TRIANGLE-ARROW-TRIANGLE                                           value=  0.0710
+  TRIANGLE-LINE-TRIANGLE                                            value=  0.0686
+  acts_stewart                                                      value=  0.0592
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  0.0408
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs HEXAGON-HEXAGON-POINT  (n=60): mean diff = -2.5490 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-POINT  (n=60): mean diff = -3.8819 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT  (n=60): mean diff = -3.5544 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE  (n=60): mean diff = -1.0863 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED  (n=60): mean diff = -2.2236 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL  (n=60): mean diff = -0.3468 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED  (n=60): mean diff = -1.2615 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL  (n=60): mean diff = -0.7300 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.9433 | Wilcoxon p=0.0000 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2  (n=60): mean diff = -0.6290 | Wilcoxon p=0.0000 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3  (n=60): mean diff = -0.2754 | Wilcoxon p=0.0000 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2  (n=60): mean diff = -0.5882 | Wilcoxon p=0.0000 (Holm p=0.0004) -> SIGNIFICANT
+  acts_stewart vs 3X2-3X2-TRIANGLE-2  (n=60): mean diff = -0.6810 | Wilcoxon p=0.0000 (Holm p=0.0006) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE  (n=60): mean diff = -0.1801 | Wilcoxon p=0.0000 (Holm p=0.0006) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2  (n=60): mean diff = -1.2810 | Wilcoxon p=0.0001 (Holm p=0.0027) -> SIGNIFICANT
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.3550 | Wilcoxon p=0.0001 (Holm p=0.0051) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE  (n=60): mean diff = -0.8826 | Wilcoxon p=0.0004 (Holm p=0.0135) -> SIGNIFICANT
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2  (n=60): mean diff = -0.0676 | Wilcoxon p=0.0007 (Holm p=0.0215) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE  (n=60): mean diff = -0.2720 | Wilcoxon p=0.0009 (Holm p=0.0265) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0  (n=60): mean diff = -0.5440 | Wilcoxon p=0.0012 (Holm p=0.0351) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE  (n=60): mean diff = -0.2749 | Wilcoxon p=0.0012 (Holm p=0.0357) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.1632 | Wilcoxon p=0.0016 (Holm p=0.0445) -> SIGNIFICANT
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -0.0233 | Wilcoxon p=0.0026 (Holm p=0.0703) -> not significant
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE  (n=60): mean diff = -0.8088 | Wilcoxon p=0.0035 (Holm p=0.0903) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE  (n=60): mean diff = -0.5171 | Wilcoxon p=0.0035 (Holm p=0.0903) -> not significant
+  acts_stewart vs LINE-LINE-TRIANGLE  (n=60): mean diff = -0.0720 | Wilcoxon p=0.0040 (Holm p=0.0959) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE  (n=60): mean diff = -0.3127 | Wilcoxon p=0.0048 (Holm p=0.1106) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -0.2391 | Wilcoxon p=0.0048 (Holm p=0.1106) -> not significant
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.2660 | Wilcoxon p=0.0054 (Holm p=0.1132) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.2938 | Wilcoxon p=0.0059 (Holm p=0.1180) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE  (n=60): mean diff = -1.1532 | Wilcoxon p=0.0094 (Holm p=0.1778) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-3  (n=60): mean diff = -0.1220 | Wilcoxon p=0.0104 (Holm p=0.1874) -> not significant
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE  (n=60): mean diff = -0.0210 | Wilcoxon p=0.0111 (Holm p=0.1886) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE  (n=60): mean diff = -0.5311 | Wilcoxon p=0.0164 (Holm p=0.2624) -> not significant
+  acts_stewart vs LINE-PENTAGON-TRIANGLE  (n=60): mean diff = -0.1424 | Wilcoxon p=0.0225 (Holm p=0.3373) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2  (n=60): mean diff = -0.1743 | Wilcoxon p=0.0272 (Holm p=0.3810) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.5612 | Wilcoxon p=0.0452 (Holm p=0.5882) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE  (n=60): mean diff = -0.2790 | Wilcoxon p=0.0575 (Holm p=0.6903) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE  (n=60): mean diff = -0.0299 | Wilcoxon p=0.0585 (Holm p=0.6903) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-2  (n=60): mean diff = -0.1261 | Wilcoxon p=0.2217 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-3  (n=60): mean diff = -0.2702 | Wilcoxon p=0.2695 (Holm p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  (n=60): mean diff = -0.3224 | Wilcoxon p=0.3731 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE  (n=60): mean diff = -0.0118 | Wilcoxon p=0.3931 (Holm p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-3  (n=60): mean diff = -0.1184 | Wilcoxon p=0.4055 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0  (n=60): mean diff = +0.0184 | Wilcoxon p=0.4097 (Holm p=1.0000) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.2233 | Wilcoxon p=0.4266 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-2  (n=60): mean diff = -0.0241 | Wilcoxon p=0.4483 (Holm p=1.0000) -> not significant
+  acts_stewart vs LINE-HEXAGON-TRIANGLE  (n=60): mean diff = -0.1422 | Wilcoxon p=0.7293 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE  (n=60): mean diff = -0.0094 | Wilcoxon p=0.7740 (Holm p=1.0000) -> not significant
+
+--- orientation_error (continuous) ---
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  1.0433
+  TRIANGLE-TRIANGLE-POINT                                           value=  0.9662
+  LINE-LINE-POINT                                                   value=  0.9570
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  0.8974
+  TRIANGLE-TRIANGLE-LINE                                            value=  0.7421
+  HEXAGON-HEXAGON-POINT                                             value=  0.7319
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  0.6904
+  TRIANGLE-ARROW-DIAGONAL                                           value=  0.6281
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  0.5914
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  0.4842
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  0.4768
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  0.4193
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.4038
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.3849
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  0.3726
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  0.3611
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  0.3328
+  small3X2-2X3-TRIANGLE                                             value=  0.3226
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.3041
+  3X2-3X2-TRIANGLE-2                                                value=  0.3015
+  CROSS-CROSS-TRIANGLE-2                                            value=  0.2911
+  3X2-3X2-TRIANGLE                                                  value=  0.2911
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  0.2801
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.2795
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  0.2773
+  small3X2-2X3-TRIANGLE-3                                           value=  0.2711
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  0.2703
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  0.2701
+  3X2-3X2-TRIANGLE-3                                                value=  0.2557
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  0.2537
+  LINE-PENTAGON-TRIANGLE                                            value=  0.2455
+  small3X2-2X3-TRIANGLE-2                                           value=  0.2450
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.2390
+  LINE-LINE-TRIANGLE                                                value=  0.2197
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  0.2142
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  0.2000
+  CROSS-HEXAGON-TRIANGLE                                            value=  0.1841
+  TRIANGLE-ARROW-TRIANGLE                                           value=  0.1800
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.1642
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  0.1563
+  3X2-2X3-TRIANGLE-3                                                value=  0.1424
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  0.1350
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  0.1323
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  0.1286
+  LINE-HEXAGON-TRIANGLE                                             value=  0.1231
+  acts_stewart                                                      value=  0.1223
+  3X2-2X3-TRIANGLE                                                  value=  0.1181
+  TRIANGLE-LINE-TRIANGLE                                            value=  0.0967
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  0.0793
+  3X2-2X3-TRIANGLE-2                                                value=  0.0414
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs HEXAGON-HEXAGON-POINT  (n=60): mean diff = -0.6095 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT  (n=60): mean diff = -0.8438 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE  (n=60): mean diff = -0.6198 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-POINT  (n=60): mean diff = -0.8347 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED  (n=60): mean diff = -0.9209 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED  (n=60): mean diff = -0.7751 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL  (n=60): mean diff = -0.5057 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL  (n=60): mean diff = -0.5680 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2  (n=60): mean diff = -0.3544 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.4691 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2  (n=60): mean diff = -0.3619 | Wilcoxon p=0.0000 (Holm p=0.0009) -> SIGNIFICANT
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE  (n=60): mean diff = -0.2814 | Wilcoxon p=0.0001 (Holm p=0.0024) -> SIGNIFICANT
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.2625 | Wilcoxon p=0.0002 (Holm p=0.0077) -> SIGNIFICANT
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.1571 | Wilcoxon p=0.0007 (Holm p=0.0248) -> SIGNIFICANT
+  acts_stewart vs small3X2-2X3-TRIANGLE  (n=60): mean diff = -0.2003 | Wilcoxon p=0.0034 (Holm p=0.1187) -> not significant
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2  (n=60): mean diff = -0.1688 | Wilcoxon p=0.0050 (Holm p=0.1712) -> not significant
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE  (n=60): mean diff = -0.1479 | Wilcoxon p=0.0055 (Holm p=0.1820) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3  (n=60): mean diff = -0.2388 | Wilcoxon p=0.0056 (Holm p=0.1820) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-2  (n=60): mean diff = -0.1792 | Wilcoxon p=0.0077 (Holm p=0.2387) -> not significant
+  acts_stewart vs LINE-LINE-TRIANGLE  (n=60): mean diff = -0.0973 | Wilcoxon p=0.0077 (Holm p=0.2387) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0  (n=60): mean diff = -0.1818 | Wilcoxon p=0.0100 (Holm p=0.2894) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-3  (n=60): mean diff = -0.1334 | Wilcoxon p=0.0161 (Holm p=0.4501) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE  (n=60): mean diff = -0.1549 | Wilcoxon p=0.0161 (Holm p=0.4501) -> not significant
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE  (n=60): mean diff = -0.2503 | Wilcoxon p=0.0164 (Holm p=0.4501) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2  (n=60): mean diff = -0.2970 | Wilcoxon p=0.0212 (Holm p=0.5303) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-2  (n=60): mean diff = +0.0809 | Wilcoxon p=0.0267 (Holm p=0.6409) -> not significant
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE  (n=60): mean diff = -0.0617 | Wilcoxon p=0.0359 (Holm p=0.8257) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE  (n=60): mean diff = -0.0777 | Wilcoxon p=0.0366 (Holm p=0.8257) -> not significant
+  acts_stewart vs LINE-PENTAGON-TRIANGLE  (n=60): mean diff = -0.1232 | Wilcoxon p=0.0850 (Holm p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-2  (n=60): mean diff = -0.1227 | Wilcoxon p=0.0976 (Holm p=1.0000) -> not significant
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE  (n=60): mean diff = -0.2104 | Wilcoxon p=0.1007 (Holm p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -0.0100 | Wilcoxon p=0.1450 (Holm p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.1478 | Wilcoxon p=0.1511 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE  (n=60): mean diff = -0.0577 | Wilcoxon p=0.1926 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE  (n=60): mean diff = -0.1687 | Wilcoxon p=0.2302 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0  (n=60): mean diff = +0.0430 | Wilcoxon p=0.2389 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2  (n=60): mean diff = -0.0918 | Wilcoxon p=0.2727 (Holm p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE  (n=60): mean diff = +0.0257 | Wilcoxon p=0.2825 (Holm p=1.0000) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.1313 | Wilcoxon p=0.4055 (Holm p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE  (n=60): mean diff = -0.1167 | Wilcoxon p=0.4395 (Holm p=1.0000) -> not significant
+  acts_stewart vs LINE-HEXAGON-TRIANGLE  (n=60): mean diff = -0.0008 | Wilcoxon p=0.4616 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-3  (n=60): mean diff = -0.0200 | Wilcoxon p=0.4889 (Holm p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE  (n=60): mean diff = +0.0042 | Wilcoxon p=0.5510 (Holm p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  (n=60): mean diff = -0.0339 | Wilcoxon p=0.5758 (Holm p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-3  (n=60): mean diff = -0.1488 | Wilcoxon p=0.6115 (Holm p=1.0000) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE  (n=60): mean diff = -0.0126 | Wilcoxon p=0.6323 (Holm p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE  (n=60): mean diff = -0.0419 | Wilcoxon p=0.6587 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE  (n=60): mean diff = -0.1577 | Wilcoxon p=0.7128 (Holm p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  (n=60): mean diff = -0.0063 | Wilcoxon p=0.8829 (Holm p=1.0000) -> not significant
+
+--- simulation_unstable (binary) ---
+  CROSS-CROSS-TRIANGLE-2                                            value=  0.5333
+  LINE-LINE-POINT                                                   value=  0.5167
+  HEXAGON-HEXAGON-POINT                                             value=  0.5167
+  2X3-RECTANGLE-SAME-TRIANGLE                                       value=  0.4833
+  3X2-2X3-TRIANGLE-2                                                value=  0.3667
+  CROSS-HEXAGON-TRIANGLE                                            value=  0.3333
+  DIAGONAL-TRIANGLE-TRIANGLE                                        value=  0.3167
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2  value=  0.3167
+  3X2-2X3-TRIANGLE-3                                                value=  0.3000
+  3X2-3X2-TRIANGLE                                                  value=  0.2667
+  3X2-3X2-TRIANGLE-2                                                value=  0.2667
+  3X2-3X2-TRIANGLE-3                                                value=  0.2667
+  HEXAGON-HEXAGON-TRIANGLE-2                                        value=  0.2667
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE            value=  0.2667
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE    value=  0.2500
+  RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE                        value=  0.2500
+  CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2          value=  0.2333
+  HEXAGON-TRIANGLE-TRIANGLE                                         value=  0.2000
+  HEXAGON-TRIANGLE-TRIANGLE-large-2_0                               value=  0.1833
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-2                                 value=  0.1667
+  TRIANGLE-TRIANGLE-ALIGNED                                         value=  0.1667
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE                                   value=  0.1667
+  HEXAGON-TRIANGLE-TRIANGLE-2                                       value=  0.1667
+  PENTAGON-TRIANGLE-TRIANGLE                                        value=  0.1500
+  HEXAGON-HEXAGON-TRIANGLE-large-2_0                                value=  0.1333
+  TRIANGLE-ARROW-DIAGONAL                                           value=  0.1333
+  LINE-PENTAGON-TRIANGLE                                            value=  0.1167
+  LINE-TRIANGLE-TRIANGLE                                            value=  0.0833
+  3X2-2X3-TRIANGLE                                                  value=  0.0833
+  small3X2-2X3-TRIANGLE                                             value=  0.0833
+  small3X2-2X3-TRIANGLE-3                                           value=  0.0833
+  TRIANGLE-LINE-TRIANGLE                                            value=  0.0833
+  acts_stewart                                                      value=  0.0833
+  LINE-LINE-TRIANGLE                                                value=  0.0833
+  PYRAMID-PYRAMID-TRIANGLE-3                                        value=  0.0833
+  TRIANGLE-TRIANGLE-LINE                                            value=  0.0667
+  small3X2-2X3-TRIANGLE-2                                           value=  0.0667
+  HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3  value=  0.0667
+  HEXAGON-HEXAGON-TRIANGLE                                          value=  0.0667
+  TRIANGLE-TRIANGLE-DISALIGNED                                      value=  0.0667
+  TRIANGLE-PENTAGON-TRIANGLE                                        value=  0.0500
+  TRIANGLE-ARROW-TRIANGLE                                           value=  0.0500
+  PYRAMID-PYRAMID-TRIANGLE-2                                        value=  0.0500
+  PYRAMID-PYRAMID-TRIANGLE                                          value=  0.0500
+  LINE-HEXAGON-TRIANGLE                                             value=  0.0333
+  TRIANGLE-TRIANGLE-DIAGONAL                                        value=  0.0333
+  TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE                              value=  0.0333
+  TRIANGLE-HEXAGON-TRIANGLE                                         value=  0.0333
+  TRIANGLE-TRIANGLE-POINT                                           value=  0.0333
+  VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE          value=  0.0000
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs CROSS-CROSS-TRIANGLE-2: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs HEXAGON-HEXAGON-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs LINE-LINE-POINT: McNemar p=0.0000 (Holm-adjusted p=0.0001) -> SIGNIFICANT
+  acts_stewart vs 2X3-RECTANGLE-SAME-TRIANGLE: McNemar p=0.0000 (Holm-adjusted p=0.0004) -> SIGNIFICANT
+  acts_stewart vs 3X2-2X3-TRIANGLE-2: McNemar p=0.0005 (Holm-adjusted p=0.0220) -> SIGNIFICANT
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-2: McNemar p=0.0013 (Holm-adjusted p=0.0577) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE-3: McNemar p=0.0023 (Holm-adjusted p=0.1010) -> not significant
+  acts_stewart vs CROSS-HEXAGON-TRIANGLE: McNemar p=0.0026 (Holm-adjusted p=0.1092) -> not significant
+  acts_stewart vs DIAGONAL-TRIANGLE-TRIANGLE: McNemar p=0.0066 (Holm-adjusted p=0.2710) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-2: McNemar p=0.0074 (Holm-adjusted p=0.2954) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE: McNemar p=0.0127 (Holm-adjusted p=0.4963) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.0127 (Holm-adjusted p=0.4963) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.0129 (Holm-adjusted p=0.4963) -> not significant
+  acts_stewart vs RECTANGLE-SAME-RECTANGLE-OPPOSITE-TRIANGLE: McNemar p=0.0129 (Holm-adjusted p=0.4963) -> not significant
+  acts_stewart vs 3X2-3X2-TRIANGLE-3: McNemar p=0.0192 (Holm-adjusted p=0.6724) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-2: McNemar p=0.0192 (Holm-adjusted p=0.6724) -> not significant
+  acts_stewart vs CENTRAL-PARALLELEPIPED-CENTRAL-PARALLELEPIPED-TRIANGLE-2: McNemar p=0.0490 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs VERTICAL-PARALLELEPIPED-VERTICAL-PARALLELEPIPED-TRIANGLE: McNemar p=0.0625 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE: McNemar p=0.0923 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-large-2_0: McNemar p=0.2101 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-ALIGNED: McNemar p=0.2266 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-TRIANGLE-TRIANGLE-2: McNemar p=0.2668 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-2: McNemar p=0.2668 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE: McNemar p=0.3018 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-HEXAGON-TRIANGLE: McNemar p=0.3750 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs PENTAGON-TRIANGLE-TRIANGLE: McNemar p=0.3877 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs LINE-HEXAGON-TRIANGLE: McNemar p=0.4531 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-TWO-TRIANGLES-TRIANGLE: McNemar p=0.4531 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-POINT: McNemar p=0.4531 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-DIAGONAL: McNemar p=0.4531 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE-large-2_0: McNemar p=0.5811 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-DIAGONAL: McNemar p=0.5811 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-PENTAGON-TRIANGLE: McNemar p=0.6875 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-2: McNemar p=0.7266 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE: McNemar p=0.7266 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-ARROW-TRIANGLE: McNemar p=0.7266 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs LINE-PENTAGON-TRIANGLE: McNemar p=0.7539 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs 3X2-2X3-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HEXAGON-HEXAGON-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs HORIZZONTAL-PARALLELEPIPED-HORIZZONTAL-PARALLELEPIPED-TRIANGLE-3: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs LINE-LINE-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs LINE-TRIANGLE-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs PYRAMID-PYRAMID-TRIANGLE-3: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-LINE-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-DISALIGNED: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TRIANGLE-TRIANGLE-LINE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-3: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs small3X2-2X3-TRIANGLE-2: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+
+================================================================================
+Report saved to: simulation_run/hand_made/statistical_analysis_report.txt
+================================================================================

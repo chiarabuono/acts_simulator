@@ -1,3 +1,14 @@
+"""
+Interactive Tkinter tool for building a node-layout database: 
+for each named layout template (line, triangle, rhombus, etc., cropped from a reference image per MODE), 
+lets you enter node count, local (x,y,z) coordinates and max-cable-capacity per node, 
+drag labels onto the reference image to visually confirm placement, auto-detects X/Y symmetry, 
+and exports everything to a JSON database.
+
+Adapt: 
+    MODE ("uav" or "ugv")
+    GRID_MAPPING from the tool `tool_crop_finder.py` if the base configurations change
+"""
 import os
 import json
 import tkinter as tk
@@ -8,7 +19,7 @@ MODE = "uav" # or ugv
 
 class AnnotatedDatabaseBuilder:
     def __init__(self, mode, root, img_path, GRID_MAPPING, json_path):
-        self.mode = MODE
+        self.mode = mode
         self.root = root
         self.root.title("Robotic Topology & Visual Layout Mapping Tool")
         self.root.geometry("1100x750")

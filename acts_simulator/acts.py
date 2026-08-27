@@ -206,16 +206,6 @@ with mujoco.viewer.launch_passive(model, data, key_callback=key_callback) as vie
                 pose_params = pose_reached(p_payload, R_mat_payload, p_star, R_star)
                 append_robot_data("collected_data/indices.xlsx", FILENAME, p_star, q_star, indices, pose_params)
 
-                print("p_drone_targets:", p_drone_targets)
-                print("optimal_tensions (UAV):", optimal_tensions)
-                print("tau_ground (measured):", tau_ground_actual)
-
-                print("W_p_generated:", Jp @ tau)   # tau = [*optimal_tensions, *tau_ground_actual]
-                print("W_p_star:", W_p_star)
-
-                print(f"{drone1.data.ctrl[drone1.thrust_id]=}")
-                print(f"{drone2.data.ctrl[drone2.thrust_id]=}")
-                print(f"{drone3.data.ctrl[drone3.thrust_id]=}")
             iteration += 1
 
         if step_counter % CHECK_RUB_FREQUENCY == 0:

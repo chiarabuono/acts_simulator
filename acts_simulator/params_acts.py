@@ -1,8 +1,19 @@
+"""
+Selects one MuJoCo model config, compiles it, extracts payload/drone/cable parameters, 
+and defines the single target pose (position + quaternion) plus helper functions to read/set it — intended to 
+be imported by a run/render script rather than executed standalone.
+
+Adapt: 
+    Target pose in `ctrl_params` (px, py, pz, quat_w/x/y/z), 
+    RENDER_EVERY_N_STEPS
+"""
+
 import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 from acts_simulator.utils_control import ACTScontrolDrone
 from acts_simulator.utils_configuration_selection import select_and_load_xml
+from acts_simulator import MODE, ITERATION_COLLECTION
 
 import os, sys
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,6 +35,8 @@ data = mujoco.MjData(model)
 # ------ Payload ------------------------------------------------------------
 PAYLOAD_MASS = model.body("payload").mass[0]
 payload_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "payload")
+i_xx, i_yy, i_zz = model.body_inertia[payload_id]
+inertia_ratio = i_zz / i_xx
 
 # ------ Drones  ------------------------------------------------------------
 drone1 = ACTScontrolDrone(model, drone_name="drone_1", payload_mass=PAYLOAD_MASS)
@@ -50,14 +63,7 @@ P_GROUND_ANCHORS = [model.site_pos[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_
 GROUND_ANCHOR_IDS = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, f"ground_anchor_{i}") for i in range(4, 10)]
 
 # ------ Optimization parameters  ------------------------------------------------------------
-RENDER_EVERY_N_STEPS = 50
-ITERATION_COLLECTION = 50  # Iteration at which indices are collected
-
-payload_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "payload")
-i_xx, i_yy, i_zz = model.body_inertia[payload_id]
-
-# 3. Calculate gains using extracted values
-inertia_ratio = i_zz / i_xx
+RENDER_EVERY_N_STEPS = 50  # Iteration at which the indices graphs are updated
 
 kr_z = kr_xy * inertia_ratio
 ctrl_params = {
@@ -69,7 +75,6 @@ ctrl_params = {
     'quat_w': 1.0, 'quat_x': 0.0, 'quat_y': 0.0, 'quat_z': 0.0
 }
 
-from acts_simulator import MODE
 VIDEONAME = f"{FILENAME}_{MODE}_{ctrl_params['px']}-{ctrl_params['py']}-{ctrl_params['pz']}_{ctrl_params['quat_w']}-{ctrl_params['quat_x']}-{ctrl_params['quat_y']}-{ctrl_params['quat_z']}.mp4"
 GRAPHNAME = f"{FILENAME}_{MODE}_{ctrl_params['px']}-{ctrl_params['py']}-{ctrl_params['pz']}_{ctrl_params['quat_w']}-{ctrl_params['quat_x']}-{ctrl_params['quat_y']}-{ctrl_params['quat_z']}"
 
@@ -82,7 +87,6 @@ def read_desired_pose():
     R_star = R.from_quat(q_scipy_format).as_matrix()
 
     return p_star, q_star, R_star
-
 
 # ------ Set desired pose  ------------------------------------------------------------
 def set_desired_pose(p_star, q_star):

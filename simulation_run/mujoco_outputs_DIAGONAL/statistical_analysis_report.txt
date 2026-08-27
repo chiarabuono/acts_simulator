@@ -1,0 +1,157 @@
+================================================================================
+Loading data and parsing MuJoCo instability logs
+================================================================================
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from simulation_run/mujoco_outputs_DIAGONAL
+[INFO] 'parallel_matched_errors.xlsx' not found in /home/chiara/ros2_ws/src/acts_simulator/simulation_run/acts. Skipping precalculated match.
+ -> Processing instability features using precalculated parallel errors table...
+
+================================================================================
+Checking configuration pose pairing
+================================================================================
+
+################################################################################
+# PRIMARY METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 4 primary metrics:
+  cable_rubbed                   binary      stat=  49.458 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_reached            binary      stat=   8.000 raw_p=  0.09158 FDR_p=  0.18316 -> not significant
+  pose_reached                   binary      stat=   6.876 raw_p=  0.14257 FDR_p=  0.19009 -> not significant
+  composite_score                continuous  stat=   4.813 raw_p=  0.30699 FDR_p=  0.30699 -> not significant
+
+--- composite_score (continuous) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  5.8950
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  5.0529
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  4.5522
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  4.2652
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  3.6751
+
+--- pose_reached (binary) ---
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  0.3000
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  0.2833
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  0.2000
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  0.1833
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  0.1500
+
+--- orientation_reached (binary) ---
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  0.3167
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  0.2833
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  0.2000
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  0.1833
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  0.1500
+
+--- cable_rubbed (binary) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  1.0000
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  0.8167
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  0.7667
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  0.6167
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  0.5000
+  Pairwise tests vs reference = 'TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL':
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-EXT-2X3-DIAGONAL: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs PENTAGON-RECTANGLE-SAME-DIAGONAL: McNemar p=0.0001 (Holm-adjusted p=0.0002) -> SIGNIFICANT
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-PENTAGON-DIAGONAL: McNemar p=0.0010 (Holm-adjusted p=0.0010) -> SIGNIFICANT
+
+################################################################################
+# DIAGNOSTIC METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 8 diagnostic metrics:
+  manipulability                 continuous  stat=  72.173 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  conditioning_index             continuous  stat=  23.587 raw_p=  0.00010 FDR_p=  0.00039 -> SIGNIFICANT
+  orientation_error              continuous  stat=  19.280 raw_p=  0.00069 FDR_p=  0.00185 -> SIGNIFICANT
+  worst_case_capacity_margin     continuous  stat=  15.093 raw_p=  0.00451 FDR_p=  0.00902 -> SIGNIFICANT
+  simulation_unstable            binary      stat=  13.000 raw_p=  0.01128 FDR_p=  0.01804 -> SIGNIFICANT
+  position_error                 continuous  stat=  12.467 raw_p=  0.01420 FDR_p=  0.01893 -> SIGNIFICANT
+  radius_available_force         continuous  stat=   5.933 raw_p=  0.20418 FDR_p=  0.23335 -> not significant
+  capacity_margin                continuous  stat=   5.413 raw_p=  0.24745 FDR_p=  0.24745 -> not significant
+
+--- conditioning_index (continuous) ---
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  0.1041
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  0.1031
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  0.1017
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  0.0874
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  0.0822
+  Pairwise tests vs reference = 'PENTAGON-RECTANGLE-SAME-DIAGONAL':
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-EXT-2X3-DIAGONAL  (n=60): mean diff = +0.0219 | Wilcoxon p=0.0104 (Holm p=0.0416) -> SIGNIFICANT
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.0167 | Wilcoxon p=0.1450 (Holm p=0.4349) -> not significant
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.0024 | Wilcoxon p=0.4138 (Holm p=0.8277) -> not significant
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-PENTAGON-DIAGONAL  (n=60): mean diff = +0.0010 | Wilcoxon p=0.8309 (Holm p=0.8309) -> not significant
+
+--- manipulability (continuous) ---
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  0.7107
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  0.5257
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  0.5136
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  0.3473
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  0.2362
+  Pairwise tests vs reference = 'PENTAGON-RECTANGLE-SAME-DIAGONAL':
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-EXT-2X3-DIAGONAL  (n=60): mean diff = +0.4744 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.3633 | Wilcoxon p=0.0001 (Holm p=0.0002) -> SIGNIFICANT
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-PENTAGON-DIAGONAL  (n=60): mean diff = +0.1850 | Wilcoxon p=0.0437 (Holm p=0.0874) -> not significant
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.1971 | Wilcoxon p=0.4395 (Holm p=0.4395) -> not significant
+
+--- radius_available_force (continuous) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value= 12.4682
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  9.7685
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  9.0086
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  7.1658
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  6.7424
+
+--- capacity_margin (continuous) ---
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  2.9175
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  1.6229
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  1.4127
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  1.2228
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  0.8568
+
+--- worst_case_capacity_margin (continuous) ---
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  0.6701
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  0.6638
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  0.6000
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  0.5915
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  0.5329
+  Pairwise tests vs reference = 'RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL':
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL vs PENTAGON-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.1372 | Wilcoxon p=0.0340 (Holm p=0.1360) -> not significant
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-PENTAGON-DIAGONAL  (n=60): mean diff = +0.0786 | Wilcoxon p=0.0407 (Holm p=0.1360) -> not significant
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-EXT-2X3-DIAGONAL  (n=60): mean diff = +0.0063 | Wilcoxon p=0.2359 (Holm p=0.4719) -> not significant
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.0700 | Wilcoxon p=0.6167 (Holm p=0.6167) -> not significant
+
+--- position_error (continuous) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  1.3362
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  1.2651
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  1.2065
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  0.6038
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  0.3978
+  Pairwise tests vs reference = 'TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL':
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-EXT-2X3-DIAGONAL  (n=60): mean diff = +0.9384 | Wilcoxon p=0.0024 (Holm p=0.0095) -> SIGNIFICANT
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.7325 | Wilcoxon p=0.1053 (Holm p=0.3160) -> not significant
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-PENTAGON-DIAGONAL  (n=60): mean diff = +0.0711 | Wilcoxon p=0.5961 (Holm p=1.0000) -> not significant
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs PENTAGON-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.1297 | Wilcoxon p=0.9648 (Holm p=1.0000) -> not significant
+
+--- orientation_error (continuous) ---
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  0.7766
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  0.5705
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  0.5569
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  0.3671
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  0.2576
+  Pairwise tests vs reference = 'PENTAGON-RECTANGLE-SAME-DIAGONAL':
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-EXT-2X3-DIAGONAL  (n=60): mean diff = +0.5190 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.4095 | Wilcoxon p=0.0021 (Holm p=0.0064) -> SIGNIFICANT
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL  (n=60): mean diff = +0.2061 | Wilcoxon p=0.0760 (Holm p=0.1521) -> not significant
+  PENTAGON-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-PENTAGON-DIAGONAL  (n=60): mean diff = +0.2197 | Wilcoxon p=0.1470 (Holm p=0.1521) -> not significant
+
+--- simulation_unstable (binary) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL                             value=  0.1500
+  PENTAGON-RECTANGLE-SAME-DIAGONAL                                  value=  0.0833
+  RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL                               value=  0.0500
+  TWO-TRIANGLES-PENTAGON-DIAGONAL                                   value=  0.0333
+  RHOMBUS-EXT-2X3-DIAGONAL                                          value=  0.0000
+  Pairwise tests vs reference = 'TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL':
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-EXT-2X3-DIAGONAL: McNemar p=0.0039 (Holm-adjusted p=0.0156) -> SIGNIFICANT
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs TWO-TRIANGLES-PENTAGON-DIAGONAL: McNemar p=0.0391 (Holm-adjusted p=0.1172) -> not significant
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs RHOMBUS-INT-RECTANGLE-SAME-DIAGONAL: McNemar p=0.1460 (Holm-adjusted p=0.2920) -> not significant
+  TWO-TRIANGLES-RECTANGLE-SAME-DIAGONAL vs PENTAGON-RECTANGLE-SAME-DIAGONAL: McNemar p=0.3877 (Holm-adjusted p=0.3877) -> not significant
+
+================================================================================
+Report saved to: simulation_run/mujoco_outputs_DIAGONAL/statistical_analysis_report.txt
+================================================================================

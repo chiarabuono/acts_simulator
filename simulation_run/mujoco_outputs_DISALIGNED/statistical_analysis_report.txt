@@ -1,0 +1,200 @@
+================================================================================
+Loading data and parsing MuJoCo instability logs
+================================================================================
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from simulation_run/mujoco_outputs_DISALIGNED
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from /home/chiara/ros2_ws/src/acts_simulator/simulation_run/acts
+ -> Processing instability features using precalculated parallel errors table...
+
+================================================================================
+Checking configuration pose pairing
+================================================================================
+
+################################################################################
+# PRIMARY METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 4 primary metrics:
+  cable_rubbed                   binary      stat= 119.574 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  pose_reached                   binary      stat=  83.990 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_reached            binary      stat=  83.990 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  composite_score                continuous  stat=  18.352 raw_p=  0.00254 FDR_p=  0.00254 -> SIGNIFICANT
+
+--- composite_score (continuous) ---
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  7.0001
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value=  6.5342
+  acts_stewart                                                      value=  5.5706
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  5.2415
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  3.9368
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  3.8389
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED  (n=60): mean diff = +1.7317 | Wilcoxon p=0.0016 (Holm p=0.0079) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED  (n=60): mean diff = +1.6338 | Wilcoxon p=0.0877 (Holm p=0.3506) -> not significant
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED  (n=60): mean diff = -1.4295 | Wilcoxon p=0.0904 (Holm p=0.3506) -> not significant
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED  (n=60): mean diff = +0.3290 | Wilcoxon p=0.2632 (Holm p=0.5263) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED  (n=60): mean diff = -0.9637 | Wilcoxon p=0.7128 (Holm p=0.7128) -> not significant
+
+--- pose_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  0.2333
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  0.2000
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  0.1667
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  0.1667
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value=  0.0333
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+--- orientation_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  0.2333
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  0.2000
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  0.1667
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  0.1667
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value=  0.0333
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+--- cable_rubbed (binary) ---
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  0.9667
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value=  0.9667
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  0.9500
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  0.8167
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  0.7833
+  acts_stewart                                                      value=  0.3167
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+################################################################################
+# DIAGNOSTIC METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 8 diagnostic metrics:
+  manipulability                 continuous  stat= 177.181 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  position_error                 continuous  stat= 118.524 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  worst_case_capacity_margin     continuous  stat= 101.800 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  conditioning_index             continuous  stat=  95.219 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_error              continuous  stat=  85.257 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  capacity_margin                continuous  stat=  25.114 raw_p=  0.00013 FDR_p=  0.00018 -> SIGNIFICANT
+  radius_available_force         continuous  stat=  18.086 raw_p=  0.00284 FDR_p=  0.00325 -> SIGNIFICANT
+  simulation_unstable            binary      stat=   6.572 raw_p=  0.25444 FDR_p=  0.25444 -> not significant
+
+--- conditioning_index (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value=  0.1169
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  0.1032
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  0.0957
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  0.0931
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  0.0872
+  acts_stewart                                                      value=  0.0533
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED  (n=60): mean diff = -0.0499 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED  (n=60): mean diff = -0.0637 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED  (n=60): mean diff = -0.0398 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED  (n=60): mean diff = -0.0424 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED  (n=60): mean diff = -0.0339 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- manipulability (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value=  1.3685
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  0.4585
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  0.4329
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  0.3979
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  0.3856
+  acts_stewart                                                      value=  0.1054
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED  (n=60): mean diff = -1.2630 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED  (n=60): mean diff = -0.3530 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED  (n=60): mean diff = -0.3275 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED  (n=60): mean diff = -0.2802 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED  (n=60): mean diff = -0.2924 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- radius_available_force (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value= 19.7337
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value= 12.8803
+  acts_stewart                                                      value= 11.7301
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value= 11.4287
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  7.5565
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  6.8325
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED  (n=60): mean diff = +4.1735 | Wilcoxon p=0.0002 (Holm p=0.0012) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED  (n=60): mean diff = +4.8976 | Wilcoxon p=0.0006 (Holm p=0.0024) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED  (n=60): mean diff = +0.3014 | Wilcoxon p=0.0386 (Holm p=0.1157) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED  (n=60): mean diff = -8.0036 | Wilcoxon p=0.0407 (Holm p=0.1157) -> not significant
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED  (n=60): mean diff = -1.1502 | Wilcoxon p=0.9589 (Holm p=0.9589) -> not significant
+
+--- capacity_margin (continuous) ---
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  3.3010
+  acts_stewart                                                      value=  2.7714
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  2.4076
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  0.5601
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value= -0.2683
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value= -3.8850
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED  (n=60): mean diff = +6.6564 | Wilcoxon p=0.0002 (Holm p=0.0009) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED  (n=60): mean diff = -0.5296 | Wilcoxon p=0.0469 (Holm p=0.1874) -> not significant
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED  (n=60): mean diff = +2.2113 | Wilcoxon p=0.0836 (Holm p=0.2509) -> not significant
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED  (n=60): mean diff = +3.0397 | Wilcoxon p=0.2569 (Holm p=0.5139) -> not significant
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED  (n=60): mean diff = +0.3638 | Wilcoxon p=0.9238 (Holm p=0.9238) -> not significant
+
+--- worst_case_capacity_margin (continuous) ---
+  acts_stewart                                                      value=  0.7337
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  0.6155
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  0.6088
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  0.5776
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  0.5143
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value= -0.5714
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED  (n=60): mean diff = +1.3051 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED  (n=60): mean diff = +0.1249 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED  (n=60): mean diff = +0.2194 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED  (n=60): mean diff = +0.1561 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED  (n=60): mean diff = +0.1182 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- position_error (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value=  2.6658
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  1.1213
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  1.1077
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  0.6524
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  0.6461
+  acts_stewart                                                      value=  0.0592
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED  (n=60): mean diff = -2.6066 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED  (n=60): mean diff = -1.0484 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED  (n=60): mean diff = -1.0620 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED  (n=60): mean diff = -0.5869 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED  (n=60): mean diff = -0.5931 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- orientation_error (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value=  1.1580
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  0.7734
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  0.7439
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  0.5435
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  0.5183
+  acts_stewart                                                      value=  0.1223
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-DISALIGNED  (n=60): mean diff = -1.0356 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-DISALIGNED  (n=60): mean diff = -0.6510 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED  (n=60): mean diff = -0.6216 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs ARROW-RECTANGLE-SAME-DISALIGNED  (n=60): mean diff = -0.4211 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-DISALIGNED  (n=60): mean diff = -0.3960 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- simulation_unstable (binary) ---
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-DISALIGNED                  value=  0.1500
+  TWO-TRIANGLES-2X3-DISALIGNED                                      value=  0.1333
+  RECTANGLE-OPPOSITE-2X3-DISALIGNED                                 value=  0.1167
+  acts_stewart                                                      value=  0.0833
+  ARROW-RECTANGLE-SAME-DISALIGNED                                   value=  0.0667
+  RHOMBUS-EXT-2X3-DISALIGNED                                        value=  0.0333
+
+================================================================================
+Report saved to: simulation_run/mujoco_outputs_DISALIGNED/statistical_analysis_report.txt
+================================================================================

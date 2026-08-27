@@ -1,7 +1,15 @@
+"""
+Defines drone-level controllers on top of `BaseDrone` (position/attitude control + motor mixing): 
+    `FreeFlightDrone` (no cable), 
+    `CableTetheredDrone`/`PayloadControlDrone` (cable-force augmented, static tension), 
+    `ACTScontrolDrone`
+
+Adapt: `self.gains` and `self.arm_length` in `BaseDrone.__init__` for a different drone/frame
+"""
+
 import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-
 from acts_simulator import MAX_ROTOR_VELOCITY, kt, kd
 
 class BaseDrone:
@@ -130,19 +138,19 @@ class PayloadControlDrone(BaseDrone):
                    self.gains_platform['Kd_pl'] * (self.v_payload_des - self.v_payload)
 
     def position_controller(self, pd, p, vd, v):
-        # COMPLIANT TO EQ. 3.19: Fp* = mp*(p_ddot* + g*e3) + Kp*(p*-p) + Kd*(v*-v)
+        # COMPLIANT TO: Fp* = mp*(p_ddot* + g*e3) + Kp*(p*-p) + Kd*(v*-v)
         F_p_star = self.compute_Fp_star()
-        F_a1_star = F_p_star - self.Fa_2        # Eq 3.12
+        F_a1_star = F_p_star - self.Fa_2        
 
         g_vec = np.array([0, 0, self.GRAVITY])
 
-        tau_star = np.linalg.norm(F_a1_star)                       # Eq 3.2
+        tau_star = np.linalg.norm(F_a1_star)                       
         f_base = self.gains["Kd_pos"] @ (vd - v) + self.gains["Kp_pos"] @ (pd - p) + (self.drone_mass * g_vec)
 
         dist_cable = np.linalg.norm(p - self.p_payload)
         u = (p - self.p_payload) / dist_cable if dist_cable > 0.001 else np.array([0.0, 0.0, 1.0]) # Eq 3.9
 
-        f_total = f_base + (tau_star * u)                      # Eq 3.5
+        f_total = f_base + (tau_star * u)                      
 
         return self.calculate_orientation_frame(f_total)
     

@@ -1,3 +1,12 @@
+"""
+Interactive Tkinter wizard that walks through 
+    picking a UGV payload layout, 
+    UGV ground-anchor layout, and 
+    UAV frame layout (from the JSON node databases built by the earlier tools), 
+then configures 
+    cable routing, scaling/mirroring, and compiles everything into a MuJoCo XML file 
+"""
+
 import os
 import json
 import tkinter as tk
@@ -181,7 +190,6 @@ class MultiStepSelectorApp:
         # Function to toggle the entry visibility based on the dropdown choice
         def toggle_scale_entry(*args):
             if self.size_mode_var.get() in ["Small", "Large"]:
-                self.scale_factor_frame.pack(fill=tk.X, before=combo_size.pack_info().get("before")) # packs it nicely below dropdown
                 self.scale_factor_frame.pack(fill=tk.X, pady=(5, 0))
             else:
                 self.scale_factor_frame.pack_forget()
@@ -369,6 +377,9 @@ class MultiStepSelectorApp:
             if key == "symmetry_metadata": continue
             cables[key] = self.uav_geo_db[uav_layout][key]["max_cables"]
 
+        uav_mx = -1.0 if (self.chk_uav_x.winfo_manager() and self.mirror_x_var.get()) else 1.0
+        uav_my = -1.0 if (self.chk_uav_y.winfo_manager() and self.mirror_y_var.get()) else 1.0
+
         drone_idx = 0
         for letter in cables:
             raw_px, raw_py, _ = self.uav_geo_db[uav_layout][letter]["coords"]
@@ -383,7 +394,9 @@ class MultiStepSelectorApp:
                 if cables[letter] == 3:
                     ux = raw_px + 0.20
                     uy = raw_py - 0.20
-                uz = 0.60
+                ux = ux * uav_mx
+                uy = uy * uav_my
+                uz = 0.25
                 drone_idx += 1
                 
                 payload_sites += f'       <site name="hook_{drone_idx}" pos="{raw_px} {raw_py} 0.10" size="0.04" rgba="1 1 0 1"/>\n'

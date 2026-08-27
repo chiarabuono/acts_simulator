@@ -1,0 +1,226 @@
+================================================================================
+Loading data and parsing MuJoCo instability logs
+================================================================================
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from simulation_run/mujoco_outputs_TRIANGLE_small
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from /home/chiara/ros2_ws/src/acts_simulator/simulation_run/acts
+ -> Processing instability features using precalculated parallel errors table...
+
+================================================================================
+Checking configuration pose pairing
+================================================================================
+=== REFERENCE (PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0): 60 rows ===
+
+--------------------------------------------------
+Comparing Reference 'PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0' vs 'TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0'
+--------------------------------------------------
+-> PERFECT MATCH!
+
+--------------------------------------------------
+Comparing Reference 'PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0' vs 'TWO-TRIANGLES-2X3-TRIANGLE-small-2_0'
+--------------------------------------------------
+-> PERFECT MATCH!
+
+--------------------------------------------------
+Comparing Reference 'PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0' vs 'RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0'
+--------------------------------------------------
+-> PERFECT MATCH!
+
+--------------------------------------------------
+Comparing Reference 'PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0' vs 'PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0'
+--------------------------------------------------
+-> PERFECT MATCH!
+
+--------------------------------------------------
+Comparing Reference 'PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0' vs 'acts_stewart'
+--------------------------------------------------
+-> PERFECT MATCH!
+
+################################################################################
+# PRIMARY METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 4 primary metrics:
+  cable_rubbed                   binary      stat= 106.315 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  composite_score                continuous  stat=  73.610 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  pose_reached                   binary      stat=  12.168 raw_p=  0.03256 FDR_p=  0.03256 -> SIGNIFICANT
+  orientation_reached            binary      stat=  12.168 raw_p=  0.03256 FDR_p=  0.03256 -> SIGNIFICANT
+
+--- composite_score (continuous) ---
+  acts_stewart                                                      value=  5.5706
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value=  4.5529
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  3.8418
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  3.7686
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  3.1418
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  1.7242
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +3.8464 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +2.4287 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = +1.8020 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = +1.7288 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +1.0177 | Wilcoxon p=0.0372 (Holm p=0.0372) -> SIGNIFICANT
+
+--- pose_reached (binary) ---
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.6500
+  acts_stewart                                                      value=  0.6500
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  0.6000
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.6000
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  0.5667
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value=  0.4333
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0: McNemar p=0.0192 (Holm-adjusted p=0.0958) -> not significant
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0: McNemar p=0.3593 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0: McNemar p=0.6291 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0: McNemar p=0.7011 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+
+--- orientation_reached (binary) ---
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.6500
+  acts_stewart                                                      value=  0.6500
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  0.6000
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.6000
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  0.5667
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value=  0.4333
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0: McNemar p=0.0192 (Holm-adjusted p=0.0958) -> not significant
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0: McNemar p=0.3593 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0: McNemar p=0.6291 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0: McNemar p=0.7011 (Holm-adjusted p=1.0000) -> not significant
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0: McNemar p=1.0000 (Holm-adjusted p=1.0000) -> not significant
+
+--- cable_rubbed (binary) ---
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value=  1.0000
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.9833
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.8000
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  0.7833
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  0.6333
+  acts_stewart                                                      value=  0.3167
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0: McNemar p=0.0003 (Holm-adjusted p=0.0003) -> SIGNIFICANT
+
+################################################################################
+# DIAGNOSTIC METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 8 diagnostic metrics:
+  manipulability                 continuous  stat= 112.343 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  radius_available_force         continuous  stat=  59.248 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  capacity_margin                continuous  stat=  46.876 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  conditioning_index             continuous  stat=  45.552 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  worst_case_capacity_margin     continuous  stat=  45.557 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  position_error                 continuous  stat=  40.800 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_error              continuous  stat=  20.276 raw_p=  0.00111 FDR_p=  0.00127 -> SIGNIFICANT
+  simulation_unstable            binary      stat=   6.984 raw_p=  0.22182 FDR_p=  0.22182 -> not significant
+
+--- conditioning_index (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value=  0.0819
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  0.0719
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.0706
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.0682
+  acts_stewart                                                      value=  0.0533
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  0.0513
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.0286 | Wilcoxon p=0.0002 (Holm p=0.0008) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = -0.0173 | Wilcoxon p=0.0015 (Holm p=0.0060) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.0150 | Wilcoxon p=0.0038 (Holm p=0.0114) -> SIGNIFICANT
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.0186 | Wilcoxon p=0.2302 (Holm p=0.4603) -> not significant
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = +0.0020 | Wilcoxon p=0.5076 (Holm p=0.5076) -> not significant
+
+--- manipulability (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value=  0.4775
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  0.2465
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.2413
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.2391
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  0.1269
+  acts_stewart                                                      value=  0.1054
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.3721 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = -0.1337 | Wilcoxon p=0.0003 (Holm p=0.0011) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.1359 | Wilcoxon p=0.0366 (Holm p=0.1097) -> not significant
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = -0.0215 | Wilcoxon p=0.1732 (Holm p=0.3465) -> not significant
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.1411 | Wilcoxon p=0.4797 (Holm p=0.4797) -> not significant
+
+--- radius_available_force (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value= 11.8971
+  acts_stewart                                                      value= 11.7301
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  8.2412
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  7.9175
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  6.0689
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  6.0347
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +5.6611 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +5.6954 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = +3.8126 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = +3.4888 | Wilcoxon p=0.0002 (Holm p=0.0003) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.1670 | Wilcoxon p=0.4752 (Holm p=0.4752) -> not significant
+
+--- capacity_margin (continuous) ---
+  acts_stewart                                                      value=  2.7714
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  1.6203
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.9736
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.5723
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value= -0.6320
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value= -4.1818
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +6.9532 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = +1.1511 | Wilcoxon p=0.0013 (Holm p=0.0050) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +1.7978 | Wilcoxon p=0.0042 (Holm p=0.0126) -> SIGNIFICANT
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +3.4034 | Wilcoxon p=0.0229 (Holm p=0.0458) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = +2.1990 | Wilcoxon p=0.3239 (Holm p=0.3239) -> not significant
+
+--- worst_case_capacity_margin (continuous) ---
+  acts_stewart                                                      value=  0.7337
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.6332
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.6017
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  0.5331
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  0.3715
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value= -0.1371
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +0.3622 | Wilcoxon p=0.0262 (Holm p=0.1310) -> not significant
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = +0.1320 | Wilcoxon p=0.1275 (Holm p=0.5102) -> not significant
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = +0.2005 | Wilcoxon p=0.2302 (Holm p=0.6905) -> not significant
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +0.1005 | Wilcoxon p=0.8081 (Holm p=1.0000) -> not significant
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0  (n=60): mean diff = +0.8707 | Wilcoxon p=0.9706 (Holm p=1.0000) -> not significant
+
+--- position_error (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value=  1.7521
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  1.6011
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.9800
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.8745
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  0.2144
+  acts_stewart                                                      value=  0.0592
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -1.6928 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -1.5419 | Wilcoxon p=0.0000 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = -0.9208 | Wilcoxon p=0.0004 (Holm p=0.0011) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.8153 | Wilcoxon p=0.0020 (Holm p=0.0040) -> SIGNIFICANT
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = -0.1552 | Wilcoxon p=0.0062 (Holm p=0.0062) -> SIGNIFICANT
+
+--- orientation_error (continuous) ---
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value=  0.5682
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  0.5346
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.3975
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.3862
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  0.2215
+  acts_stewart                                                      value=  0.1223
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.4458 | Wilcoxon p=0.0002 (Holm p=0.0009) -> SIGNIFICANT
+  acts_stewart vs PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.4122 | Wilcoxon p=0.0032 (Holm p=0.0129) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = -0.2638 | Wilcoxon p=0.0247 (Holm p=0.0742) -> not significant
+  acts_stewart vs TWO-TRIANGLES-2X3-TRIANGLE-small-2_0  (n=60): mean diff = -0.2751 | Wilcoxon p=0.0353 (Holm p=0.0742) -> not significant
+  acts_stewart vs PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0  (n=60): mean diff = -0.0991 | Wilcoxon p=0.3386 (Holm p=0.3386) -> not significant
+
+--- simulation_unstable (binary) ---
+  RECTANGLE-OPPOSITE-2X3-TRIANGLE-small-2_0                         value=  0.1500
+  PARALLELEPIPED-INT-2X3-TRIANGLE-small-2_0                         value=  0.0833
+  acts_stewart                                                      value=  0.0833
+  TWO-TRIANGLES-RECTANGLE-SAME-TRIANGLE-small-2_0                   value=  0.0667
+  TWO-TRIANGLES-2X3-TRIANGLE-small-2_0                              value=  0.0500
+  PENTAGON-RECTANGLE-SAME-TRIANGLE-small-2_0                        value=  0.0333
+
+================================================================================
+Report saved to: simulation_run/mujoco_outputs_TRIANGLE_small/statistical_analysis_report.txt
+================================================================================

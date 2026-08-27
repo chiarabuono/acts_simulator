@@ -1,0 +1,182 @@
+================================================================================
+Loading data and parsing MuJoCo instability logs
+================================================================================
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from simulation_run/stewart
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from /home/chiara/ros2_ws/src/acts_simulator/simulation_run/acts
+ -> Processing instability features using precalculated parallel errors table...
+
+================================================================================
+Checking configuration pose pairing
+================================================================================
+
+################################################################################
+# PRIMARY METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 4 primary metrics:
+  pose_reached                   binary      stat=  83.111 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_reached            binary      stat=  83.111 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  cable_rubbed                   binary      stat=  31.695 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  composite_score                continuous  stat=  19.533 raw_p=  0.00062 FDR_p=  0.00062 -> SIGNIFICANT
+
+--- composite_score (continuous) ---
+  acts_stewart                                                      value=  5.5706
+  acts_line                                                         value=  4.4131
+  acts_disaligned                                                   value=  4.0677
+  acts_diagonal                                                     value=  4.0019
+  acts_aligned                                                      value=  2.8281
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_diagonal  (n=60): mean diff = +1.5687 | Wilcoxon p=0.0001 (Holm p=0.0004) -> SIGNIFICANT
+  acts_stewart vs acts_aligned  (n=60): mean diff = +2.7425 | Wilcoxon p=0.0011 (Holm p=0.0032) -> SIGNIFICANT
+  acts_stewart vs acts_disaligned  (n=60): mean diff = +1.5028 | Wilcoxon p=0.0026 (Holm p=0.0052) -> SIGNIFICANT
+  acts_stewart vs acts_line  (n=60): mean diff = +1.1575 | Wilcoxon p=0.0933 (Holm p=0.0933) -> not significant
+
+--- pose_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  acts_diagonal                                                     value=  0.2167
+  acts_disaligned                                                   value=  0.1667
+  acts_aligned                                                      value=  0.0833
+  acts_line                                                         value=  0.0667
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_line: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_aligned: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_disaligned: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_diagonal: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+--- orientation_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  acts_diagonal                                                     value=  0.2167
+  acts_disaligned                                                   value=  0.1667
+  acts_aligned                                                      value=  0.0833
+  acts_line                                                         value=  0.0667
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_line: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_aligned: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_disaligned: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_diagonal: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+--- cable_rubbed (binary) ---
+  acts_disaligned                                                   value=  0.6833
+  acts_aligned                                                      value=  0.6667
+  acts_diagonal                                                     value=  0.6500
+  acts_line                                                         value=  0.5833
+  acts_stewart                                                      value=  0.3167
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_disaligned: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_diagonal: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_aligned: McNemar p=0.0000 (Holm-adjusted p=0.0001) -> SIGNIFICANT
+  acts_stewart vs acts_line: McNemar p=0.0009 (Holm-adjusted p=0.0009) -> SIGNIFICANT
+
+################################################################################
+# DIAGNOSTIC METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 8 diagnostic metrics:
+  position_error                 continuous  stat=  96.093 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_error              continuous  stat=  89.173 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  worst_case_capacity_margin     continuous  stat=  67.133 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  capacity_margin                continuous  stat=  30.213 raw_p=  0.00000 FDR_p=  0.00001 -> SIGNIFICANT
+  manipulability                 continuous  stat=  24.280 raw_p=  0.00007 FDR_p=  0.00011 -> SIGNIFICANT
+  simulation_unstable            binary      stat=  20.000 raw_p=  0.00050 FDR_p=  0.00067 -> SIGNIFICANT
+  radius_available_force         continuous  stat=  14.760 raw_p=  0.00523 FDR_p=  0.00597 -> SIGNIFICANT
+  conditioning_index             continuous  stat=  13.747 raw_p=  0.00815 FDR_p=  0.00815 -> SIGNIFICANT
+
+--- conditioning_index (continuous) ---
+  acts_aligned                                                      value=  0.0835
+  acts_disaligned                                                   value=  0.0672
+  acts_diagonal                                                     value=  0.0649
+  acts_line                                                         value=  0.0619
+  acts_stewart                                                      value=  0.0533
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_aligned  (n=60): mean diff = -0.0302 | Wilcoxon p=0.0002 (Holm p=0.0008) -> SIGNIFICANT
+  acts_stewart vs acts_disaligned  (n=60): mean diff = -0.0140 | Wilcoxon p=0.0046 (Holm p=0.0138) -> SIGNIFICANT
+  acts_stewart vs acts_line  (n=60): mean diff = -0.0086 | Wilcoxon p=0.0131 (Holm p=0.0262) -> SIGNIFICANT
+  acts_stewart vs acts_diagonal  (n=60): mean diff = -0.0116 | Wilcoxon p=0.0161 (Holm p=0.0262) -> SIGNIFICANT
+
+--- manipulability (continuous) ---
+  acts_aligned                                                      value=  0.2917
+  acts_disaligned                                                   value=  0.1842
+  acts_diagonal                                                     value=  0.1394
+  acts_line                                                         value=  0.1349
+  acts_stewart                                                      value=  0.1054
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_aligned  (n=60): mean diff = -0.1863 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs acts_disaligned  (n=60): mean diff = -0.0788 | Wilcoxon p=0.0006 (Holm p=0.0019) -> SIGNIFICANT
+  acts_stewart vs acts_line  (n=60): mean diff = -0.0295 | Wilcoxon p=0.1135 (Holm p=0.2270) -> not significant
+  acts_stewart vs acts_diagonal  (n=60): mean diff = -0.0340 | Wilcoxon p=0.5961 (Holm p=0.5961) -> not significant
+
+--- radius_available_force (continuous) ---
+  acts_stewart                                                      value= 11.7301
+  acts_disaligned                                                   value= 10.7623
+  acts_line                                                         value=  9.8432
+  acts_aligned                                                      value=  9.8341
+  acts_diagonal                                                     value=  8.7775
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_diagonal  (n=60): mean diff = +2.9526 | Wilcoxon p=0.0000 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs acts_disaligned  (n=60): mean diff = +0.9678 | Wilcoxon p=0.0118 (Holm p=0.0354) -> SIGNIFICANT
+  acts_stewart vs acts_aligned  (n=60): mean diff = +1.8960 | Wilcoxon p=0.1554 (Holm p=0.3108) -> not significant
+  acts_stewart vs acts_line  (n=60): mean diff = +1.8869 | Wilcoxon p=0.1709 (Holm p=0.3108) -> not significant
+
+--- capacity_margin (continuous) ---
+  acts_stewart                                                      value=  2.7714
+  acts_diagonal                                                     value=  1.8012
+  acts_line                                                         value=  1.3934
+  acts_disaligned                                                   value= -0.9331
+  acts_aligned                                                      value= -4.6637
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_aligned  (n=60): mean diff = +7.4351 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs acts_disaligned  (n=60): mean diff = +3.7045 | Wilcoxon p=0.0013 (Holm p=0.0039) -> SIGNIFICANT
+  acts_stewart vs acts_diagonal  (n=60): mean diff = +0.9702 | Wilcoxon p=0.0134 (Holm p=0.0268) -> SIGNIFICANT
+  acts_stewart vs acts_line  (n=60): mean diff = +1.3780 | Wilcoxon p=0.0810 (Holm p=0.0810) -> not significant
+
+--- worst_case_capacity_margin (continuous) ---
+  acts_stewart                                                      value=  0.7337
+  acts_line                                                         value=  0.6982
+  acts_diagonal                                                     value=  0.6732
+  acts_disaligned                                                   value=  0.5979
+  acts_aligned                                                      value=  0.5476
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_disaligned  (n=60): mean diff = +0.1358 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_aligned  (n=60): mean diff = +0.1861 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_line  (n=60): mean diff = +0.0355 | Wilcoxon p=0.0015 (Holm p=0.0029) -> SIGNIFICANT
+  acts_stewart vs acts_diagonal  (n=60): mean diff = +0.0605 | Wilcoxon p=0.0657 (Holm p=0.0657) -> not significant
+
+--- position_error (continuous) ---
+  acts_aligned                                                      value=  1.1404
+  acts_disaligned                                                   value=  0.8860
+  acts_diagonal                                                     value=  0.2957
+  acts_line                                                         value=  0.2516
+  acts_stewart                                                      value=  0.0592
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_aligned  (n=60): mean diff = -1.0811 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_disaligned  (n=60): mean diff = -0.8268 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_line  (n=60): mean diff = -0.1924 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_diagonal  (n=60): mean diff = -0.2364 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- orientation_error (continuous) ---
+  acts_aligned                                                      value=  0.7642
+  acts_disaligned                                                   value=  0.6607
+  acts_line                                                         value=  0.4842
+  acts_diagonal                                                     value=  0.4134
+  acts_stewart                                                      value=  0.1223
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_aligned  (n=60): mean diff = -0.6419 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_disaligned  (n=60): mean diff = -0.5383 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_line  (n=60): mean diff = -0.3618 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_diagonal  (n=60): mean diff = -0.2910 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- simulation_unstable (binary) ---
+  acts_stewart                                                      value=  0.0833
+  acts_aligned                                                      value=  0.0000
+  acts_disaligned                                                   value=  0.0000
+  acts_line                                                         value=  0.0000
+  acts_diagonal                                                     value=  0.0000
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_aligned: McNemar p=0.0625 (Holm-adjusted p=0.2500) -> not significant
+  acts_stewart vs acts_disaligned: McNemar p=0.0625 (Holm-adjusted p=0.2500) -> not significant
+  acts_stewart vs acts_line: McNemar p=0.0625 (Holm-adjusted p=0.2500) -> not significant
+  acts_stewart vs acts_diagonal: McNemar p=0.0625 (Holm-adjusted p=0.2500) -> not significant
+
+================================================================================
+Report saved to: simulation_run/stewart/statistical_analysis_report.txt
+================================================================================

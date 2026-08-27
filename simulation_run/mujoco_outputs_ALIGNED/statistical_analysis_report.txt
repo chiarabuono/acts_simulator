@@ -1,0 +1,200 @@
+================================================================================
+Loading data and parsing MuJoCo instability logs
+================================================================================
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from simulation_run/mujoco_outputs_ALIGNED
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from /home/chiara/ros2_ws/src/acts_simulator/simulation_run/acts
+ -> Processing instability features using precalculated parallel errors table...
+
+================================================================================
+Checking configuration pose pairing
+================================================================================
+
+################################################################################
+# PRIMARY METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 4 primary metrics:
+  cable_rubbed                   binary      stat= 147.491 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  pose_reached                   binary      stat= 117.483 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_reached            binary      stat= 117.483 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  composite_score                continuous  stat=  18.571 raw_p=  0.00231 FDR_p=  0.00231 -> SIGNIFICANT
+
+--- composite_score (continuous) ---
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  6.9394
+  acts_stewart                                                      value=  5.5706
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  4.7392
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  4.4362
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  3.7571
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  3.1612
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED  (n=60): mean diff = +1.8134 | Wilcoxon p=0.0006 (Holm p=0.0028) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED  (n=60): mean diff = +2.4094 | Wilcoxon p=0.0010 (Holm p=0.0040) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED  (n=60): mean diff = +1.1343 | Wilcoxon p=0.1135 (Holm p=0.3404) -> not significant
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED  (n=60): mean diff = +0.8314 | Wilcoxon p=0.3850 (Holm p=0.7701) -> not significant
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED  (n=60): mean diff = -1.3689 | Wilcoxon p=0.9413 (Holm p=0.9413) -> not significant
+
+--- pose_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  0.2833
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  0.0833
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  0.0500
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  0.0167
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  0.0167
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED: McNemar p=0.0001 (Holm-adjusted p=0.0001) -> SIGNIFICANT
+
+--- orientation_reached (binary) ---
+  acts_stewart                                                      value=  0.6500
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  0.2833
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  0.0833
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  0.0500
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  0.0167
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  0.0167
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED: McNemar p=0.0001 (Holm-adjusted p=0.0001) -> SIGNIFICANT
+
+--- cable_rubbed (binary) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  1.0000
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  1.0000
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  0.9833
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  0.9333
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  0.7500
+  acts_stewart                                                      value=  0.3167
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED: McNemar p=0.0000 (Holm-adjusted p=0.0000) -> SIGNIFICANT
+
+################################################################################
+# DIAGNOSTIC METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 8 diagnostic metrics:
+  position_error                 continuous  stat= 152.581 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_error              continuous  stat= 130.324 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  manipulability                 continuous  stat= 127.448 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  conditioning_index             continuous  stat= 105.133 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  worst_case_capacity_margin     continuous  stat=  86.876 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  capacity_margin                continuous  stat=  40.990 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  radius_available_force         continuous  stat=  22.352 raw_p=  0.00045 FDR_p=  0.00051 -> SIGNIFICANT
+  simulation_unstable            binary      stat=   6.208 raw_p=  0.28650 FDR_p=  0.28650 -> not significant
+
+--- conditioning_index (continuous) ---
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  0.1345
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  0.1274
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  0.1187
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  0.1179
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  0.0915
+  acts_stewart                                                      value=  0.0533
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED  (n=60): mean diff = -0.0812 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED  (n=60): mean diff = -0.0741 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED  (n=60): mean diff = -0.0654 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED  (n=60): mean diff = -0.0383 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED  (n=60): mean diff = -0.0646 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- manipulability (continuous) ---
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  0.9516
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  0.9361
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  0.8604
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  0.8218
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  0.4400
+  acts_stewart                                                      value=  0.1054
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED  (n=60): mean diff = -0.8461 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED  (n=60): mean diff = -0.7164 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED  (n=60): mean diff = -0.7550 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED  (n=60): mean diff = -0.8307 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED  (n=60): mean diff = -0.3346 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- radius_available_force (continuous) ---
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value= 18.5554
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value= 14.7220
+  acts_stewart                                                      value= 11.7301
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value= 10.1458
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  9.6870
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  9.5317
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED  (n=60): mean diff = +1.5843 | Wilcoxon p=0.0052 (Holm p=0.0258) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED  (n=60): mean diff = +2.1984 | Wilcoxon p=0.0071 (Holm p=0.0282) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED  (n=60): mean diff = +2.0431 | Wilcoxon p=0.0353 (Holm p=0.1058) -> not significant
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED  (n=60): mean diff = -6.8253 | Wilcoxon p=0.2245 (Holm p=0.4490) -> not significant
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED  (n=60): mean diff = -2.9919 | Wilcoxon p=0.2389 (Holm p=0.4490) -> not significant
+
+--- capacity_margin (continuous) ---
+  acts_stewart                                                      value=  2.7714
+  RHOMBUS-EXT-2X3-ALIGNED                                           value= -0.9302
+  TWO-TRIANGLES-2X3-ALIGNED                                         value= -3.4437
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value= -3.6281
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value= -3.6846
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value= -6.0528
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED  (n=60): mean diff = +6.2151 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED  (n=60): mean diff = +6.3995 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED  (n=60): mean diff = +8.8242 | Wilcoxon p=0.0000 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED  (n=60): mean diff = +6.4560 | Wilcoxon p=0.0001 (Holm p=0.0001) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED  (n=60): mean diff = +3.7016 | Wilcoxon p=0.4797 (Holm p=0.4797) -> not significant
+
+--- worst_case_capacity_margin (continuous) ---
+  acts_stewart                                                      value=  0.7337
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  0.5738
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  0.2226
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  0.1422
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  0.1000
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  0.0807
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED  (n=60): mean diff = +0.6530 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED  (n=60): mean diff = +0.6337 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED  (n=60): mean diff = +0.1598 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED  (n=60): mean diff = +0.5111 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED  (n=60): mean diff = +0.5915 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- position_error (continuous) ---
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  3.0815
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  3.0221
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  2.6047
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  2.2666
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  0.9787
+  acts_stewart                                                      value=  0.0592
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED  (n=60): mean diff = -2.9629 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED  (n=60): mean diff = -2.5455 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED  (n=60): mean diff = -3.0222 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED  (n=60): mean diff = -2.2074 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED  (n=60): mean diff = -0.9195 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- orientation_error (continuous) ---
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  1.5192
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  1.3568
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  1.3531
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  0.9380
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  0.5777
+  acts_stewart                                                      value=  0.1223
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED  (n=60): mean diff = -1.2344 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED  (n=60): mean diff = -1.2308 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-2X3-ALIGNED  (n=60): mean diff = -1.3968 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs TWO-TRIANGLES-PENTAGON-ALIGNED  (n=60): mean diff = -0.8156 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs RHOMBUS-EXT-2X3-ALIGNED  (n=60): mean diff = -0.4553 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- simulation_unstable (binary) ---
+  TWO-TRIANGLES-VERTICAL-PARALLELEPIPED-ALIGNED                     value=  0.1667
+  RHOMBUS-EXT-2X3-ALIGNED                                           value=  0.1167
+  TWO-TRIANGLES-RECTANGLE-SAME-ALIGNED                              value=  0.1000
+  acts_stewart                                                      value=  0.0833
+  TWO-TRIANGLES-2X3-ALIGNED                                         value=  0.0667
+  TWO-TRIANGLES-PENTAGON-ALIGNED                                    value=  0.0500
+
+================================================================================
+Report saved to: simulation_run/mujoco_outputs_ALIGNED/statistical_analysis_report.txt
+================================================================================

@@ -1,15 +1,25 @@
+"""
+Interactive Tkinter tool that helps you generate the GRID_MAPPING crop-box dictionary used by the database-builder tool: 
+click-and-drag a box on the reference image for each layout option, then it prints the resulting `GRID_MAPPING = {...}` dict 
+to the terminal and writes it to `<mode>_configuration_database.json`.
+
+Adapt: MODE ("uav" or "ugv") to pick the image and option list
+"""
+
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
+import json
 
-MODE = "ugv"
+MODE = "uav" # or "ugv"
 
 class GuidedCropFinderApp:
-    def __init__(self, root, img_path, options, MODE):
+    def __init__(self, root, img_path, options, mode):
         self.root = root
         self.root.title("Guided Configuration Grid Mapper")
         self.root.geometry("1000x800")
+        self.mode = mode
         
         if not os.path.exists(img_path):
             print(f"Error: Image not found at {img_path}")
@@ -79,7 +89,7 @@ class GuidedCropFinderApp:
         else:
             self.lbl_instruction.config(text="All configurations mapped successfully! Check terminal output.")
             self.print_final_dictionary()
-            self.save_file(MODE)
+            self.save_file(self.mode)
             self.root.destroy()
 
     def on_button_press(self, event):
@@ -139,12 +149,13 @@ class GuidedCropFinderApp:
         print("==================================================================\n")
         messagebox.showinfo("Done!", "The complete dictionary has been printed to your terminal window output!")
 
-    def save_file(self, MODE):
-        with open(f"{MODE}_configuration_database.json", "w") as f:
+    def save_file(self, mode):
+        with open(f"{mode}_configuration_database.json", "w") as f:
             f.write("{")
             for key, value in self.mapped_dictionary.items():
                 f.write(f"    \"{key}\": {value},")
             f.write("}")
+            # json.dump({k: list(v) for k, v in self.mapped_dictionary.items()}, f, indent=4)
 
 
 

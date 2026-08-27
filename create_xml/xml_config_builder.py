@@ -1,18 +1,5 @@
 """
-xml_config_builder.py
-
-Headless, GUI-free version of the XML-generation logic that lives inside
-MultiStepSelectorApp.process_final_xml_data() in the Tkinter wizard.
-
-The wizard builds the MuJoCo XML from a handful of user selections (payload
-layout, ground layout, UAV layout, per-cable routing, mirror flags, ground
-scale). This module exposes that same logic as a plain function so a batch
-script / DOE loop can call it directly, without touching Tkinter at all.
-
-Validation rules (duplicate paths, max_cables per node) and the XML template
-filling are kept identical to the original wizard so that anything generated
-here is 100% equivalent to what a human would have produced by clicking
-through the GUI.
+Non-interactive xml file generator called by `analytical_ground_screening` for the best performing architectures
 """
 
 import os
@@ -21,7 +8,6 @@ from dataclasses import dataclass, field
 from typing import Dict, Tuple, Optional
 
 from config_params import MUJOCO_TEMPLATE
-
 
 class RoutingValidationError(Exception):
     """Raised when a candidate configuration violates capacity or duplicate-path constraints."""

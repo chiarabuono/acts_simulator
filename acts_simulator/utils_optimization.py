@@ -1,3 +1,10 @@
+"""
+`optimize_drone_positions` solves (via SLSQP) for drone hook positions and cable tensions that track a desired payload wrench 
+while respecting cable-length, tension-bound, and collision-avoidance constraints.
+    
+`check_ground_cable_rubbing` independently checks ground-cable-to-ground-cable clearance for a given payload pose.
+"""
+
 import numpy as np
 from scipy.optimize import minimize, lsq_linear
 import itertools
@@ -8,16 +15,11 @@ if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
 from acts_simulator import D_SAFE_DRONE, D_SAFE_CABLE, TAU_MIN, TAU_MAX, MODE, THRUST_MAX, THRUST_MIN
 
-# -----------------------------------------------------------------------
-# Geometric helpers for the Interference-Free Condition (Eq. 2.19)
-# -----------------------------------------------------------------------
+
 def segment_segment_distance(p1, p2, p3, p4):
     """
     Minimum distance between segment [p1, p2] and segment [p3, p4] in 3D.
     Standard closest-point-between-two-segments algorithm
-    (see e.g. Ericson, "Real-Time Collision Detection", Ch. 5.1.9).
-    This is what d_ij = dist(cable_i, cable_j) actually means in Eq. 2.19 -
-    NOT the distance between the segment endpoints.
     """
     d1 = p2 - p1
     d2 = p4 - p3
@@ -278,7 +280,7 @@ def optimize_drone_positions(p_payload, R_mat_payload, p_ground_anchors,
 def check_ground_cable_rubbing(p_payload, R_mat_payload, p_ground_anchors,
                                 hook_offsets_ground, d_safe=D_SAFE_CABLE):
     """
-    Interference-Free Condition (Eq. 2.19) restricted to the n_g ground
+    Interference-Free Condition restricted to the n_g ground
     cables against each other: d_ij = dist(cable_i, cable_j) >= d_safe.
 
     Both endpoints of every ground cable are fixed given the current

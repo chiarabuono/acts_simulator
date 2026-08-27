@@ -1,0 +1,131 @@
+================================================================================
+Loading data and parsing MuJoCo instability logs
+================================================================================
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from simulation_run/acts_2
+[INFO] Successfully loaded 'parallel_matched_errors.xlsx' from /home/chiara/ros2_ws/src/acts_simulator/simulation_run/acts
+ -> Processing instability features using precalculated parallel errors table...
+
+================================================================================
+Checking configuration pose pairing
+================================================================================
+
+################################################################################
+# PRIMARY METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 4 primary metrics:
+  composite_score                continuous  stat=  77.700 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  pose_reached                   binary      stat=  27.706 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_reached            binary      stat=  27.706 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  cable_rubbed                   binary      stat=  19.935 raw_p=  0.00005 FDR_p=  0.00005 -> SIGNIFICANT
+
+--- composite_score (continuous) ---
+  acts_stewart -large-2_0                                           value= 12.0467
+  acts_stewart                                                      value=  5.5706
+  acts_stewart -small-2_0                                           value=  2.5077
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0  (n=60): mean diff = -6.4761 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0   (n=60): mean diff = +3.0629 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- pose_reached (binary) ---
+  acts_stewart -large-2_0                                           value=  0.8833
+  acts_stewart                                                      value=  0.6500
+  acts_stewart -small-2_0                                           value=  0.4667
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0: McNemar p=0.0013 (Holm-adjusted p=0.0026) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0 : McNemar p=0.0347 (Holm-adjusted p=0.0347) -> SIGNIFICANT
+
+--- orientation_reached (binary) ---
+  acts_stewart -large-2_0                                           value=  0.8833
+  acts_stewart                                                      value=  0.6500
+  acts_stewart -small-2_0                                           value=  0.4667
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0: McNemar p=0.0013 (Holm-adjusted p=0.0026) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0 : McNemar p=0.0347 (Holm-adjusted p=0.0347) -> SIGNIFICANT
+
+--- cable_rubbed (binary) ---
+  acts_stewart -small-2_0                                           value=  0.5333
+  acts_stewart                                                      value=  0.3167
+  acts_stewart -large-2_0                                           value=  0.2000
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -small-2_0 : McNemar p=0.0023 (Holm-adjusted p=0.0047) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -large-2_0: McNemar p=0.1671 (Holm-adjusted p=0.1671) -> not significant
+
+################################################################################
+# DIAGNOSTIC METRICS
+################################################################################
+
+Omnibus tests, BH-FDR corrected across 8 diagnostic metrics:
+  manipulability                 continuous  stat=  85.233 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  radius_available_force         continuous  stat=  74.533 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  conditioning_index             continuous  stat=  60.833 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  capacity_margin                continuous  stat=  50.800 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  orientation_error              continuous  stat=  44.100 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  worst_case_capacity_margin     continuous  stat=  40.833 raw_p=  0.00000 FDR_p=  0.00000 -> SIGNIFICANT
+  position_error                 continuous  stat=  16.033 raw_p=  0.00033 FDR_p=  0.00038 -> SIGNIFICANT
+  simulation_unstable            binary      stat=   2.667 raw_p=  0.26360 FDR_p=  0.26360 -> not significant
+
+--- conditioning_index (continuous) ---
+  acts_stewart -large-2_0                                           value=  0.0788
+  acts_stewart                                                      value=  0.0533
+  acts_stewart -small-2_0                                           value=  0.0398
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0  (n=60): mean diff = -0.0256 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0   (n=60): mean diff = +0.0135 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- manipulability (continuous) ---
+  acts_stewart -large-2_0                                           value=  0.2872
+  acts_stewart                                                      value=  0.1054
+  acts_stewart -small-2_0                                           value=  0.0551
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0  (n=60): mean diff = -0.1817 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0   (n=60): mean diff = +0.0504 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- radius_available_force (continuous) ---
+  acts_stewart -large-2_0                                           value= 24.7313
+  acts_stewart                                                      value= 11.7301
+  acts_stewart -small-2_0                                           value=  6.0844
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0  (n=60): mean diff = -13.0012 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0   (n=60): mean diff = +5.6457 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- capacity_margin (continuous) ---
+  acts_stewart -large-2_0                                           value=  6.7333
+  acts_stewart                                                      value=  2.7714
+  acts_stewart -small-2_0                                           value=  0.5533
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0  (n=60): mean diff = -3.9619 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0   (n=60): mean diff = +2.2180 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+
+--- worst_case_capacity_margin (continuous) ---
+  acts_stewart -large-2_0                                           value=  0.7385
+  acts_stewart                                                      value=  0.7337
+  acts_stewart -small-2_0                                           value=  0.7165
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0  (n=60): mean diff = -0.0049 | Wilcoxon p=0.0000 (Holm p=0.0000) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0   (n=60): mean diff = +0.0172 | Wilcoxon p=0.1827 (Holm p=0.1827) -> not significant
+
+--- position_error (continuous) ---
+  acts_stewart -small-2_0                                           value=  0.1646
+  acts_stewart                                                      value=  0.0592
+  acts_stewart -large-2_0                                           value=  0.0566
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0  (n=60): mean diff = +0.0026 | Wilcoxon p=0.0004 (Holm p=0.0008) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0   (n=60): mean diff = -0.1054 | Wilcoxon p=0.1022 (Holm p=0.1022) -> not significant
+
+--- orientation_error (continuous) ---
+  acts_stewart -small-2_0                                           value=  0.2476
+  acts_stewart                                                      value=  0.1223
+  acts_stewart -large-2_0                                           value=  0.0736
+  Pairwise tests vs reference = 'acts_stewart':
+  acts_stewart vs acts_stewart -large-2_0  (n=60): mean diff = +0.0487 | Wilcoxon p=0.0001 (Holm p=0.0002) -> SIGNIFICANT
+  acts_stewart vs acts_stewart -small-2_0   (n=60): mean diff = -0.1253 | Wilcoxon p=0.0221 (Holm p=0.0221) -> SIGNIFICANT
+
+--- simulation_unstable (binary) ---
+  acts_stewart                                                      value=  0.0833
+  acts_stewart -small-2_0                                           value=  0.0500
+  acts_stewart -large-2_0                                           value=  0.0167
+
+================================================================================
+Report saved to: simulation_run/acts_2/statistical_analysis_report.txt
+================================================================================

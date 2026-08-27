@@ -1,3 +1,7 @@
+"""
+Central config module for the create_xml/ tooling
+"""
+
 import os
 import sys
 import json
@@ -49,7 +53,7 @@ UAV_LAYOUT = "triangle"
 UAV_CABLE_LENGTH = 1.5             # [m] nominal drone cable length
 
 WFC_RESIDUAL_TOL = 5.0             # combined force+moment tolerance (coarse, backward-compatible)
-WFC_FORCE_TOL = 3.0               # separate force-only tolerance [N]
+WFC_FORCE_TOL = 10.0               # separate force-only tolerance [N]
 WFC_MOMENT_TOL = 1.5             # separate moment-only tolerance [N*m]
 
 WFC_VERIFY_TOP_K = 20              # 0 = strict/cheap-only mode
@@ -58,8 +62,8 @@ WFC_VERIFY_MAX_ITER = 100
 # --- Interference-Free Condition (IFC) ---
 ENABLE_IFC = True
 
-CHECK_EXIT_ANGLE = False
-MIN_EXIT_ANGLE_DEG = 1.0
+CHECK_EXIT_ANGLE = True
+MIN_EXIT_ANGLE_DEG = 2.0
 FACE_NORMAL_LOCAL = np.array([0.0, 0.0, -1.0])
 
 # --- Parallelism ---

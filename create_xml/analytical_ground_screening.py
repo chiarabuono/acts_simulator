@@ -1,8 +1,15 @@
+"""
+Cable-routing architecture screener for the UGV/UAV rig: for every (payload layout, ground layout) pair, 
+exhaustively enumerates valid 6-cable ground routings, scores each across a set of poses on wrench-conditioning (WCC), 
+cable-cable/exit-angle interference (IFC)
+"""
+
 import itertools
 import os
 import glob
 import shutil
 from collections import Counter
+import hashlib
 
 import pandas as pd
 from scipy.optimize import linprog, lsq_linear, minimize
@@ -222,7 +229,7 @@ def optimize_drone_positions_for_wfc(uav_hook_offsets, payload_pos, payload_R, u
                                       ground_routing, ugv_db, pay_layout, gnd_layout,
                                       ground_tau_min, ground_tau_max,
                                       drone_thrust_min, drone_thrust_max, W_target,
-                                      max_iter=200):
+                                      max_iter=200, rng=None):
     """
     Searches each drone's position on the sphere of radius uav_cable_length 
     around its hook to minimize the joint WFC residual.
@@ -253,9 +260,8 @@ def optimize_drone_positions_for_wfc(uav_hook_offsets, payload_pos, payload_R, u
                                W_target=W_target, residual_tol=0.0)
         return wfc["residual"]
 
-    #x0 = np.zeros(2 * n_drone)  # theta=0 for all -> starts exactly at nominal_drone_positions
-    x0 = np.random.uniform(-0.3, 0.3, 2 * n_drone)
-    # x0 = np.tile([0.3, 0.0], n_drone)
+    rng = rng if rng is not None else np.random.default_rng()
+    x0 = rng.uniform(-0.3, 0.3, 2 * n_drone)
     res = minimize(objective, x0, method="Nelder-Mead",
                     options={"xatol": 1e-3, "fatol": 1e-3, "maxiter": max_iter})
 
@@ -496,7 +502,7 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
                          wfc_force_tol=None, wfc_moment_tol=None,
                          wfc_verify_top_k=0, wfc_verify_max_iter=500,
                          enable_ifc=True, d_safe=D_SAFE_CABLE,
-                         check_exit_angle=False, min_exit_angle_deg=15.0, face_normal_local=None):
+                         check_exit_angle=False, min_exit_angle_deg=15.0, face_normal_local=None, seed=None):
     """
     Picks the routing with the best worst-case manipulability across all
     poses, among routings that pass WCC (always) and, if enabled, WFC/IFC.
@@ -511,6 +517,8 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
     first one that passes real tolerances. Rescues routings whose only
     problem was a lateral-force/moment mismatch a repositioned drone can fix.
     """
+    rng = np.random.default_rng(seed)
+
     upper_bound = count_routings_upper_bound(ugv_db, pay_layout, gnd_layout)
     if upper_bound == 0:
         return None
@@ -527,9 +535,6 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
     pending_candidates = []  # (manipulability, routing, score) - only used if use_two_phase
 
     for routing in routings:
-        gnd_counts = Counter(g for (_, g) in routing)
-        if any(count >= 3 for count in gnd_counts.values()):
-            continue  # no ground node may take 3+ cables
 
         score = score_routing_across_poses(
             routing, ugv_db, pay_layout, gnd_layout, poses,
@@ -563,7 +568,7 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
                     uav_hook_offsets, payload_pos, payload_R, uav_cable_length,
                     routing, ugv_db, pay_layout, gnd_layout,
                     tau_min, tau_max, drone_thrust_min, drone_thrust_max, wfc_wrench,
-                    max_iter=wfc_verify_max_iter,
+                    max_iter=wfc_verify_max_iter, rng=rng,
                 )
                 # re-check against the REAL configured tolerances, not the
                 # internal residual_tol=0.0 used to drive the search itself
@@ -624,6 +629,10 @@ def screen_architecture(ugv_db, pay_layout, gnd_layout, poses, max_enumerate=200
     }
 
 
+def stable_seed(*parts: str) -> int:
+    s = "|".join(parts).encode("utf-8")
+    return int(hashlib.sha256(s).hexdigest(), 16) % (2**32)
+
 def screen_all(poses, max_enumerate=20000,
                 enable_wfc=False, tau_min=5.0, tau_max=100.0, wfc_wrench=None,
                 uav_layout="triangle", uav_cable_length=1.5,
@@ -633,9 +642,8 @@ def screen_all(poses, max_enumerate=20000,
                 enable_ifc=True, d_safe=D_SAFE_CABLE,
                 check_exit_angle=False, min_exit_angle_deg=15.0, face_normal_local=None):
     ugv_db = _load_json_db(UGV_DB_PATH)
-    ugv_db.pop("rectangle-same", None)  # known unstable in simulation; excluded from re-screening
 
-    layouts = [l for l in GRID_MAPPING_UGV.keys() if l != "rectangle-same"]
+    layouts = [l for l in GRID_MAPPING_UGV.keys()]
 
     uav_hook_offsets = None
     if enable_wfc:
@@ -661,7 +669,7 @@ def screen_all(poses, max_enumerate=20000,
             wfc_verify_top_k=wfc_verify_top_k, wfc_verify_max_iter=wfc_verify_max_iter,
             enable_ifc=enable_ifc, d_safe=d_safe,
             check_exit_angle=check_exit_angle, min_exit_angle_deg=min_exit_angle_deg,
-            face_normal_local=face_normal_local,
+            face_normal_local=face_normal_local, seed=stable_seed(pay_layout, gnd_layout),
         )
         if result is None:
             print("no valid pairs (fewer nodes than 6 cables need)")
@@ -876,7 +884,7 @@ def main():
     print("\nTop 5 architectures by worst-case conditioning index (each already using its best routing):")
     print(df.head(5).to_string(index=False))
 
-    generate_top_xml_configs(df, target_output_dir, chosen_uav_layout="triangle")    
+    generate_top_xml_configs(df, target_output_dir, chosen_uav_layout=UAV_LAYOUT)    
     copy_file_to_folder(DEFAULT_POSES_CSV, f"mujoco/mujoco_outputs_{counter}")
 
 if __name__ == "__main__":

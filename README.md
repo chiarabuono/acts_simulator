@@ -2,73 +2,89 @@
 
 ## Project Structure
 
-Here is an overview of how the repository is organized:
-
 ```text
-├── acts_simpler_cases/                  # Simplified simulation scripts
+├── acts_simpler_cases/                       # Standalone/simplified simulation scripts
 │   ├── mujoco_311_simulation.py
-│   ├── mujoco_311_simulation_real.py   # Physical rig parameters
+│   ├── mujoco_311_simulation_real.py         # Physical rig parameters variant
 │   ├── mujoco_312_simulation.py
-│   ├── mujoco_312_simulation_real.py   # Physical rig parameters
+│   ├── mujoco_312_simulation_real.py         # Physical rig parameters variant
 │   ├── mujoco_313_simulation.py
 │   └── mujoco_single_drone.py
 │
-├── acts_simulator/                      # Core simulator module
-│   ├── acts.py                         # Main simulation entry point
-│   ├── params_acts.py                  # Geometric constraints, mass properties & bounds
-│   ├── utils_configuration_selection.py# Architecture selector utilities
-│   ├── utils_control.py                # Drone control laws
-│   ├── utils_optimization.py           # Tension optimization & linear programming
-│   ├── utils_performance_indices.py    # Performance indices & stability checks
-│   ├── utils_visual.py                 # Plotting & visualization utilities
-│   └── video_recorder.py               # Video capture tools
+├── acts_simulator/                           # Core simulator package
+│   ├── __init__.py                           # Central config
+│   ├── acts.py                               # Main simulation entry point
+│   ├── params_acts.py                        # Geometric constraints, mass properties & bounds
+│   ├── utils_configuration_selection.py      # Architecture selector utilities
+│   ├── utils_control.py                      # Drone controllers
+│   ├── utils_optimization.py                 # SLSQP drone-position/tension solver + ground-cable
+│   ├── utils_performance_indices.py          # Performance indices & stability checks
+│   ├── utils_visual.py                       # Plotting & visualization utilities
+│   └── video_recorder.py                     # Video capture tools
 │
-├── collected_data/                      # Output logs, metrics, and video renders
-│   ├── indeces/                        # Plotted performance index & error graphs (.png)
-│   ├── videos/                         # Recorded simulation runs (.mp4)
-│   └── indices.xlsx                    # Tabulated performance metrics
+├── collected_data/                           # Output logs, metrics, and video renders
+│   ├── indices/                              # Plotted performance-index & error graphs (.png)
+│   ├── videos/                               # Recorded simulation runs (.mp4)
+│   └── indices.xlsx                          # Tabulated performance metrics
 │
-├── create_xml/                          # Model generation & analytical screening toolkit
-│   ├── analytical_ground_screening.py  # Fast screening algorithm for candidate configurations
-│   ├── config_params.py                 # Configuration parameters for model creation
-│   ├── poses_to_analyze.csv            # Evaluation pose dataset
-│   ├── xml_config_builder.py           # Configuration builder
+├── create_xml/                               # Model generation & analytical screening toolkit
+│   ├── analytical_ground_screening.py        # Screening candidates algorithm
+│   ├── config_params.py                      # Configuration parameters for model creation
+│   ├── xml_config_builder.py                 # Configuration builder
+│   ├── poses_to_analyze.csv                  # Evaluation pose dataset
 │   │
-│   ├── database/                       # Configuration node & anchor databases
+│   ├── database/                             # Generated node/anchor coordinate databases
 │   │   ├── uav_configuration_database.json
 │   │   └── ugv_configuration_database.json
 │   │
-│   ├── images/                         # Reference architecture diagrams
+│   ├── images/                               # Reference architecture diagrams
 │   │   ├── 3_uav_config.png
 │   │   └── 6_ugv_config.jpeg
 │   │
-│   └── visual_interface/               # Interactive annotation & building UI
-│       ├── tool_annotation_marker.py   # Interactive node coordinate annotation tool
-│       ├── tool_crop_finder.py         # Interactive bounding box crop finder
-│       └── xml_generator.py            # XML generator interface
+│   └── visual_interface/                     # Interactive annotation & building UI
+│       ├── tool_crop_finder.py               # Step 1: click-drag crop boxes on the reference image
+│       ├── tool_annotation_marker.py          # Step 2: per-layout node coordinate entry + drag-to-place
+│       │                                      #   annotation → writes the JSON node database
+│       └── xml_generator.py                  # Step 3: interactive wizard
 │
-├── mujoco/                              # MuJoCo XML configuration models
-│   ├── acts_stewart.xml                # Stewart platform baseline model
-│   ├── hand_made/                      # Manually crafted XML candidate models
-│   ├── mujoco_outputs_1/               # Automated generator run output 1 (XMLs + screening CSV)
-│   ├── mujoco_outputs_2/               # Automated generator run output 2 (XMLs + screening CSV)
-│   ├── mujoco_outputs_3/               # Automated generator run output 3 (XMLs + screening CSV)
-│   └── simpler_cases/                  # Isolated system XML components (311, 312, 313 models)
+├── mujoco/                                   # MuJoCo XML configuration models
+│   ├── acts_stewart/, acts_ground_spacing/,
+│   │   acts_stewart_drone_configurations/    # Hand-built reference/baseline models
+│   ├── hand_made/                             # Manually crafted XML candidate models
+│   ├── mujoco_outputs_*/                      # XMLs auto-generated by analytical_ground_screening.py,
+│   └── simpler_cases/                        # Isolated system XML components
 │
-├── simulation_run/                      # Automation & batch testing
-│   └── batch_run.py                    # Automated multi-configuration batch execution script
+├── simulation_run/                           # Batch execution & post-processing
+│   ├── batch_run.py                          # Runs every XML × every pose in batch_run.xlsx
+│   ├── batch_run.xlsx                        # Pose input table consumed by batch_run.py
+│   ├── match-mujoco_log-to-unstable-position.py  # Matches MUJOCO_LOG.TXT instability warnings to the nearest logged simulation record
+│   ├── pose_reacheability.py                 # Reports poses never reached by any tested configuration
+│   ├── stats_test_suit.py                    # Paired statistical comparison
+│   └── mujoco_outputs_*/, acts_*/, hand_made/ # Per-run results.xlsx, rubbing logs, matched errors, and statistical_analysis_report.txt
 │
 └── README.md
 ```
 
-## Launch ACTS.py
-If the system gives jacobian errors, try with:
+## Launch
+
+Run the interactive simulator with `acts_simulator/acts.py` (prompts you to pick a model XML, then simulates).
+
+If the system gives Jacobian errors, try:
 ```bash
 pip uninstall -y cvxpy scipy numpy osqp ecos clarabel --break-system-packages
 sudo apt install --reinstall python3-numpy python3-scipy
 ```
 
+## Typical Workflow
+In the case you don't have your xml configuration file on which run the simulation:
+1. **Define node layouts** — `create_xml/visual_interface/tool_crop_finder.py` to get crop boxes, then `tool_annotation_marker.py` to annotate node coordinates → populates `create_xml/database/*.json`.
+2. **Build a model XML** — either manually via `create_xml/visual_interface/xml_generator.py`, or automatically by screening all layouts/routings with `create_xml/analytical_ground_screening.py` (uses `xml_config_builder.py` under the hood).
+
+Once you have the xml configuration files:
+3. **Run simulations** — `simulation_run/batch_run.py` against the generated XMLs and a pose table.
+4. **Analyze results** — `simulation_run/match-mujoco_log-to-unstable-position.py`, `pose_reacheability.py`, and `stats_test_suit.py` to disambiguate instability warnings, check reachability, and compare configurations statistically.
+
 ## Dependencies
-- To create an xml file using the interactive guide pip install Pillow
-- To plot pip install pyqtgraph PySide6
-- pip install statsmodels --break-system-packages
+- To create an XML file using the interactive guide: `pip install Pillow`
+- To plot live dashboards: `pip install pyqtgraph PySide6`
+- For statistical analysis: `pip install statsmodels --break-system-packages`

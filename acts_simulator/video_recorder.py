@@ -1,3 +1,7 @@
+"""
+`VideoRecorder`: captures MuJoCo simulation frames and saves them to an MP4 via imageio.
+"""
+
 import imageio
 import mujoco
 
