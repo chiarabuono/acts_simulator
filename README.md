@@ -1,5 +1,5 @@
 # ACTS Simulator (Aerial Cable-Towed System)
-Documentation is available at the [following link](https://docs.readthedocs.io/en/stable/config-file/v2.html).
+Documentation is available at the [following link](https://acts-simulator.readthedocs.io/en/latest/).
 
 ## Project Structure
 
