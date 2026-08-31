@@ -1,4 +1,5 @@
 # ACTS Simulator (Aerial Cable-Towed System)
+Documentation is available at the [following link](https://docs.readthedocs.io/en/stable/config-file/v2.html).
 
 ## Project Structure
 
@@ -88,3 +89,4 @@ Once you have the xml configuration files:
 - To create an XML file using the interactive guide: `pip install Pillow`
 - To plot live dashboards: `pip install pyqtgraph PySide6`
 - For statistical analysis: `pip install statsmodels --break-system-packages`
+- To update the documentation: `pip install sphinx myst-parser sphinx-rtd-theme --break-system-packages`
